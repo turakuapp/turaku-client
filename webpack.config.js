@@ -1,15 +1,29 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
-  entry: './main.js',
+  entry: './index.js',
   output: {
-    path: path.resolve('dist'),
-    filename: 'turaku.js'
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js'
   },
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
-      { test: /\.jsx$/, loader: 'babel-loader', exclude: /node_modules/ }
+      {
+        test: /\.jsx?$/,
+        use: ['babel-loader'],
+        exclude: /node_modules/
+      }, {
+        test: /\.scss$/,
+        use: [{
+          loader: 'style-loader' // Creates style nodes from JS strings.
+        }, {
+          loader: 'css-loader' // Translates CSS into CommonJS.
+        }, {
+          loader: 'postcss-loader' // Use PostCSS plugins.
+        }, {
+          loader: 'sass-loader' // Compiles Sass to CSS.
+        }]
+      }
     ]
   }
 }

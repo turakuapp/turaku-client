@@ -4,21 +4,33 @@
   "description": "Turaku client code",
   "main": "main.js",
   "scripts": {
-    "pack": "webpack"
+    "build": "webpack",
+    "fix": "standard --fix"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/harigopal/turaku-client",
   "author": "Hari Gopal",
   "devDependencies": {
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
-    "electron": "~1.7.5",
-    "eslint-config-standard": "^10.2.1",
-    "webpack": "^3.4.1"
+    "css-loader": "^0.28.4",
+    "node-sass": "^4.5.3",
+    "postcss-flexbugs-fixes": "^3.2.0",
+    "postcss-loader": "^2.0.6",
+    "sass-loader": "^6.0.6",
+    "standard": "^10.0.3",
+    "style-loader": "^0.18.2",
+    "webpack": "^3.4.1",
+    "webpack-dev-server": "^2.7.0"
   },
   "dependencies": {
+    "bootstrap": "4.0.0-alpha.6",
+    "lodash": "^4.17.4",
     "react": "^15.6.1",
     "react-dom": "^15.6.1"
+  },
+  "peerDependencies": {
+    "node-sass": "^4.5.3"
   }
 }
