@@ -16,7 +16,7 @@ module.exports = {
           loader: 'babel-loader',
           query: {
             plugins: [
-              'react-css-modules'
+              'babel-plugin-react-css-modules'
             ]
           }
         }]
