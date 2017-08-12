@@ -38,9 +38,9 @@ module.exports = {
         use: [{
           loader: 'style-loader' // Creates style nodes from JS strings.
         }, {
-          loader: 'css-loader',
+          loader: 'css-loader'
         }, {
-          loader: 'sass-loader', // Translates SCSS into CommonJS.
+          loader: 'sass-loader' // Translates SCSS into CommonJS.
         }]
       }
     ]
