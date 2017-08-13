@@ -1,5 +1,7 @@
 {
   "name": "Turaku",
+  "license": "UNLICENSED",
+  "private": true,
   "version": "0.0.1",
   "description": "Turaku client code",
   "main": "main.js",
