@@ -1,14 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './src/style/index.css'
+import './style/index.css'
 import 'bootstrap/scss/bootstrap.scss'
 
-import AppState from './src/components/app_state.js'
-import SignIn from './src/components/sign_in.js'
+import AppState from './components/app_state.js'
+import App from './components/app.js'
 
 ReactDOM.render(
   <AppState>
-    <SignIn />
+    <App/>
   </AppState>,
   document.getElementById('turaku__root')
 )
