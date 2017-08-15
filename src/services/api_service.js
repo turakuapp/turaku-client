@@ -33,7 +33,7 @@ export default class ApiService {
   fetch (path, method, body = null) {
     console.log('Calling ' + this.fullUrl(path))
 
-    return fetch(this.fullUrl(path), {method: method, headers: this.headers(), body: body})
+    return window.fetch(this.fullUrl(path), {method: method, headers: this.headers(), body: body})
       .then(this.parseResponse)
   }
 

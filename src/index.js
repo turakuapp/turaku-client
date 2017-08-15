@@ -8,7 +8,7 @@ import App from './components/app.js'
 
 ReactDOM.render(
   <AppState>
-    <App/>
+    <App />
   </AppState>,
   document.getElementById('turaku__root')
 )

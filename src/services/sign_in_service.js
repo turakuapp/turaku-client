@@ -10,7 +10,7 @@ export default class SignInService {
     }).catch((response) => {
       console.log(response, 'failure')
       // TODO: What should be returned if sign in fails?
-      return Promise.reject(null)
+      return Promise.reject(new Error('Response from API indicated a failure.'))
     })
   }
 }
