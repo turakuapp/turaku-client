@@ -1,14 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import './style/index.css'
-import 'bootstrap/scss/bootstrap.scss'
-
-import AppState from './components/app_state.js'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css'
+import './assets/style/index.css';
+import AppState from './components/appState'
 import App from './components/app.js'
+import registerServiceWorker from './registerServiceWorker';
 
 ReactDOM.render(
   <AppState>
     <App />
   </AppState>,
-  document.getElementById('turaku__root')
-)
+  document.getElementById('root')
+);
+
+registerServiceWorker();

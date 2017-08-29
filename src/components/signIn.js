@@ -1,5 +1,5 @@
 import React from 'react'
-import './sign_in.css'
+import './signIn.css'
 
 import SignInService from '../services/sign_in_service.js'
 
@@ -27,7 +27,7 @@ export default class SignIn extends React.Component {
   render () {
     return (
       <div className='container'>
-        <div className='row justify-content-center' styleName='centered-container'>
+        <div className='row justify-content-center sign-in__centered-container'>
           <div className='col-md-6 align-self-center'>
             <form onSubmit={this.submit}>
               <div className='form-group'>

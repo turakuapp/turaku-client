@@ -7,11 +7,11 @@ export default class Dashboard extends React.Component {
     return (
       <div className='container-fluid'>
         <div className='row'>
-          <div className='col' styleName='tags'>
+          <div className='col' styleName='dashboard__tags'>
             Tags
           </div>
 
-          <div className='col-10' styleName='entries'>
+          <div className='col-10' styleName='dashboard__entries'>
             Entries
           </div>
         </div>

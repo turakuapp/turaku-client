@@ -1,42 +1,20 @@
 {
-  "name": "Turaku",
-  "license": "UNLICENSED",
+  "name": "turaku",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.1",
-  "description": "Turaku client code",
-  "main": "main.js",
-  "scripts": {
-    "build": "webpack",
-    "fix": "standard --fix",
-    "dev": "webpack-dev-server --inline --hot"
-  },
-  "repository": "https://github.com/harigopal/turaku-client",
-  "author": "Hari Gopal",
-  "devDependencies": {
-    "babel-core": "^6.25.0",
-    "babel-loader": "^7.1.1",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-react": "^6.24.1",
-    "css-loader": "^0.28.4",
-    "node-sass": "^4.5.3",
-    "postcss-flexbugs-fixes": "^3.2.0",
-    "postcss-loader": "^2.0.6",
-    "sass-loader": "^6.0.6",
-    "standard": "^10.0.3",
-    "style-loader": "^0.18.2",
-    "webpack": "^3.4.1",
-    "webpack-dev-server": "^2.7.1"
-  },
   "dependencies": {
-    "babel-plugin-react-css-modules": "^3.1.0",
     "bootstrap": "4.0.0-beta",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
-    "popper.js": "^1.11.1",
+    "popper.js": "^1.12.5",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "react-scripts": "1.0.11"
   },
-  "peerDependencies": {
-    "node-sass": "^4.5.3"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   }
 }

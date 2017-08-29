@@ -1,5 +1,5 @@
 import React from 'react'
-import SignIn from './sign_in.js'
+import SignIn from './signIn'
 import Dashboard from './dashboard.js'
 
 export default class App extends React.Component {
@@ -11,11 +11,11 @@ export default class App extends React.Component {
   render () {
     return (
       <div>
-        {this.isSignedIn() &&
+        {!this.isSignedIn() &&
         <SignIn appState={this.props.appState} setAppState={this.props.setAppState} />
         }
 
-        {!this.isSignedIn() &&
+        {this.isSignedIn() &&
         <Dashboard appState={this.props.appState} setAppState={this.props.setAppState} />
         }
       </div>

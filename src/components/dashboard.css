@@ -1,8 +1,8 @@
-.tags {
+.dashboard__tags {
   height: 100vh;
   border-right: 1px solid grey;
 }
 
-.entries {
+.dashboard__entries {
   height: 100vh;
 }
