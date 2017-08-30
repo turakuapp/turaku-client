@@ -1,26 +1,26 @@
-import React from 'react'
+import React from "react";
 
-import './dashboard.css'
+import "./dashboard.css";
 
 export default class Dashboard extends React.Component {
-  render () {
+  render() {
     return (
-      <div className='container-fluid'>
-        <div className='row'>
-          <div className='col' styleName='dashboard__tags'>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col" styleName="dashboard__tags">
             Tags
           </div>
 
-          <div className='col-10' styleName='dashboard__entries'>
+          <div className="col-10" styleName="dashboard__entries">
             Entries
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
 Dashboard.propTypes = {
   appState: React.PropTypes.object,
   setAppState: React.PropTypes.func
-}
+};
