@@ -1,7 +1,7 @@
 import React from "react";
-import "./signIn.css";
-
+import PropTypes from "prop-types";
 import SignInService from "../services/sign_in_service.js";
+import "./signIn.css";
 
 export default class SignIn extends React.Component {
   constructor(props) {
@@ -71,6 +71,6 @@ export default class SignIn extends React.Component {
 }
 
 SignIn.propTypes = {
-  appState: React.PropTypes.object,
-  setAppState: React.PropTypes.func
+  appState: PropTypes.object,
+  setAppState: PropTypes.func
 };

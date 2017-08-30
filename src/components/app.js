@@ -1,6 +1,7 @@
 import React from "react";
 import SignIn from "./signIn";
 import Dashboard from "./dashboard.js";
+import PropTypes from "prop-types";
 
 export default class App extends React.Component {
   isSignedIn() {
@@ -30,6 +31,6 @@ export default class App extends React.Component {
 }
 
 App.propTypes = {
-  appState: React.PropTypes.object,
-  setAppState: React.PropTypes.func
+  appState: PropTypes.object,
+  setAppState: PropTypes.func
 };

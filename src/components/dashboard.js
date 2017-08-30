@@ -1,5 +1,5 @@
 import React from "react";
-
+import PropTypes from "prop-types";
 import "./dashboard.css";
 
 export default class Dashboard extends React.Component {
@@ -21,6 +21,6 @@ export default class Dashboard extends React.Component {
 }
 
 Dashboard.propTypes = {
-  appState: React.PropTypes.object,
-  setAppState: React.PropTypes.func
+  appState: PropTypes.object,
+  setAppState: PropTypes.func
 };
