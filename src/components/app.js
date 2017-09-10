@@ -4,6 +4,8 @@ import SignUp from "./signUp";
 import Dashboard from "./dashboard.js";
 import PropTypes from "prop-types";
 
+import { BrowserRouter as Router, Redirect, Route } from "react-router-dom";
+
 export default class App extends React.Component {
   isSignedIn() {
     let token = this.props.appState.token;
@@ -12,30 +14,44 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <div>
-        {!this.isSignedIn() &&
-        this.props.appState.page === "signUp" && (
-          <SignUp
-            appState={this.props.appState}
-            setAppState={this.props.setAppState}
-          />
-        )}
+      <Router>
+        <div>
+          {!this.isSignedIn() && <Redirect from="/" to="sign_in" />}
 
-        {!this.isSignedIn() &&
-        this.props.appState.page === "signIn" && (
-          <SignIn
-            appState={this.props.appState}
-            setAppState={this.props.setAppState}
-          />
-        )}
+          {this.isSignedIn() && (
+            <Route
+              path="/"
+              exact
+              render={props => (
+                <Dashboard
+                  appState={this.props.appState}
+                  setAppState={this.props.setAppState}
+                />
+              )}
+            />
+          )}
 
-        {this.isSignedIn() && (
-          <Dashboard
-            appState={this.props.appState}
-            setAppState={this.props.setAppState}
+          <Route
+            path="/sign_in"
+            render={props => (
+              <SignIn
+                appState={this.props.appState}
+                setAppState={this.props.setAppState}
+              />
+            )}
           />
-        )}
-      </div>
+
+          <Route
+            path="/sign_up"
+            render={props => (
+              <SignUp
+                appState={this.props.appState}
+                setAppState={this.props.setAppState}
+              />
+            )}
+          />
+        </div>
+      </Router>
     );
   }
 }

@@ -1,19 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 export default class SignUp extends React.Component {
-  constructor(props) {
-    super(props);
-    this.signIn = this.signIn.bind(this);
-  }
-
   submit(event) {
     event.preventDefault();
-  }
-
-  signIn(event) {
-    event.preventDefault();
-    this.props.setAppState({ page: "signIn" });
   }
 
   render() {
@@ -63,12 +54,11 @@ export default class SignUp extends React.Component {
                 Submit
               </button>
 
-              <button
-                className="mt-2 ml-md-2 btn btn-secondary"
-                onClick={this.signIn}
-              >
-                Sign In
-              </button>
+              <Link to="/sign_in">
+                <button className="mt-2 ml-md-2 btn btn-secondary">
+                  Sign In
+                </button>
+              </Link>
             </form>
           </div>
         </div>

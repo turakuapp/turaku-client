@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default class AppState extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { page: "signIn" };
+    this.state = {};
     this.setAppState = this.setAppState.bind(this);
   }
 

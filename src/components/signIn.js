@@ -2,12 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import SignInService from "../services/sign_in_service.js";
 import "./signIn.css";
+import { Link } from "react-router-dom";
 
 export default class SignIn extends React.Component {
   constructor(props) {
     super(props);
     this.submit = this.submit.bind(this);
-    this.signUp = this.signUp.bind(this);
   }
 
   submit(event) {
@@ -26,11 +26,6 @@ export default class SignIn extends React.Component {
         // Handle invalid credentials / exception.
         console.log(exception, "Sign in failed.");
       });
-  }
-
-  signUp(event) {
-    event.preventDefault();
-    this.props.setAppState({ page: "signUp" });
   }
 
   render() {
@@ -66,12 +61,11 @@ export default class SignIn extends React.Component {
                 Sign In
               </button>
 
-              <button
-                className="mt-2 ml-md-2 btn btn-secondary"
-                onClick={this.signUp}
-              >
-                Sign Up
-              </button>
+              <Link to="/sign_up">
+                <button className="mt-2 ml-md-2 btn btn-secondary">
+                  Sign Up
+                </button>
+              </Link>
             </form>
           </div>
         </div>
