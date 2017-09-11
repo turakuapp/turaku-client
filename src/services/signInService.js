@@ -1,4 +1,4 @@
-import ApiService from "./api_service.js";
+import ApiService from "./apiService";
 
 export default class SignInService {
   signIn(email, password) {

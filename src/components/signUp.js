@@ -1,10 +1,32 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import SignUpService from "../services/signUpService";
 
 export default class SignUp extends React.Component {
   submit(event) {
     event.preventDefault();
+
+    let name = document.getElementById("sign-up-form__name").value;
+    let email = document.getElementById("sign-up-form__email").value;
+    let password = document.getElementById("sign-up-form__password").value;
+
+    // TODO: Compare the confirmation against the supplied password.
+    // let passwordConfirmation = document.getElementById(
+    //   "sign-up-form__password-confirmation"
+    // ).value;
+
+    let signUpService = new SignUpService();
+
+    signUpService
+      .signUp(name, email, password)
+      .then(() => {
+        console.log("Signed up. Verify email address before signing in.");
+      })
+      .catch(exception => {
+        // Handle exception.
+        console.log(exception, "Sign up failed. <shrug>");
+      });
   }
 
   render() {
@@ -13,6 +35,15 @@ export default class SignUp extends React.Component {
         <div className="row justify-content-center sign-in__centered-container">
           <div className="col-md-6 align-self-center">
             <form onSubmit={this.submit}>
+              <div className="form-group">
+                <label htmlFor="sign-up-form__name">Name</label>
+                <input
+                  className="form-control"
+                  id="sign-up-form__name"
+                  placeholder="What should we call you?"
+                />
+              </div>
+
               <div className="form-group">
                 <label htmlFor="sign-up-form__email">Email address</label>
                 <input
