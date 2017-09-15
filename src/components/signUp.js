@@ -1,9 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import SignUpService from "../services/signUpService";
 
 export default class SignUp extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.submit = this.submit.bind(this);
+  }
+
   submit(event) {
     event.preventDefault();
 
@@ -17,11 +23,12 @@ export default class SignUp extends React.Component {
     // ).value;
 
     let signUpService = new SignUpService();
+    let that = this;
 
     signUpService
       .signUp(name, email, password)
       .then(() => {
-        console.log("Signed up. Verify email address before signing in.");
+        that.props.setAppState({ justSignedUp: true });
       })
       .catch(exception => {
         // Handle exception.
@@ -30,6 +37,10 @@ export default class SignUp extends React.Component {
   }
 
   render() {
+    if (this.props.appState.justSignedUp) {
+      return <Redirect to="/sign_in" />;
+    }
+
     return (
       <div className="container">
         <div className="row justify-content-center sign-in__centered-container">
@@ -51,7 +62,6 @@ export default class SignUp extends React.Component {
                   className="form-control"
                   id="sign-up-form__email"
                   aria-describedby="emailHelp"
-                  placeholder="Enter email"
                 />
 
                 <small id="emailHelp" className="form-text text-muted">
@@ -77,7 +87,7 @@ export default class SignUp extends React.Component {
                   type="password"
                   className="form-control"
                   id="sign-up-form__password-confirmation"
-                  placeholder="Password"
+                  placeholder="Again, to be sure"
                 />
               </div>
 

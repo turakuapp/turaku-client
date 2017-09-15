@@ -10,6 +10,12 @@ export default class SignIn extends React.Component {
     this.submit = this.submit.bind(this);
   }
 
+  componentWillMount() {
+    if (this.props.appState.justSignedUp) {
+      this.props.setAppState({ justSignedUp: false, signedUp: true });
+    }
+  }
+
   submit(event) {
     event.preventDefault();
     let email = document.getElementById("sign-in-email").value;
@@ -33,6 +39,13 @@ export default class SignIn extends React.Component {
       <div className="container">
         <div className="row justify-content-center sign-in__centered-container">
           <div className="col-md-6 align-self-center">
+            {this.props.appState.signedUp && (
+              <div className="alert alert-success" role="alert">
+                Thank you for signing up! Please confirm your email address
+                before signing in.
+              </div>
+            )}
+
             <form onSubmit={this.submit}>
               <div className="form-group">
                 <label htmlFor="sign-in-email">Email address</label>
@@ -42,7 +55,7 @@ export default class SignIn extends React.Component {
                   className="form-control"
                   id="sign-in-email"
                   aria-describedby="emailHelp"
-                  placeholder="Enter email"
+                  placeholder="Your registered email address"
                 />
               </div>
 

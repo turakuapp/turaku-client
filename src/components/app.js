@@ -21,7 +21,7 @@ export default class App extends React.Component {
           {this.isSignedIn() && (
             <Route
               path="/"
-              exact
+              exact={true}
               render={props => (
                 <Dashboard
                   appState={this.props.appState}
