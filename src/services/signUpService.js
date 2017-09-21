@@ -1,4 +1,6 @@
 import ApiService from "./apiService";
+import _ from "lodash";
+import jsSHA from "jssha/src/sha256";
 
 export default class SignUpService {
   saltPossibleCharacters = "1234567890abcdef";
@@ -11,8 +13,8 @@ export default class SignUpService {
         user: {
           name: name,
           email: email,
-          password: password,
-          authentication_salt: this.newAuthenticationSalt()
+          password: this.authenticationHash(password),
+          authentication_salt: this.authenticationSalt()
         }
       })
       .then(response => {
@@ -27,15 +29,27 @@ export default class SignUpService {
       });
   }
 
-  newAuthenticationSalt() {
-    let salt = "";
+  authenticationHash(password) {
+    let preHash = new jsSHA("SHA-256", "TEXT");
+    preHash.update(password);
+    preHash.update(this.authenticationSalt());
+    debugger;
+    return preHash.getHash("HEX");
+  }
+
+  authenticationSalt() {
+    if (_.isString(this.storedAuthenticationSalt)) {
+      return this.storedAuthenticationSalt;
+    }
+
+    this.storedAuthenticationSalt = "";
 
     for (var i = 0; i < 64; i++) {
-      salt += this.saltPossibleCharacters.charAt(
+      this.storedAuthenticationSalt += this.saltPossibleCharacters.charAt(
         Math.floor(Math.random() * this.saltPossibleCharacters.length)
       );
     }
 
-    return salt;
+    return this.storedAuthenticationSalt;
   }
 }
