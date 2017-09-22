@@ -33,7 +33,6 @@ export default class SignUpService {
     let preHash = new jsSHA("SHA-256", "TEXT");
     preHash.update(password);
     preHash.update(this.authenticationSalt());
-    debugger;
     return preHash.getHash("HEX");
   }
 

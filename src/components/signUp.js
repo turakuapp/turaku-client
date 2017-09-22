@@ -89,6 +89,12 @@ export default class SignUp extends React.Component {
                   id="sign-up-form__password-confirmation"
                   placeholder="Again, to be sure"
                 />
+                <small id="emailHelp" className="form-text text-muted">
+                  Please store this password in your personal password manager.
+                  The Turaku team cannot recover your data if you forget your
+                  password. <a href="#">Read about Turaku's security</a> to
+                  learn more.
+                </small>
               </div>
 
               <button type="submit" className="mt-2 btn btn-primary">
