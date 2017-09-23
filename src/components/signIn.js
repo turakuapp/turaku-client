@@ -20,13 +20,16 @@ export default class SignIn extends React.Component {
     event.preventDefault();
     let email = document.getElementById("sign-in-email").value;
     let password = document.getElementById("sign-in-password").value;
-    let signInService = new SignInService();
+    let signInService = new SignInService(email, password);
 
     signInService
-      .signIn(email, password)
-      .then(token => {
+      .signIn()
+      .then(authorization => {
         console.log("Signed in.");
-        this.props.setAppState({ token: token });
+        this.props.setAppState({
+          token: authorization.token,
+          encryptionSalt: authorization.encryptionSalt
+        });
       })
       .catch(exception => {
         // Handle invalid credentials / exception.

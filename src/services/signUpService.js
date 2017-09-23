@@ -1,19 +1,23 @@
 import ApiService from "./apiService";
+import AuthenticationHashService from "./authenticationHashService";
 import _ from "lodash";
-import jsSHA from "jssha/src/sha256";
 
 export default class SignUpService {
   saltPossibleCharacters = "1234567890abcdef";
 
   signUp(name, email, password) {
     let api = new ApiService();
+    let hashService = new AuthenticationHashService(
+      password,
+      this.authenticationSalt()
+    );
 
     return api
       .post("users", {
         user: {
           name: name,
           email: email,
-          password: this.authenticationHash(password),
+          password: hashService.authenticationHash(),
           authentication_salt: this.authenticationSalt()
         }
       })
@@ -27,13 +31,6 @@ export default class SignUpService {
           new Error("Response from API indicated a failure.")
         );
       });
-  }
-
-  authenticationHash(password) {
-    let preHash = new jsSHA("SHA-256", "TEXT");
-    preHash.update(password);
-    preHash.update(this.authenticationSalt());
-    return preHash.getHash("HEX");
   }
 
   authenticationSalt() {

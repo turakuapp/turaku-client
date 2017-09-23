@@ -9,6 +9,7 @@
     "lodash": "^4.17.4",
     "popper.js": "^1.12.5",
     "prop-types": "^15.5.10",
+    "query-string": "^5.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.2.2",

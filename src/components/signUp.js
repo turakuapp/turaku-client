@@ -92,8 +92,11 @@ export default class SignUp extends React.Component {
                 <small id="emailHelp" className="form-text text-muted">
                   Please store this password in your personal password manager.
                   The Turaku team cannot recover your data if you forget your
-                  password. <a href="#">Read about Turaku's security</a> to
-                  learn more.
+                  password.{" "}
+                  <a href="help.turaku.com/security">
+                    Read about Turaku's security
+                  </a>{" "}
+                  to learn more.
                 </small>
               </div>
 

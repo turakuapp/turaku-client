@@ -1,4 +1,5 @@
 import _ from "lodash";
+import queryString from "query-string";
 
 export default class ApiService {
   constructor(token) {
@@ -33,6 +34,10 @@ export default class ApiService {
   fetch(path, method, body = null) {
     console.log("Calling " + this.fullUrl(path));
 
+    if (body !== null) {
+      console.log(body);
+    }
+
     return window
       .fetch(this.fullUrl(path), {
         method: method,
@@ -42,7 +47,18 @@ export default class ApiService {
       .then(this.parseResponse);
   }
 
-  get(path) {
+  get(path, params) {
+    if (_.isObject(params)) {
+      let incomingParams = {};
+
+      if (_.includes(path, "?")) {
+        incomingParams = _.split(path, "?")[1];
+      }
+
+      _.merge(incomingParams, params);
+      path = path + "?" + queryString.stringify(incomingParams);
+    }
+
     return this.fetch(path, "GET");
   }
 
