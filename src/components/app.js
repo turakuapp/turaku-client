@@ -4,7 +4,12 @@ import SignUp from "./signUp";
 import Dashboard from "./dashboard.js";
 import PropTypes from "prop-types";
 
-import { BrowserRouter as Router, Redirect, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Redirect,
+  Route,
+  Switch
+} from "react-router-dom";
 
 export default class App extends React.Component {
   isSignedIn() {
@@ -15,8 +20,10 @@ export default class App extends React.Component {
   render() {
     return (
       <Router>
-        <div>
-          {!this.isSignedIn() && <Redirect from="/" to="sign_in" />}
+        <Switch>
+          {!this.isSignedIn() && (
+            <Redirect from="/" exact={true} to="/sign_in" />
+          )}
 
           {this.isSignedIn() && (
             <Route
@@ -50,7 +57,7 @@ export default class App extends React.Component {
               />
             )}
           />
-        </div>
+        </Switch>
       </Router>
     );
   }
