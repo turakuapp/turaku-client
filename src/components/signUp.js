@@ -7,6 +7,10 @@ export default class SignUp extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      signUpComplete: false
+    };
+
     this.submit = this.submit.bind(this);
   }
 
@@ -28,7 +32,15 @@ export default class SignUp extends React.Component {
     signUpService
       .signUp(name, email, password)
       .then(() => {
-        that.props.setAppState({ justSignedUp: true });
+        that.props.setAppState(
+          {
+            redirectFrom: "SignUp",
+            redirectTo: "SignIn"
+          },
+          () => {
+            that.setState({ signUpComplete: true });
+          }
+        );
       })
       .catch(exception => {
         // Handle exception.
@@ -37,7 +49,7 @@ export default class SignUp extends React.Component {
   }
 
   render() {
-    if (this.props.appState.justSignedUp) {
+    if (this.state.signUpComplete === true) {
       return <Redirect to="/sign_in" />;
     }
 

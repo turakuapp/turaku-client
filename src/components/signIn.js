@@ -37,12 +37,19 @@ export default class SignIn extends React.Component {
       });
   }
 
+  justSignedUp() {
+    return (
+      this.props.appState.redirectFrom === "SignUp" &&
+      this.props.appState.redirectTo === "SignIn"
+    );
+  }
+
   render() {
     return (
       <div className="container">
         <div className="row justify-content-center sign-in__centered-container">
           <div className="col-md-6 align-self-center">
-            {this.props.appState.signedUp && (
+            {this.justSignedUp() && (
               <div className="alert alert-success" role="alert">
                 Thank you for signing up! Please confirm your email address
                 before signing in.
