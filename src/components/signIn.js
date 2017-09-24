@@ -2,11 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import SignInService from "../services/signInService";
 import "./signIn.css";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 
 export default class SignIn extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { signInComplete: false };
     this.submit = this.submit.bind(this);
   }
 
@@ -26,10 +27,15 @@ export default class SignIn extends React.Component {
       .signIn()
       .then(authorization => {
         console.log("Signed in.");
-        this.props.setAppState({
-          token: authorization.token,
-          encryptionSalt: authorization.encryptionSalt
-        });
+        this.props.setAppState(
+          {
+            token: authorization.token,
+            encryptionSalt: authorization.encryptionSalt
+          },
+          () => {
+            this.setState({ signInComplete: true });
+          }
+        );
       })
       .catch(exception => {
         // Handle invalid credentials / exception.
@@ -45,6 +51,10 @@ export default class SignIn extends React.Component {
   }
 
   render() {
+    if (this.state.signInComplete === true) {
+      return <Redirect to="/" />;
+    }
+
     return (
       <div className="container">
         <div className="row justify-content-center sign-in__centered-container">
