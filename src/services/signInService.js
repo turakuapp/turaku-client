@@ -51,7 +51,8 @@ export default class SignInService {
         console.log(response, "POST sessions -> success");
         return Promise.resolve({
           token: response.token,
-          encryptionSalt: response.user.encryption_salt
+          encryptionSalt: response.user.encryption_salt,
+          teams: response.teams
         });
       })
       .catch(response => {

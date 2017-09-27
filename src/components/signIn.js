@@ -30,7 +30,8 @@ export default class SignIn extends React.Component {
         this.props.setAppState(
           {
             token: authorization.token,
-            encryptionSalt: authorization.encryptionSalt
+            encryptionSalt: authorization.encryptionSalt,
+            teams: authorization.teams
           },
           () => {
             this.setState({ signInComplete: true });
@@ -52,7 +53,7 @@ export default class SignIn extends React.Component {
 
   render() {
     if (this.state.signInComplete === true) {
-      return <Redirect to="/" />;
+      return <Redirect to="/teams" />;
     }
 
     return (

@@ -2,6 +2,7 @@ import React from "react";
 import SignIn from "./signIn";
 import SignUp from "./signUp";
 import Dashboard from "./dashboard.js";
+import Teams from "./teams.js";
 import PropTypes from "prop-types";
 
 import {
@@ -52,6 +53,16 @@ export default class App extends React.Component {
             path="/sign_up"
             render={props => (
               <SignUp
+                appState={this.props.appState}
+                setAppState={this.props.setAppState}
+              />
+            )}
+          />
+
+          <Route
+            path="/teams"
+            render={props => (
+              <Teams
                 appState={this.props.appState}
                 setAppState={this.props.setAppState}
               />
