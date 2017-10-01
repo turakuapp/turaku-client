@@ -4,6 +4,7 @@ import SignUp from "./signUp";
 import Dashboard from "./dashboard.js";
 import Teams from "./teams.js";
 import PropTypes from "prop-types";
+import _ from "lodash";
 
 import {
   BrowserRouter as Router,
@@ -14,8 +15,7 @@ import {
 
 export default class App extends React.Component {
   isSignedIn() {
-    let token = this.props.appState.token;
-    return typeof token !== "undefined" && token !== null;
+    return _.isString(this.props.appState.token);
   }
 
   render() {

@@ -96,9 +96,7 @@ export default class SignIn extends React.Component {
               </button>
 
               <Link to="/sign_up">
-                <button className="mt-2 ml-md-2 btn btn-secondary">
-                  Sign Up
-                </button>
+                <button className="mt-2 ml-2 btn btn-secondary">Sign Up</button>
               </Link>
             </form>
           </div>
