@@ -3,27 +3,45 @@ import PropTypes from "prop-types";
 import CreateService from "../services/teams/createService";
 import _ from "lodash";
 import { Redirect } from "react-router";
+import "./teams.css";
 
 export default class Teams extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      createFormVisible: false
+      createFormVisible: false,
+      teamSelected: false
     };
 
     this.createTeam = this.createTeam.bind(this);
     this.showCreateForm = this.showCreateForm.bind(this);
     this.hideCreateForm = this.hideCreateForm.bind(this);
+    this.selectTeam = this.selectTeam.bind(this);
   }
 
   haveTeams() {
     return this.props.appState.teams.length > 0;
   }
 
+  selectTeam(team) {
+    this.props.setAppState({ team: team }, () => {
+      this.setState({ teamSelected: true });
+    });
+  }
+
   currentTeams() {
     return _.map(this.props.appState.teams, team => {
-      return <li key={team.id}>{team.name}</li>;
+      return (
+        <li className="mb-1" key={team.id}>
+          <button
+            onClick={_.partial(this.selectTeam, team)}
+            className="btn btn-sm btn-outline-dark"
+          >
+            {team.name}
+          </button>
+        </li>
+      );
     });
   }
 
@@ -98,6 +116,10 @@ export default class Teams extends React.Component {
       return <Redirect to="/sign_in" />;
     }
 
+    if (this.state.teamSelected) {
+      return <Redirect to="/" />;
+    }
+
     return (
       <div className="container">
         <div className="row justify-content-center sign-in__centered-container">
@@ -105,7 +127,7 @@ export default class Teams extends React.Component {
             {this.haveTeams() && (
               <div>
                 <h2>Your Teams</h2>
-                <ul>{this.currentTeams()}</ul>
+                <ul className="mt-3 teams__ul">{this.currentTeams()}</ul>
               </div>
             )}
 
