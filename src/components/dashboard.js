@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Users from "./users";
 import "./dashboard.css";
 
 export default class Dashboard extends React.Component {
@@ -7,12 +8,13 @@ export default class Dashboard extends React.Component {
     return (
       <div className="container-fluid">
         <div className="row">
-          <div className="col" styleName="dashboard__tags">
-            Tags
-          </div>
+          <div className="col dashboard__tags">Tags</div>
 
-          <div className="col-10" styleName="dashboard__entries">
-            Entries
+          <div className="col-10 dashboard__content">
+            <Users
+              appState={this.props.appState}
+              setAppState={this.props.setAppState}
+            />
           </div>
         </div>
       </div>
@@ -21,6 +23,6 @@ export default class Dashboard extends React.Component {
 }
 
 Dashboard.propTypes = {
-  appState: PropTypes.object,
-  setAppState: PropTypes.func
+  appState: PropTypes.object.isRequired,
+  setAppState: PropTypes.func.isRequired
 };

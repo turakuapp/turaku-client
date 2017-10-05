@@ -128,6 +128,6 @@ export default class SignUp extends React.Component {
 }
 
 SignUp.propTypes = {
-  appState: PropTypes.object,
-  setAppState: PropTypes.func
+  appState: PropTypes.object.isRequired,
+  setAppState: PropTypes.func.isRequired
 };
