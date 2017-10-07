@@ -4,6 +4,7 @@ import SignUp from "./signUp";
 import Dashboard from "./dashboard.js";
 import Teams from "./teams.js";
 import PropTypes from "prop-types";
+import SessionRestoreService from "../services/sessions/restoreService";
 import _ from "lodash";
 
 import {
@@ -14,11 +15,37 @@ import {
 } from "react-router-dom";
 
 export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { restorationAttempted: false };
+  }
+
+  componentWillMount() {
+    // Attempt to restore a session.
+    let service = new SessionRestoreService(this.props.setAppState);
+
+    if (service.canRestore()) {
+      let that = this;
+
+      service.restore().then(() => {
+        that.setState({ restorationAttempted: true });
+      });
+    } else {
+      // Cannot restore - just proceed.
+      this.setState({ restorationAttempted: true });
+    }
+  }
+
   isSignedIn() {
     return _.isString(this.props.appState.token);
   }
 
   render() {
+    if (!this.state.restorationAttempted) {
+      return <div>Restoring session...</div>;
+    }
+
     return (
       <Router>
         <Switch>

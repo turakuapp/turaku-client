@@ -26,7 +26,11 @@ export default class Teams extends React.Component {
 
   selectTeam(team) {
     this.props.setAppState({ team: team }, () => {
-      this.setState({ teamSelected: true });
+      this.setState({ teamSelected: true }, () => {
+        // Store the team in session storage as well, so that when reloading,
+        // it can be automatically set as selected team.
+        sessionStorage.setItem("team", JSON.stringify(team));
+      });
     });
   }
 

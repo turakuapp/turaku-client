@@ -8,9 +8,13 @@ export default class SignInService {
   }
 
   signIn() {
-    return this.loadAuthenticationSalt().then(authenticationSalt => {
-      return this.signInWithHashedPassword(authenticationSalt);
-    });
+    return this.loadAuthenticationSalt()
+      .then(authenticationSalt => {
+        return this.signInWithHashedPassword(authenticationSalt);
+      })
+      .then(authenticationResponse => {
+        return this.saveSession(authenticationResponse);
+      });
   }
 
   loadAuthenticationSalt() {
@@ -62,5 +66,13 @@ export default class SignInService {
           new Error("Response from API indicated a failure.")
         );
       });
+  }
+
+  // Save the session in storage to allow it to be restored without signing in again on a page reload.
+  saveSession(authenticationResponse) {
+    sessionStorage.setItem("token", authenticationResponse.token);
+
+    // Now resolve the promise with the authentication response.
+    return Promise.resolve(authenticationResponse);
   }
 }
