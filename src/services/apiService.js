@@ -67,6 +67,10 @@ export default class ApiService {
     return this.fetch(path, "POST", body);
   }
 
+  delete(path) {
+    return this.fetch(path, "DELETE");
+  }
+
   fullUrl(path) {
     return [this.baseUrl, path].join("/");
   }

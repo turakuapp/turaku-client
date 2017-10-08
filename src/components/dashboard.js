@@ -4,8 +4,26 @@ import Users from "./users";
 import "./dashboard.css";
 import _ from "lodash";
 import { Redirect, Link, Route } from "react-router-dom";
+import SessionSignOutService from "../services/sessions/signOutService";
 
 export default class Dashboard extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { signingOut: false };
+    this.signOut = this.signOut.bind(this);
+  }
+
+  signOut() {
+    let service = new SessionSignOutService(this.props.appState.token);
+    let that = this;
+
+    this.setState({ signingOut: true }, () => {
+      service.signOut().then(() => {
+        that.props.setAppState({ token: null, team: null, teams: null });
+      });
+    });
+  }
+
   render() {
     if (!_.isObject(this.props.appState.team)) {
       return <Redirect to="/teams" />;
@@ -22,6 +40,16 @@ export default class Dashboard extends React.Component {
             <div>
               <Link to="/dash/users">Users</Link>
             </div>
+            {!this.state.signingOut && (
+              <div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={this.signOut}
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="col-10 dashboard__content">

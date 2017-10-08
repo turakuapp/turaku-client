@@ -20,30 +20,47 @@ export default class RestoreService {
         let that = this;
 
         resolve(
-          api.get("sessions/restore").then(response => {
-            let sessionData = {
-              token: token,
-              encryptionSalt: response.user.encryption_salt,
-              teams: response.teams
-            };
+          api
+            .get("sessions/restore")
+            .then(response => {
+              let sessionData = {
+                token: token,
+                encryptionSalt: response.user.encryption_salt,
+                teams: response.teams
+              };
 
-            if (_.isObject(that.selectedTeam())) {
-              sessionData["team"] = that.selectedTeam();
-            }
+              if (_.isObject(that.selectedTeam())) {
+                sessionData["team"] = that.selectedTeam();
+              }
 
-            // Store particulars of the response in application state. Note that
-            // the server only has a hashed token so nothing is returned, unlike
-            // when signing in. Instead, the locally sourced value must be used
-            // to update state.
-            that.setAppState(sessionData);
+              // Store particulars of the response in application state. Note that
+              // the server only has a hashed token so nothing is returned, unlike
+              // when signing in. Instead, the locally sourced value must be used
+              // to update state.
+              that.setAppState(sessionData);
 
-            return Promise.resolve(true);
-          })
+              return Promise.resolve(true);
+            })
+            .catch(response => {
+              console.log(response, "POST sessions -> failure");
+
+              if (response.exception === "TokenAuthenticationFailedException") {
+                that.deleteStoredSessionData();
+              } else {
+                return Promise.reject(
+                  new Error("Response from API indicated an unknown failure.")
+                );
+              }
+            })
         );
       } else {
         reject("Token is not present in session storage.");
       }
     });
+  }
+
+  deleteStoredSessionData() {
+    sessionStorage.clear();
   }
 
   selectedTeam() {
