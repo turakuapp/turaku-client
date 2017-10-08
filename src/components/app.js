@@ -53,18 +53,17 @@ export default class App extends React.Component {
             <Redirect from="/" exact={true} to="/sign_in" />
           )}
 
-          {this.isSignedIn() && (
-            <Route
-              path="/"
-              exact={true}
-              render={props => (
-                <Dashboard
-                  appState={this.props.appState}
-                  setAppState={this.props.setAppState}
-                />
-              )}
-            />
-          )}
+          {this.isSignedIn() && <Redirect from="/" exact={true} to="/dash" />}
+
+          <Route
+            path="/dash"
+            render={props => (
+              <Dashboard
+                appState={this.props.appState}
+                setAppState={this.props.setAppState}
+              />
+            )}
+          />
 
           <Route
             path="/sign_in"

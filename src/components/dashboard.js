@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Users from "./users";
 import "./dashboard.css";
 import _ from "lodash";
-import { Redirect, Link } from "react-router-dom";
+import { Redirect, Link, Route } from "react-router-dom";
 
 export default class Dashboard extends React.Component {
   render() {
@@ -19,12 +19,20 @@ export default class Dashboard extends React.Component {
             <div>
               <Link to="/teams">Teams</Link>
             </div>
+            <div>
+              <Link to="/dash/users">Users</Link>
+            </div>
           </div>
 
           <div className="col-10 dashboard__content">
-            <Users
-              appState={this.props.appState}
-              setAppState={this.props.setAppState}
+            <Route
+              path="/dash/users"
+              render={props => (
+                <Users
+                  appState={this.props.appState}
+                  setAppState={this.props.setAppState}
+                />
+              )}
             />
           </div>
         </div>

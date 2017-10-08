@@ -121,7 +121,7 @@ export default class Teams extends React.Component {
     }
 
     if (this.state.teamSelected) {
-      return <Redirect to="/" />;
+      return <Redirect to="/dash" />;
     }
 
     return (
