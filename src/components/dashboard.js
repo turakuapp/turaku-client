@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Users from "./users";
 import "./dashboard.css";
 import _ from "lodash";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 
 export default class Dashboard extends React.Component {
   render() {
@@ -14,7 +14,12 @@ export default class Dashboard extends React.Component {
     return (
       <div className="container-fluid">
         <div className="row">
-          <div className="col dashboard__tags">Tags</div>
+          <div className="col dashboard__navigation">
+            <div>Tags</div>
+            <div>
+              <Link to="/teams">Teams</Link>
+            </div>
+          </div>
 
           <div className="col-10 dashboard__content">
             <Users
