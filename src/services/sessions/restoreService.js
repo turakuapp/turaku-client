@@ -26,7 +26,8 @@ export default class RestoreService {
               let sessionData = {
                 token: token,
                 encryptionSalt: response.user.encryption_salt,
-                teams: response.teams
+                teams: response.teams,
+                incomingInvitations: response.incoming_invitations
               };
 
               if (_.isObject(that.selectedTeam())) {

@@ -56,7 +56,8 @@ export default class SignInService {
         return Promise.resolve({
           token: response.token,
           encryptionSalt: response.user.encryption_salt,
-          teams: response.teams
+          teams: response.teams,
+          incomingInvitations: response.incoming_invitations
         });
       })
       .catch(response => {

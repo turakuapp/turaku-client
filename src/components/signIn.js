@@ -31,7 +31,8 @@ export default class SignIn extends React.Component {
           {
             token: authorization.token,
             encryptionSalt: authorization.encryptionSalt,
-            teams: authorization.teams
+            teams: authorization.teams,
+            incomingInvitations: authorization.incomingInvitations
           },
           () => {
             this.setState({ signInComplete: true });

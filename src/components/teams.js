@@ -4,6 +4,7 @@ import CreateService from "../services/teams/createService";
 import _ from "lodash";
 import { Redirect } from "react-router";
 import "./teams.css";
+import IncomingInvitation from "./incomingInvitation";
 
 export default class Teams extends React.Component {
   constructor(props) {
@@ -22,6 +23,10 @@ export default class Teams extends React.Component {
 
   haveTeams() {
     return this.props.appState.teams.length > 0;
+  }
+
+  haveIncomingInvitations() {
+    return this.props.appState.incomingInvitations.length > 0;
   }
 
   selectTeam(team) {
@@ -115,6 +120,19 @@ export default class Teams extends React.Component {
     this.setState({ createFormVisible: false });
   }
 
+  incomingInvitations() {
+    return _.map(this.props.appState.incomingInvitations, invitation => {
+      return (
+        <IncomingInvitation
+          appState={this.props.appState}
+          setAppState={this.props.setAppState}
+          invitation={invitation}
+          key={invitation.team.id}
+        />
+      );
+    });
+  }
+
   render() {
     if (!_.isArray(this.props.appState.teams)) {
       return <Redirect to="/sign_in" />;
@@ -132,6 +150,14 @@ export default class Teams extends React.Component {
               <div>
                 <h2>Your Teams</h2>
                 <ul className="mt-3 teams__ul">{this.currentTeams()}</ul>
+              </div>
+            )}
+
+            {this.haveIncomingInvitations() && (
+              <div>
+                <h2>Invitations</h2>
+                <p>You have been invited to join:</p>
+                <ul className="mt-3 teams_ul">{this.incomingInvitations()}</ul>
               </div>
             )}
 
