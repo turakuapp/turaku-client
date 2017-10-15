@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import InvitationRejectService from "../services/invitations/rejectService";
+import InvitationAcceptService from "../services/invitations/acceptService";
 import _ from "lodash";
 
 export default class IncomingInvitation extends React.Component {
@@ -12,6 +13,37 @@ export default class IncomingInvitation extends React.Component {
 
   acceptInvitation() {
     console.log("Accepting invitation...");
+
+    let service = new InvitationAcceptService(
+      this.props.appState.token,
+      this.props.invitation.id
+    );
+
+    service.accept().then(response => {
+      let updatedIncomingInvitations = this.invitationsWithoutSelf();
+
+      // Add team entry to appState.
+      let updatedTeams = _.cloneDeep(this.props.appState.teams);
+
+      updatedTeams.push(response.team);
+
+      this.props.setAppState({
+        incomingInvitations: updatedIncomingInvitations,
+        teams: updatedTeams
+      });
+    });
+  }
+
+  invitationsWithoutSelf() {
+    let updatedIncomingInvitations = _.cloneDeep(
+      this.props.appState.incomingInvitations
+    );
+
+    _.remove(updatedIncomingInvitations, invitation => {
+      return invitation.id === this.props.invitation.id;
+    });
+
+    return updatedIncomingInvitations;
   }
 
   rejectInvitation() {
@@ -24,19 +56,7 @@ export default class IncomingInvitation extends React.Component {
 
     service.reject().then(() => {
       // Delete own entry from appState.
-      let updatedIncomingInvitations = _.cloneDeep(
-        this.props.appState.incomingInvitations
-      );
-
-      _.remove(updatedIncomingInvitations, invitation => {
-        console.log(
-          "Comparing state invitation ID " +
-            invitation.id +
-            " to local invitation ID " +
-            this.props.invitation.id
-        );
-        return invitation.id === this.props.invitation.id;
-      });
+      let updatedIncomingInvitations = this.invitationsWithoutSelf();
 
       this.props.setAppState({
         incomingInvitations: updatedIncomingInvitations
