@@ -13,7 +13,11 @@ export default class ListUsersService {
 
     return api.get("teams/" + this.team.id + "/users").then(response => {
       console.log(response, "success");
-      return Promise.resolve(response.users);
+
+      return Promise.resolve({
+        users: response.users,
+        invitedUsers: response.invited_users
+      });
     });
   }
 }
