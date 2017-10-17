@@ -1,5 +1,5 @@
 import ApiService from "./apiService";
-import AuthenticationHashService from "./authenticationHashService";
+import HashService from "./hashService";
 
 export default class SignInService {
   constructor(email, password) {
@@ -39,34 +39,33 @@ export default class SignInService {
   signInWithHashedPassword(authenticationSalt) {
     let api = new ApiService();
 
-    let hashService = new AuthenticationHashService(
-      this.password,
-      authenticationSalt
-    );
+    let hashService = new HashService(this.password, authenticationSalt);
 
-    return api
-      .post("sessions", {
-        session: {
-          email: this.email,
-          password: hashService.authenticationHash()
-        }
-      })
-      .then(response => {
-        console.log(response, "POST sessions -> success");
-        return Promise.resolve({
-          token: response.token,
-          encryptionSalt: response.user.encryption_salt,
-          teams: response.teams,
-          incomingInvitations: response.incoming_invitations
+    return hashService.hexHash().then(hash => {
+      return api
+        .post("sessions", {
+          session: {
+            email: this.email,
+            password: hash
+          }
+        })
+        .then(response => {
+          console.log(response, "POST sessions -> success");
+          return Promise.resolve({
+            token: response.token,
+            encryptionSalt: response.user.encryption_salt,
+            teams: response.teams,
+            incomingInvitations: response.incoming_invitations
+          });
+        })
+        .catch(response => {
+          console.log(response, "POST sessions -> failure");
+          // TODO: What should be returned if sign in fails?
+          return Promise.reject(
+            new Error("Response from API indicated a failure.")
+          );
         });
-      })
-      .catch(response => {
-        console.log(response, "POST sessions -> failure");
-        // TODO: What should be returned if sign in fails?
-        return Promise.reject(
-          new Error("Response from API indicated a failure.")
-        );
-      });
+    });
   }
 
   // Save the session in storage to allow it to be restored without signing in again on a page reload.
