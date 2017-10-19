@@ -8,11 +8,12 @@ export default class HashService {
 
   hexHash() {
     console.log("Hashing ", this.password, this.authenticationSalt);
+    let that = this;
 
     return window.crypto.subtle
       .digest("SHA-256", this.saltedArray())
       .then(hash => {
-        return Promise.resolve(this.arrayBufferToHexString(hash), this.salt);
+        return Promise.resolve(this.arrayBufferToHexString(hash));
       });
   }
 

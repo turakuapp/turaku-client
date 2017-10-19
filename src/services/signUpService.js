@@ -7,9 +7,10 @@ export default class SignUpService {
 
   signUp(name, email, password) {
     let api = new ApiService();
-    let hashService = new HashService(password, this.authenticationSalt());
+    let salt = this.authenticationSalt();
+    let hashService = new HashService(password, salt);
 
-    return hashService.hexHash().then((hash, salt) => {
+    return hashService.hexHash().then(hash => {
       return api
         .post("users", {
           user: {
