@@ -13,7 +13,18 @@ export default class SignInService {
         return this.signInWithHashedPassword(authenticationSalt);
       })
       .then(authenticationResponse => {
-        return this.saveSession(authenticationResponse);
+        // Store the authentication response to avoid losing it during the next step.
+        this.resolvedObject = authenticationResponse;
+
+        return this.createEncryptionHash(authenticationResponse.encryptionSalt);
+      })
+      .then(hash => {
+        this.resolvedObject.encryptionHash = hash;
+
+        // Save both the token and the encryption hash in session to allow restoration.
+        this.saveSession(this.resolvedObject.token, hash);
+
+        return Promise.resolve(this.resolvedObject);
       });
   }
 
@@ -69,10 +80,15 @@ export default class SignInService {
   }
 
   // Save the session in storage to allow it to be restored without signing in again on a page reload.
-  saveSession(authenticationResponse) {
-    sessionStorage.setItem("token", authenticationResponse.token);
+  saveSession(token, encryptionHash) {
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("encryptionHash", encryptionHash);
+  }
 
-    // Now resolve the promise with the authentication response.
-    return Promise.resolve(authenticationResponse);
+  createEncryptionHash(encryptionSalt) {
+    // Create and store encryption hash.
+    let hashService = new HashService(this.password, encryptionSalt);
+
+    return hashService.hexHash();
   }
 }

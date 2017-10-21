@@ -30,9 +30,9 @@ export default class SignIn extends React.Component {
         this.props.setAppState(
           {
             token: authorization.token,
-            encryptionSalt: authorization.encryptionSalt,
             teams: authorization.teams,
-            incomingInvitations: authorization.incomingInvitations
+            incomingInvitations: authorization.incomingInvitations,
+            encryptionHash: authorization.encryptionHash
           },
           () => {
             this.setState({ signInComplete: true });

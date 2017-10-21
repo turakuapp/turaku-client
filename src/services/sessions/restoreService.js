@@ -4,19 +4,21 @@ import _ from "lodash";
 export default class RestoreService {
   constructor(setAppState) {
     this.setAppState = setAppState;
+    this.sessionToken = sessionStorage.getItem("token");
+    this.sessionEncryptionHash = sessionStorage.getItem("encryptionHash");
   }
 
   canRestore() {
-    return _.isString(sessionStorage.getItem("token"));
+    return (
+      _.isString(this.sessionToken) && _.isString(this.sessionEncryptionHash)
+    );
   }
 
   restore() {
     return new Promise((resolve, reject) => {
-      if (_.isString(sessionStorage.getItem("token"))) {
-        let token = sessionStorage.getItem("token");
-
-        // Try to fetch the encryption salt and teams using token.
-        let api = new ApiService(token);
+      if (this.canRestore()) {
+        // Try to fetch teams using token.
+        let api = new ApiService(this.sessionToken);
         let that = this;
 
         resolve(
@@ -24,8 +26,8 @@ export default class RestoreService {
             .get("sessions/restore")
             .then(response => {
               let sessionData = {
-                token: token,
-                encryptionSalt: response.user.encryption_salt,
+                token: this.sessionToken,
+                encryptionHash: this.sessionEncryptionHash,
                 teams: response.teams,
                 incomingInvitations: response.incoming_invitations
               };
