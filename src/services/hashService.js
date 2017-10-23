@@ -6,14 +6,16 @@ export default class HashService {
     this.salt = salt;
   }
 
+  hash() {
+    return window.crypto.subtle.digest("SHA-256", this.saltedArray());
+  }
+
   hexHash() {
     console.log("Hashing ", this.password, this.authenticationSalt);
 
-    return window.crypto.subtle
-      .digest("SHA-256", this.saltedArray())
-      .then(hash => {
-        return Promise.resolve(this.arrayBufferToHexString(hash));
-      });
+    this.hash().then(hash => {
+      return Promise.resolve(this.arrayBufferToHexString(hash));
+    });
   }
 
   arrayBufferToHexString(buffer) {
