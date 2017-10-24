@@ -5,6 +5,7 @@ import _ from "lodash";
 import { Redirect } from "react-router";
 import "./teams.css";
 import IncomingInvitation from "./incomingInvitation";
+import TeamPasswordService from "../services/teams/passwordService";
 
 export default class Teams extends React.Component {
   constructor(props) {
@@ -19,6 +20,7 @@ export default class Teams extends React.Component {
     this.showCreateForm = this.showCreateForm.bind(this);
     this.hideCreateForm = this.hideCreateForm.bind(this);
     this.selectTeam = this.selectTeam.bind(this);
+    this.updateTeamPassword = this.updateTeamPassword.bind(this);
   }
 
   haveTeams() {
@@ -78,6 +80,22 @@ export default class Teams extends React.Component {
       });
   }
 
+  async updateTeamPassword(event) {
+    if (_.isObject(event)) {
+      console.log(
+        "Hashing " + event.target.value + " to get new team password..."
+      );
+
+      const updatedPassword = await new TeamPasswordService().updatePassword(
+        event.target.value
+      );
+
+      console.log("Updated team password is " + updatedPassword);
+
+      this.setState({ teamPassword: updatedPassword });
+    }
+  }
+
   createForm() {
     return (
       <form onSubmit={this.createTeam}>
@@ -91,6 +109,30 @@ export default class Teams extends React.Component {
           />
           <small id="teams__form-name-help" className="form-text text-muted">
             You can add team members later.
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="teams__form-password">Team Password</label>
+          <input
+            className="form-control"
+            id="teams__form-password"
+            aria-describedby="teams__form-password-help"
+            value={this.state.teamPassword}
+            onChange={this.updateTeamPassword}
+          />
+          <small
+            id="teams__form-password-help"
+            className="form-text text-muted"
+          >
+            <ul>
+              <li>
+                Type random characters into the password field to improve its{" "}
+                <em>randomness</em>.
+              </li>
+              <li>This is the password used to encode your team's records.</li>
+              <li>It will be encrypted before being sent to Turaku.</li>
+            </ul>
           </small>
         </div>
 
@@ -113,7 +155,10 @@ export default class Teams extends React.Component {
   }
 
   showCreateForm() {
-    this.setState({ createFormVisible: true });
+    this.setState({
+      createFormVisible: true,
+      teamPassword: new TeamPasswordService().newPassword()
+    });
   }
 
   hideCreateForm() {
@@ -150,6 +195,7 @@ export default class Teams extends React.Component {
               <div>
                 <h2>Your Teams</h2>
                 <ul className="mt-3 teams__ul">{this.currentTeams()}</ul>
+                <hr />
               </div>
             )}
 

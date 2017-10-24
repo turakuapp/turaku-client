@@ -13,7 +13,7 @@ export default class HashService {
   hexHash() {
     console.log("Hashing ", this.password, this.authenticationSalt);
 
-    this.hash().then(hash => {
+    return this.hash().then(hash => {
       return Promise.resolve(this.arrayBufferToHexString(hash));
     });
   }
