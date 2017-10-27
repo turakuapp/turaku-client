@@ -1,31 +1,24 @@
 import ApiService from "../apiService";
+import CryptoService from "../cryptoService";
 
 export default class CreateService {
-  constructor(token) {
+  constructor(token, encryptionHash) {
     this.token = token;
+    this.encryptionHash = encryptionHash;
   }
 
-  create(name) {
+  async create(name, password) {
     console.log("teams/CreateService#create");
 
-    let api = new ApiService(this.token);
+    let encryptedPassword = await new CryptoService(
+      this.encryptionHash
+    ).encrypt(password);
 
-    return api
-      .post("teams", {
-        team: {
-          name: name
-        }
-      })
-      .then(response => {
-        console.log(response, "success");
-        return Promise.resolve(response);
-      })
-      .catch(response => {
-        console.log(response, "failure");
-        // TODO: What should be returned if create team fails?
-        return Promise.reject(
-          new Error("Response from API indicated a failure.")
-        );
-      });
+    return await new ApiService(this.token).post("teams", {
+      team: {
+        name: name,
+        encrypted_password: encryptedPassword
+      }
+    });
   }
 }

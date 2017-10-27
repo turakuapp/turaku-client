@@ -58,12 +58,17 @@ export default class Teams extends React.Component {
 
   createTeam(event) {
     event.preventDefault();
-    let createService = new CreateService(this.props.appState.token);
-    let teamName = document.getElementById("teams__form-name").value;
+
+    let createService = new CreateService(
+      this.props.appState.token,
+      this.props.appState.encryptionHash
+    );
+
+    let name = document.getElementById("teams__form-name").value;
     let that = this;
 
     createService
-      .create(teamName)
+      .create(name, this.state.teamPassword)
       .then(team => {
         console.log("Created team.");
 
