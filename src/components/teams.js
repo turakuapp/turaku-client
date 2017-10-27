@@ -6,6 +6,7 @@ import { Redirect } from "react-router";
 import "./teams.css";
 import IncomingInvitation from "./incomingInvitation";
 import TeamPasswordService from "../services/teams/passwordService";
+import CryptoService from "../services/cryptoService";
 
 export default class Teams extends React.Component {
   constructor(props) {
@@ -31,12 +32,21 @@ export default class Teams extends React.Component {
     return this.props.appState.incomingInvitations.length > 0;
   }
 
-  selectTeam(team) {
-    this.props.setAppState({ team: team }, () => {
+  async selectTeam(team) {
+    // Decrypt the password and store that now that a team has been selected.
+    let password = await new CryptoService(
+      this.props.appState.encryptionHash
+    ).decrypt(team.encrypted_password);
+
+    let decryptedTeam = _.clone(team);
+    delete decryptedTeam.encrypted_password;
+    decryptedTeam.password = password;
+
+    this.props.setAppState({ team: decryptedTeam }, () => {
       this.setState({ teamSelected: true }, () => {
         // Store the team in session storage as well, so that when reloading,
         // it can be automatically set as selected team.
-        sessionStorage.setItem("team", JSON.stringify(team));
+        sessionStorage.setItem("team", JSON.stringify(decryptedTeam));
       });
     });
   }
