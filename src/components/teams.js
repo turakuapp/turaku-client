@@ -218,7 +218,7 @@ export default class Teams extends React.Component {
               <div>
                 <h2>Invitations</h2>
                 <p>You have been invited to join:</p>
-                <ul className="mt-3 teams_ul">{this.incomingInvitations()}</ul>
+                {this.incomingInvitations()}
               </div>
             )}
 
