@@ -19,7 +19,13 @@ export default class Dashboard extends React.Component {
 
     this.setState({ signingOut: true }, () => {
       service.signOut().then(() => {
-        that.props.setAppState({ token: null, team: null, teams: null });
+        that.props.setAppState({
+          token: undefined,
+          team: undefined,
+          teams: undefined,
+          encryptionHash: undefined,
+          incomingInvitations: undefined
+        });
       });
     });
   }
