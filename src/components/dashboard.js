@@ -5,6 +5,7 @@ import "./dashboard.css";
 import _ from "lodash";
 import { Redirect, Link, Route } from "react-router-dom";
 import SessionSignOutService from "../services/sessions/signOutService";
+import Entries from "./entries";
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -39,13 +40,24 @@ export default class Dashboard extends React.Component {
       <div className="container-fluid">
         <div className="row">
           <div className="col dashboard__navigation">
-            <div>Tags</div>
+            <h3>Tags</h3>
+
+            <div>
+              <Link to="/dash/entries/all">All tags</Link>
+            </div>
+
+            <hr />
+
             <div>
               <Link to="/teams">Teams</Link>
             </div>
+
             <div>
               <Link to="/dash/users">Users</Link>
             </div>
+
+            <hr />
+
             {!this.state.signingOut && (
               <div>
                 <button
@@ -59,6 +71,16 @@ export default class Dashboard extends React.Component {
           </div>
 
           <div className="col-10 dashboard__content">
+            <Route
+              path="/dash/entries/all"
+              render={props => (
+                <Entries
+                  appState={this.props.appState}
+                  setAppState={this.props.setAppState}
+                />
+              )}
+            />
+
             <Route
               path="/dash/users"
               render={props => (
