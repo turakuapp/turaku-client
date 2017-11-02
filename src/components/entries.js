@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import "./entries.css";
+import Entry from "./entry";
+import _ from "lodash";
 
 export default class Entries extends React.Component {
   constructor(props) {
@@ -13,6 +15,28 @@ export default class Entries extends React.Component {
 
   addEntry() {
     console.log("Add a new entry...");
+
+    const entry = {
+      title: "New Entry",
+      fields: [
+        { name: "user", type: "user", value: "" },
+        { name: "password", type: "password", value: "" },
+        { name: "tags", type: "tags", value: "" }
+      ]
+    };
+
+    let entries = null;
+
+    if (_.isArray(this.props.appState.entries)) {
+      entries = _.cloneDeep(this.props.appState.entries).unshift(entry);
+    } else {
+      entries = [entry];
+    }
+
+    this.props.setAppState({
+      entry: entry,
+      entries: entries
+    });
   }
 
   render() {
@@ -32,7 +56,10 @@ export default class Entries extends React.Component {
           </div>
         </div>
         <div className="col-8">
-          <p>Decrypted entry contents go here.</p>
+          <Entry
+            setAppState={this.props.setAppState}
+            appState={this.props.appState}
+          />
         </div>
       </div>
     );
