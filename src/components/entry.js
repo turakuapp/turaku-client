@@ -11,32 +11,43 @@ export default class Entry extends React.Component {
   }
 
   entrySelected() {
-    return _.isObject(this.props.appState.entry);
+    return _.isString(this.props.appState.entryId);
   }
 
   handleTitleChange(event) {
-    console.log("Title has changed...");
+    console.log("Title has changed to " + event.target.value);
+  }
+
+  findEntry() {
+    const entryId = this.props.appState.entryId;
+
+    if (_.startsWith(entryId, "N")) {
+      return this.props.appState.staleEntries[entryId];
+    } else {
+      const staleEntry = this.props.appState.staleEntries[entryId];
+      if (_.isObject(staleEntry)) {
+        return staleEntry;
+      } else {
+        return this.props.appState.entries[entryId];
+      }
+    }
   }
 
   entryData() {
-    // {
-    //   title: "New Entry",
-    //   fields: [
-    //     { name: "user", type: "user", value: "" },
-    //     { name: "password", type: "password", value: "" },
-    //     { name: "tags", type: "tags", value: "" }
-    //   ]
-    // };
-
-    const entry = this.props.appState.entry;
+    const entry = this.findEntry();
 
     return (
       <div>
-        <input
-          type="text"
-          value={entry.title}
-          onChange={this.handleTitleChange}
-        />
+        <div className="row">
+          <div className="col offset-sm-2">
+            <input
+              type="text"
+              value={entry.title}
+              onChange={this.handleTitleChange}
+              className="my-2"
+            />
+          </div>
+        </div>
         {_.map(entry.fields, field => {
           return (
             // TODO: The key passed to Field may have to be 'more unique'.

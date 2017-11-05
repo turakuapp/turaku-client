@@ -15,7 +15,7 @@ export default class Field extends React.Component {
   render() {
     return (
       <div className="row">
-        <div className="col-3">
+        <div className="col-2">
           {/* TODO: Clicking the field name should copy the contents */}
           <button>{this.props.field.name}</button>
         </div>

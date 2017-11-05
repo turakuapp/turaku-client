@@ -14,10 +14,11 @@ export default class Entries extends React.Component {
   }
 
   addEntry() {
-    console.log("Add a new entry...");
+    console.log("Adding a new entry...");
 
     const entry = {
       title: "New Entry",
+      persisted: false,
       fields: [
         { name: "user", type: "user", value: "" },
         { name: "password", type: "password", value: "" },
@@ -25,17 +26,43 @@ export default class Entries extends React.Component {
       ]
     };
 
-    let entries = null;
+    let staleEntries = {};
+    let newKey = null;
 
-    if (_.isArray(this.props.appState.entries)) {
-      entries = _.cloneDeep(this.props.appState.entries).unshift(entry);
+    if (_.isObject(this.props.appState.staleEntries)) {
+      console.log("Stale entries exist...");
+      staleEntries = _.cloneDeep(this.props.appState.staleEntries);
+
+      const newEntryKeys = _.filter(Object.keys(staleEntries), key => {
+        return _.startsWith(key, "N");
+      });
+
+      console.log("New entry keys are: ", newEntryKeys);
+
+      if (_.isEmpty(newEntryKeys)) {
+        newKey = "N1";
+      } else {
+        const newKeyInteger =
+          parseInt(
+            _.max(
+              _.map(newEntryKeys, key => {
+                return _.join(_.slice(key, 1));
+              })
+            )
+          ) + 1;
+
+        newKey = "N" + newKeyInteger;
+      }
     } else {
-      entries = [entry];
+      console.log("Stale entries do not exist...");
+      newKey = "N1";
     }
 
+    staleEntries[newKey] = entry;
+
     this.props.setAppState({
-      entry: entry,
-      entries: entries
+      entryId: newKey,
+      staleEntries: staleEntries
     });
   }
 
