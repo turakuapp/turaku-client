@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import "./entries.css";
 import Entry from "./entry";
 import _ from "lodash";
+import EntryChoice from "./entryChoice";
 
 export default class Entries extends React.Component {
   constructor(props) {
@@ -48,7 +49,8 @@ export default class Entries extends React.Component {
               _.map(newEntryKeys, key => {
                 return _.join(_.slice(key, 1));
               })
-            )
+            ),
+            10
           ) + 1;
 
         newKey = "N" + newKeyInteger;
@@ -66,6 +68,38 @@ export default class Entries extends React.Component {
     });
   }
 
+  entryChoices() {
+    const choices = [];
+
+    // List all unpersisted entries.
+    _.forOwn(this.props.appState.staleEntries, (staleEntry, entryId) => {
+      if (staleEntry.persisted === false) {
+        choices.push(
+          <EntryChoice
+            appState={this.props.appState}
+            setAppState={this.props.setAppState}
+            entryId={entryId}
+            entry={staleEntry}
+          />
+        );
+      }
+    });
+
+    // List all persisted entries.
+    _.forOwn(this.props.appState.entries, (entry, entryId) => {
+      choices.push(
+        <EntryChoice
+          appState={this.props.appState}
+          setAppState={this.props.setAppState}
+          entryId={entryId}
+          entry={entry}
+        />
+      );
+    });
+
+    return choices;
+  }
+
   render() {
     return (
       <div className="row">
@@ -81,6 +115,8 @@ export default class Entries extends React.Component {
               </button>
             </div>
           </div>
+
+          {this.entryChoices()}
         </div>
         <div className="col-8">
           <Entry

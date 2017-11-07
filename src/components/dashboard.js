@@ -6,6 +6,7 @@ import _ from "lodash";
 import { Redirect, Link, Route } from "react-router-dom";
 import SessionSignOutService from "../services/sessions/signOutService";
 import Entries from "./entries";
+import initialState from "../procedures/initialState";
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -20,13 +21,7 @@ export default class Dashboard extends React.Component {
 
     this.setState({ signingOut: true }, () => {
       service.signOut().then(() => {
-        that.props.setAppState({
-          token: undefined,
-          team: undefined,
-          teams: undefined,
-          encryptionHash: undefined,
-          incomingInvitations: undefined
-        });
+        that.props.setAppState(initialState());
       });
     });
   }

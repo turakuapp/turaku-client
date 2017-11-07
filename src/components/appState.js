@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
+import initialState from "../procedures/initialState";
 
 export default class AppState extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = initialState();
     this.setAppState = this.setAppState.bind(this);
   }
 
