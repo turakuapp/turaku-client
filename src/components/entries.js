@@ -115,9 +115,9 @@ export default class Entries extends React.Component {
                 Add new
               </button>
             </div>
-          </div>
 
-          {this.entryChoices()}
+            {this.entryChoices()}
+          </div>
         </div>
         <div className="col-8">
           <Entry
