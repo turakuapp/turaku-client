@@ -15,7 +15,17 @@ export default class Entry extends React.Component {
   }
 
   handleTitleChange(event) {
-    console.log("Title has changed to " + event.target.value);
+    console.log("Changing title to " + event.target.value);
+
+    const staleEntries = _.cloneDeep(this.props.appState.staleEntries);
+    const staleEntry = staleEntries[this.props.appState.entryId];
+
+    if (_.isObject(staleEntry)) {
+      staleEntry.title = event.target.value;
+      this.props.setAppState({ staleEntries: staleEntries });
+    } else {
+      // TODO: Handle editing of titles for newly edited persisted entries.
+    }
   }
 
   findEntry() {
