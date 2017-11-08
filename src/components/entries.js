@@ -76,6 +76,7 @@ export default class Entries extends React.Component {
       if (staleEntry.persisted === false) {
         choices.push(
           <EntryChoice
+            key={entryId}
             appState={this.props.appState}
             setAppState={this.props.setAppState}
             entryId={entryId}
