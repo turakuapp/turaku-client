@@ -27,14 +27,14 @@ export default class Entries extends React.Component {
       ]
     };
 
-    let staleEntries = {};
+    let unsavedEntries = {};
     let newKey = null;
 
-    if (_.isObject(this.props.appState.staleEntries)) {
+    if (_.isObject(this.props.appState.unsavedEntries)) {
       console.log("Stale entries exist...");
-      staleEntries = _.cloneDeep(this.props.appState.staleEntries);
+      unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
 
-      const newEntryKeys = _.filter(Object.keys(staleEntries), key => {
+      const newEntryKeys = _.filter(Object.keys(unsavedEntries), key => {
         return _.startsWith(key, "N");
       });
 
@@ -60,11 +60,11 @@ export default class Entries extends React.Component {
       newKey = "N1";
     }
 
-    staleEntries[newKey] = entry;
+    unsavedEntries[newKey] = entry;
 
     this.props.setAppState({
       entryId: newKey,
-      staleEntries: staleEntries
+      unsavedEntries: unsavedEntries
     });
   }
 
@@ -72,15 +72,15 @@ export default class Entries extends React.Component {
     const choices = [];
 
     // List all unpersisted entries.
-    _.forOwn(this.props.appState.staleEntries, (staleEntry, entryId) => {
-      if (staleEntry.persisted === false) {
+    _.forOwn(this.props.appState.unsavedEntries, (unsavedEntry, entryId) => {
+      if (unsavedEntry.persisted === false) {
         choices.push(
           <EntryChoice
             key={entryId}
             appState={this.props.appState}
             setAppState={this.props.setAppState}
             entryId={entryId}
-            entry={staleEntry}
+            entry={unsavedEntry}
           />
         );
       }

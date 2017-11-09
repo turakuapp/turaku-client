@@ -17,12 +17,12 @@ export default class Entry extends React.Component {
   handleTitleChange(event) {
     console.log("Changing title to " + event.target.value);
 
-    const staleEntries = _.cloneDeep(this.props.appState.staleEntries);
-    const staleEntry = staleEntries[this.props.appState.entryId];
+    const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
+    const unsavedEntry = unsavedEntries[this.props.appState.entryId];
 
-    if (_.isObject(staleEntry)) {
-      staleEntry.title = event.target.value;
-      this.props.setAppState({ staleEntries: staleEntries });
+    if (_.isObject(unsavedEntry)) {
+      unsavedEntry.title = event.target.value;
+      this.props.setAppState({ unsavedEntries: unsavedEntries });
     } else {
       // TODO: Handle editing of titles for newly edited persisted entries.
     }
@@ -32,11 +32,11 @@ export default class Entry extends React.Component {
     const entryId = this.props.appState.entryId;
 
     if (_.startsWith(entryId, "N")) {
-      return this.props.appState.staleEntries[entryId];
+      return this.props.appState.unsavedEntries[entryId];
     } else {
-      const staleEntry = this.props.appState.staleEntries[entryId];
-      if (_.isObject(staleEntry)) {
-        return staleEntry;
+      const unsavedEntry = this.props.appState.unsavedEntries[entryId];
+      if (_.isObject(unsavedEntry)) {
+        return unsavedEntry;
       } else {
         return this.props.appState.entries[entryId];
       }

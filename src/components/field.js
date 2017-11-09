@@ -12,21 +12,21 @@ export default class Field extends React.Component {
   handleChange(event) {
     console.log("Saving change to a field...");
 
-    const staleEntries = _.cloneDeep(this.props.appState.staleEntries);
-    const staleEntry = staleEntries[this.props.appState.entryId];
+    const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
+    const unsavedEntry = unsavedEntries[this.props.appState.entryId];
 
-    if (_.isObject(staleEntry)) {
-      const fieldIndex = _.findIndex(staleEntry.fields, [
+    if (_.isObject(unsavedEntry)) {
+      const fieldIndex = _.findIndex(unsavedEntry.fields, [
         "name",
         this.props.field.name
       ]);
 
       const updatedField = _.cloneDeep(this.props.field);
       updatedField.value = event.target.value;
-      staleEntry.fields[fieldIndex] = updatedField;
+      unsavedEntry.fields[fieldIndex] = updatedField;
 
-      console.log("Setting updated staleEntries: ", staleEntries);
-      this.props.setAppState({ staleEntries: staleEntries });
+      console.log("Setting updated unsavedEntries: ", unsavedEntries);
+      this.props.setAppState({ unsavedEntries: unsavedEntries });
     } else {
       // TODO: Handle the case of user newly editing a persisted entry.
     }
