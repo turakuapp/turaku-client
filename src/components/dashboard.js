@@ -13,6 +13,7 @@ export default class Dashboard extends React.Component {
     super(props);
     this.state = { signingOut: false };
     this.signOut = this.signOut.bind(this);
+    this.saveChanges = this.saveChanges.bind(this);
   }
 
   signOut() {
@@ -24,6 +25,14 @@ export default class Dashboard extends React.Component {
         that.props.setAppState(initialState());
       });
     });
+  }
+
+  haveUnsavedEntries() {
+    return !_.isEmpty(this.props.appState.unsavedEntries);
+  }
+
+  saveChanges() {
+    console.log("Saving changes...");
   }
 
   render() {
@@ -87,6 +96,17 @@ export default class Dashboard extends React.Component {
             />
           </div>
         </div>
+
+        {this.haveUnsavedEntries() && (
+          <div className="fixed-bottom text-center dashboard__unsaved-entries-notification p-2">
+            <button
+              className="btn btn-outline-light btn-sm"
+              onClick={this.saveChanges}
+            >
+              Save all changes
+            </button>
+          </div>
+        )}
       </div>
     );
   }
