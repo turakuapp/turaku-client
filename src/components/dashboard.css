@@ -6,8 +6,3 @@
 .dashboard__entries {
   height: 100vh;
 }
-
-.dashboard__unsaved-entries-notification {
-  background-color: black;
-  color: white;
-}

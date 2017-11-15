@@ -90,6 +90,7 @@ export default class Entries extends React.Component {
     _.forOwn(this.props.appState.entries, (entry, entryId) => {
       choices.push(
         <EntryChoice
+          key={entryId}
           appState={this.props.appState}
           setAppState={this.props.setAppState}
           entryId={entryId}
