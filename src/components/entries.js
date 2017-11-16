@@ -4,14 +4,40 @@ import "./entries.css";
 import Entry from "./entry";
 import _ from "lodash";
 import EntryChoice from "./entryChoice";
+import ListEntriesService from "../services/entries/listService";
+import CryptoService from "../services/cryptoService";
 
 export default class Entries extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {};
-
     this.addEntry = this.addEntry.bind(this);
+  }
+
+  componentDidMount() {
+    // Load entries.
+    if (_.isEmpty(this.props.appState.entries)) {
+      const listService = new ListEntriesService(
+        this.props.appState.token,
+        this.props.appState.encryptionHash,
+        this.props.appState.team.id,
+        this.props.appState,
+        this.props.setAppState
+      );
+
+      listService.list().then(entries => {
+        for (const encryptedEntry of entries) {
+          this.decryptEntry(encryptedEntry);
+        }
+      });
+    }
+  }
+
+  async decryptEntry(encryptedEntry) {
+    const crypto = new CryptoService(this.props.appState.encryptionHash);
+    const decryptedEntry = await crypto.decrypt(encryptedEntry.encrypted_data);
+    const entriesClone = _.cloneDeep(this.props.appState.entries);
+    entriesClone[encryptedEntry.id] = decryptedEntry;
+    this.props.setAppState({ entries: entriesClone });
   }
 
   addEntry() {
