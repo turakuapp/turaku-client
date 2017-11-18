@@ -17,15 +17,19 @@ export default class Entry extends React.Component {
   handleTitleChange(event) {
     console.log("Changing title to " + event.target.value);
 
+    const entryId = this.props.appState.entryId;
     const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
-    const unsavedEntry = unsavedEntries[this.props.appState.entryId];
+    let unsavedEntry = unsavedEntries[entryId];
 
-    if (_.isObject(unsavedEntry)) {
-      unsavedEntry.title = event.target.value;
-      this.props.setAppState({ unsavedEntries: unsavedEntries });
-    } else {
-      // TODO: Handle editing of titles for newly edited persisted entries.
+    if (!_.isObject(unsavedEntry)) {
+      // The unsaved entry doesn't exist, copy it into the clone
+      // of unsaved entries list from list of saved entries.
+      unsavedEntry = _.cloneDeep(this.props.appState.entries[entryId]);
+      unsavedEntries[entryId] = unsavedEntry;
     }
+
+    unsavedEntry.title = event.target.value;
+    this.props.setAppState({ unsavedEntries: unsavedEntries });
   }
 
   findEntry() {

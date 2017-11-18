@@ -12,24 +12,28 @@ export default class Field extends React.Component {
   handleChange(event) {
     console.log("Saving change to a field...");
 
+    const entryId = this.props.appState.entryId;
     const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
-    const unsavedEntry = unsavedEntries[this.props.appState.entryId];
+    let unsavedEntry = unsavedEntries[entryId];
 
-    if (_.isObject(unsavedEntry)) {
-      const fieldIndex = _.findIndex(unsavedEntry.fields, [
-        "name",
-        this.props.field.name
-      ]);
-
-      const updatedField = _.cloneDeep(this.props.field);
-      updatedField.value = event.target.value;
-      unsavedEntry.fields[fieldIndex] = updatedField;
-
-      console.log("Setting updated unsavedEntries: ", unsavedEntries);
-      this.props.setAppState({ unsavedEntries: unsavedEntries });
-    } else {
-      // TODO: Handle the case of user newly editing a persisted entry.
+    if (!_.isObject(unsavedEntry)) {
+      // The unsaved entry doesn't exist, copy it into the clone
+      // of unsaved entries list from list of saved entries.
+      unsavedEntry = _.cloneDeep(this.props.appState.entries[entryId]);
+      unsavedEntries[entryId] = unsavedEntry;
     }
+
+    const fieldIndex = _.findIndex(unsavedEntry.fields, [
+      "name",
+      this.props.field.name
+    ]);
+
+    const updatedField = _.cloneDeep(this.props.field);
+    updatedField.value = event.target.value;
+    unsavedEntry.fields[fieldIndex] = updatedField;
+
+    console.log("Setting updated unsavedEntries: ", unsavedEntries);
+    this.props.setAppState({ unsavedEntries: unsavedEntries });
   }
 
   render() {
