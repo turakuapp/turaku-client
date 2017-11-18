@@ -11,20 +11,40 @@ export default class SaveBar extends React.Component {
   }
 
   saveChanges() {
-    console.log("Saving changes...  ");
+    console.log("Saving changes...");
 
-    // Iterate over all new entries and create them on the server.
+    // Iterate over all new entries and create / update them on the server.
     for (const entryId in this.props.appState.unsavedEntries) {
-      console.log("Creating new entry with temp ID: " + entryId);
-      this.createEntry(entryId);
+      if (this.props.appState.unsavedEntries[entryId].persisted) {
+        this.updateEntry(entryId);
+      } else {
+        this.createEntry(entryId);
+      }
     }
   }
 
+  updatedEntry(unsavedEntryId) {
+    const unsavedEntryClone = _.cloneDeep(
+      this.props.appState.unsavedEntries[unsavedEntryId]
+    );
+
+    // Remove the persisted flag - this is doesn't need to be sent to the server.
+    delete unsavedEntryClone.persisted;
+
+    return unsavedEntryClone;
+  }
+
+  async updateEntry(entryId) {
+    console.log(`Updating existing entry with ID ${entryId}`);
+  }
+
   async createEntry(unsavedEntryId) {
+    console.log("Creating new entry with temp ID: " + unsavedEntryId);
+
     const createService = new CreateEntryService(
       this.props.appState.token,
       this.props.appState.encryptionHash,
-      this.props.appState.unsavedEntries[unsavedEntryId],
+      this.updatedEntry(unsavedEntryId),
       this.props.appState.team.id
     );
 
@@ -40,7 +60,7 @@ export default class SaveBar extends React.Component {
 
     const entriesClone = _.cloneDeep(this.props.appState.entries);
     const unsavedEntriesClone = _.cloneDeep(this.props.appState.unsavedEntries);
-    entriesClone[savedEntryId] = unsavedEntriesClone[unsavedEntryId];
+    entriesClone[savedEntryId] = this.updatedEntry(unsavedEntryId);
     delete unsavedEntriesClone[unsavedEntryId];
 
     const newAppState = {
