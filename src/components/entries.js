@@ -35,6 +35,11 @@ export default class Entries extends React.Component {
   async decryptEntry(encryptedEntry) {
     const crypto = new CryptoService(this.props.appState.encryptionHash);
     const decryptedEntry = await crypto.decrypt(encryptedEntry.encrypted_data);
+
+    // Mark all loaded entries as persisted, so that changes
+    // to them are handles as updates instead of creates.
+    decryptedEntry.persisted = true;
+
     const entriesClone = _.cloneDeep(this.props.appState.entries);
     entriesClone[encryptedEntry.id] = decryptedEntry;
     this.props.setAppState({ entries: entriesClone });

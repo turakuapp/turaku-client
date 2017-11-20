@@ -67,6 +67,11 @@ export default class ApiService {
     return this.fetch(path, "POST", body);
   }
 
+  patch(path, params) {
+    let body = JSON.stringify(params);
+    return this.fetch(path, "PATCH", body);
+  }
+
   delete(path) {
     return this.fetch(path, "DELETE");
   }

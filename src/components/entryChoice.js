@@ -10,12 +10,19 @@ export default class EntryChoice extends React.Component {
     this.chooseEntry = this.chooseEntry.bind(this);
   }
 
+  entry() {
+    if (this.props.appState.unsavedEntries.hasOwnProperty(this.props.entryId)) {
+      return this.props.appState.unsavedEntries[this.props.entryId];
+    } else {
+      return this.props.appState.entries[this.props.entryId];
+    }
+  }
+
   title() {
-    if (
-      _.isString(this.props.entry.title) &&
-      this.props.entry.title.length > 0
-    ) {
-      return this.props.entry.title;
+    const resolvedEntry = this.entry();
+
+    if (_.isString(resolvedEntry.title) && resolvedEntry.title.length > 0) {
+      return resolvedEntry.title;
     } else {
       return <em>Nameless entry</em>;
     }

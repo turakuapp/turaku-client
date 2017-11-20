@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import "./saveBar.css";
 import CreateEntryService from "../services/entries/createService";
+import UpdateEntryService from "../services/entries/updateService";
 
 export default class SaveBar extends React.Component {
   constructor(props) {
@@ -23,19 +24,50 @@ export default class SaveBar extends React.Component {
     }
   }
 
-  updatedEntry(unsavedEntryId) {
+  updatedEntry(unsavedEntryId, deletePersisted = true) {
     const unsavedEntryClone = _.cloneDeep(
       this.props.appState.unsavedEntries[unsavedEntryId]
     );
 
     // Remove the persisted flag - this is doesn't need to be sent to the server.
-    delete unsavedEntryClone.persisted;
+    if (deletePersisted) {
+      delete unsavedEntryClone.persisted;
+    }
 
     return unsavedEntryClone;
   }
 
   async updateEntry(entryId) {
     console.log(`Updating existing entry with ID ${entryId}`);
+
+    const updateService = new UpdateEntryService(
+      this.props.appState.token,
+      this.props.appState.encryptionHash,
+      entryId,
+      this.updatedEntry(entryId)
+    );
+
+    const updatedEntryId = await updateService.execute();
+
+    console.log(
+      `Entry with ID ${entryId} has been updated. Updating app state...`
+    );
+
+    const entriesClone = _.cloneDeep(this.props.appState.entries);
+    const unsavedEntriesClone = _.cloneDeep(this.props.appState.unsavedEntries);
+    entriesClone[updatedEntryId] = this.updatedEntry(entryId, false);
+    delete unsavedEntriesClone[entryId];
+
+    const newAppState = {
+      entries: entriesClone,
+      unsavedEntries: unsavedEntriesClone
+    };
+
+    console.log("Updating appState with data: ", newAppState);
+
+    this.props.setAppState(newAppState, () => {
+      console.log("New app state should include: ", newAppState);
+    });
   }
 
   async createEntry(unsavedEntryId) {
