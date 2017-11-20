@@ -21,7 +21,10 @@ export default class EntryChoice extends React.Component {
   title() {
     const resolvedEntry = this.entry();
 
-    if (_.isString(resolvedEntry.title) && resolvedEntry.title.length > 0) {
+    if (
+      _.isString(resolvedEntry.title) &&
+      resolvedEntry.title.trim().length > 0
+    ) {
       return resolvedEntry.title;
     } else {
       return <em>Nameless entry</em>;
