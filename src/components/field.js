@@ -1,12 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
+import EyeIcon from "mdi-react/EyeIcon";
+import EyeOffIcon from "mdi-react/EyeOffIcon";
 
 export default class Field extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = { passwordVisible: false };
+
     this.handleChange = this.handleChange.bind(this);
+    this.toggleVisibility = this.toggleVisibility.bind(this);
   }
 
   handleChange(event) {
@@ -36,6 +41,22 @@ export default class Field extends React.Component {
     this.props.setAppState({ unsavedEntries: unsavedEntries });
   }
 
+  isPassword() {
+    return this.props.field.type === "password";
+  }
+
+  toggleVisibility() {
+    this.setState({ passwordVisible: !this.state.passwordVisible });
+  }
+
+  fieldType() {
+    if (this.props.field.type !== "password" || this.state.passwordVisible) {
+      return "text";
+    } else {
+      return "password";
+    }
+  }
+
   render() {
     return (
       <div className="row">
@@ -45,10 +66,20 @@ export default class Field extends React.Component {
         </div>
         <div className="col">
           <input
-            type="text"
+            type={this.fieldType()}
             value={this.props.field.value}
             onChange={this.handleChange}
           />
+
+          {this.isPassword() && (
+            <button
+              className="ml-2 btn btn-sm btn-outline-secondary"
+              onClick={this.toggleVisibility}
+            >
+              {this.state.passwordVisible && <EyeOffIcon />}
+              {!this.state.passwordVisible && <EyeIcon />}
+            </button>
+          )}
         </div>
       </div>
     );
