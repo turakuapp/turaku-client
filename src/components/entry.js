@@ -59,6 +59,7 @@ export default class Entry extends React.Component {
               value={entry.title}
               onChange={this.handleTitleChange}
               className="my-2"
+              placeholder="Entry Title"
             />
           </div>
         </div>

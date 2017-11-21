@@ -49,7 +49,7 @@ export default class Entries extends React.Component {
     console.log("Adding a new entry...");
 
     const entry = {
-      title: "New Entry",
+      title: "",
       persisted: false,
       fields: [
         { name: "user", type: "user", value: "" },

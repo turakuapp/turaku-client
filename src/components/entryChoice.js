@@ -26,8 +26,10 @@ export default class EntryChoice extends React.Component {
       resolvedEntry.title.trim().length > 0
     ) {
       return resolvedEntry.title;
-    } else {
+    } else if (resolvedEntry.persisted) {
       return <em>Nameless entry</em>;
+    } else {
+      return <em>New entry</em>;
     }
   }
 
