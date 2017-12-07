@@ -2,8 +2,9 @@ import HashService from "./hashService";
 import base64js from "base64-js";
 
 export default class CryptoService {
-  constructor(key) {
+  constructor(key, base64Key = false) {
     this.key = key;
+    this.base64Key = base64Key;
   }
 
   // Promise to encrypt input object with key, with its
@@ -65,13 +66,24 @@ export default class CryptoService {
   }
 
   async cryptoKey() {
-    // Crypto-key accepts only 128-bit of 256-bit key data, so hash the key with SHA-256.
-    const hash = await new HashService(this.key).hash();
+    // Crypto-key accepts only 128-bit of 256-bit key data, so depending on the value
+    // of boolean base64Key, either hash the key with SHA-256 or treat the key as a
+    // Base64 encoded 32-bit string and convert it back to a byte array.
+    let keyData = null;
+
+    if (this.base64Key) {
+      keyData = base64js.toByteArray(this.key);
+    } else {
+      keyData = await new HashService(this.key).hash();
+    }
 
     // Create a CryptoKey for AES-CBC with the key hash.
-    return await window.crypto.subtle.importKey("raw", hash, "AES-CBC", false, [
-      "encrypt",
-      "decrypt"
-    ]);
+    return await window.crypto.subtle.importKey(
+      "raw",
+      keyData,
+      "AES-CBC",
+      false,
+      ["encrypt", "decrypt"]
+    );
   }
 }

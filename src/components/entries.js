@@ -33,7 +33,7 @@ export default class Entries extends React.Component {
   }
 
   async decryptEntry(encryptedEntry) {
-    const crypto = new CryptoService(this.props.appState.encryptionHash);
+    const crypto = new CryptoService(this.props.appState.team.password, true);
     const decryptedEntry = await crypto.decrypt(encryptedEntry.encrypted_data);
 
     // Mark all loaded entries as persisted, so that changes

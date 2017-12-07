@@ -42,7 +42,7 @@ export default class SaveBar extends React.Component {
 
     const updateService = new UpdateEntryService(
       this.props.appState.token,
-      this.props.appState.encryptionHash,
+      this.props.appState.team.password,
       entryId,
       this.updatedEntry(entryId)
     );
@@ -75,7 +75,7 @@ export default class SaveBar extends React.Component {
 
     const createService = new CreateEntryService(
       this.props.appState.token,
-      this.props.appState.encryptionHash,
+      this.props.appState.team.password,
       this.updatedEntry(unsavedEntryId),
       this.props.appState.team.id
     );

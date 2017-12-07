@@ -13,7 +13,7 @@ export default class UpdateService {
     console.log("entries/UpdateService#execute");
 
     // Create the encrypted entry.
-    const crypto = new CryptoService(this.key);
+    const crypto = new CryptoService(this.key, true);
     const encryptedEntry = await crypto.encrypt(this.entry);
 
     // Send the encrypted entry to the server.
