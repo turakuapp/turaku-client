@@ -54,7 +54,7 @@ export default class Entries extends React.Component {
       fields: [
         { name: "user", type: "user", value: "" },
         { name: "password", type: "password", value: "" },
-        { name: "tags", type: "tags", value: "" }
+        { name: "tags", type: "tags", value: [] }
       ]
     };
 
