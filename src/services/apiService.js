@@ -4,7 +4,7 @@ import queryString from "query-string";
 export default class ApiService {
   constructor(token) {
     this.token = token;
-    this.baseUrl = "http://turaku.dev/api/v0";
+    this.baseUrl = "http://turaku.localhost/api/v0";
   }
 
   headers() {
