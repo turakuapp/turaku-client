@@ -6,6 +6,7 @@ export default function initialState() {
     encryptionHash: undefined,
     incomingInvitations: undefined,
     entries: {},
-    unsavedEntries: {}
+    unsavedEntries: {},
+    tags: {}
   };
 }

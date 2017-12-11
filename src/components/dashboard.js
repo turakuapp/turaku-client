@@ -8,6 +8,7 @@ import SessionSignOutService from "../services/sessions/signOutService";
 import Entries from "./entries";
 import initialState from "../procedures/initialState";
 import SaveBar from "./saveBar";
+import Tags from "./tags";
 
 export default class Dashboard extends React.Component {
   constructor(props) {
@@ -40,11 +41,10 @@ export default class Dashboard extends React.Component {
       <div className="container-fluid">
         <div className="row">
           <div className="col dashboard__navigation">
-            <h3>Tags</h3>
-
-            <div>
-              <Link to="/dash/entries/all">All tags</Link>
-            </div>
+            <Tags
+              appState={this.props.appState}
+              setAppState={this.props.setAppState}
+            />
 
             <hr />
 
