@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
 import Field from "./field";
+import EntryTags from "./entryTags";
 
 export default class Entry extends React.Component {
   constructor(props) {
@@ -74,6 +75,12 @@ export default class Entry extends React.Component {
             />
           );
         })}
+
+        <EntryTags
+          appState={this.props.appState}
+          setAppState={this.props.setAppState}
+          entry={entry}
+        />
       </div>
     );
   }

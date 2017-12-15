@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import EyeIcon from "mdi-react/EyeIcon";
 import EyeOffIcon from "mdi-react/EyeOffIcon";
-import { WithContext as ReactTags } from "react-tag-input";
 
 export default class Field extends React.Component {
   constructor(props) {
@@ -13,9 +12,6 @@ export default class Field extends React.Component {
 
     this.handleChange = this.handleChange.bind(this);
     this.toggleVisibility = this.toggleVisibility.bind(this);
-    this.handleAddTag = this.handleAddTag.bind(this);
-    this.handleDeleteTag = this.handleDeleteTag.bind(this);
-    this.handleDragTag = this.handleDragTag.bind(this);
   }
 
   handleChange(event) {
@@ -65,42 +61,6 @@ export default class Field extends React.Component {
     }
   }
 
-  suggestedTags() {
-    return ["Tag 1", "Tag 2"];
-  }
-
-  handleDeleteTag(i) {
-    const tagsClone = _.cloneDeep(this.props.field.value);
-    tagsClone.splice(i, 1);
-    this.saveChangeToField(tagsClone);
-  }
-
-  handleAddTag(tag) {
-    const tagsClone = _.cloneDeep(this.props.field.value);
-
-    tagsClone.push({
-      id: tagsClone.length + 1,
-      text: tag
-    });
-
-    this.saveChangeToField(tagsClone);
-  }
-
-  handleDragTag(tag, currPos, newPos) {
-    const tagsClone = _.cloneDeep(this.props.field.value);
-
-    // mutate array
-    tagsClone.splice(currPos, 1);
-    tagsClone.splice(newPos, 0, tag);
-
-    // re-render
-    this.saveChangeToField(tagsClone);
-  }
-
-  isTags() {
-    return this.props.field.type === "tags";
-  }
-
   render() {
     return (
       <div className="row">
@@ -109,23 +69,11 @@ export default class Field extends React.Component {
           <button>{this.props.field.name}</button>
         </div>
         <div className="col">
-          {!this.isTags() && (
-            <input
-              type={this.fieldType()}
-              value={this.props.field.value}
-              onChange={this.handleChange}
-            />
-          )}
-
-          {this.isTags() && (
-            <ReactTags
-              tags={this.props.field.value}
-              suggestions={this.suggestedTags()}
-              handleDelete={this.handleDeleteTag}
-              handleAddition={this.handleAddTag}
-              handleDrag={this.handleDragTag}
-            />
-          )}
+          <input
+            type={this.fieldType()}
+            value={this.props.field.value}
+            onChange={this.handleChange}
+          />
 
           {this.isPassword() && (
             <button

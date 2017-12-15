@@ -36,8 +36,11 @@ export default class Entries extends React.Component {
     const crypto = new CryptoService(this.props.appState.team.password, true);
     const decryptedEntry = await crypto.decrypt(encryptedEntry.encrypted_data);
 
+    // Tag IDs loaded from server are not encrypted. Attach them directly to decrypted entry.
+    decryptedEntry.tags = encryptedEntry.tags;
+
     // Mark all loaded entries as persisted, so that changes
-    // to them are handles as updates instead of creates.
+    // to them are handled as updates instead of creates.
     decryptedEntry.persisted = true;
 
     const entriesClone = _.cloneDeep(this.props.appState.entries);
@@ -53,9 +56,9 @@ export default class Entries extends React.Component {
       persisted: false,
       fields: [
         { name: "user", type: "user", value: "" },
-        { name: "password", type: "password", value: "" },
-        { name: "tags", type: "tags", value: [] }
-      ]
+        { name: "password", type: "password", value: "" }
+      ],
+      tags: []
     };
 
     let unsavedEntries = {};
