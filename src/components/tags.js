@@ -28,7 +28,7 @@ export default class Tags extends React.Component {
     const name = await cryptoService.decrypt(tag.encrypted_name);
     const tagsClone = _.cloneDeep(this.props.appState.tags);
 
-    tagsClone[tag.id] = name;
+    tagsClone[tag.id] = { name: name, nameHash: tag.name_hash };
 
     this.props.setAppState({ tags: tagsClone });
   }

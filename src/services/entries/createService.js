@@ -2,11 +2,12 @@ import ApiService from "../apiService";
 import CryptoService from "../cryptoService";
 
 export default class CreateService {
-  constructor(token, key, entry, teamId) {
+  constructor(token, key, teamId, entry, tagIds) {
     this.token = token;
     this.key = key;
-    this.entry = entry;
     this.teamId = teamId;
+    this.entry = entry;
+    this.tagIds = tagIds;
   }
 
   async execute() {
@@ -19,7 +20,11 @@ export default class CreateService {
     // Send the encrypted entry to the server.
     const api = new ApiService(this.token);
     const response = await api.post("entries", {
-      entry: { team_id: this.teamId, encrypted_data: encryptedEntry }
+      entry: {
+        team_id: this.teamId,
+        encrypted_data: encryptedEntry,
+        tag_ids: this.tagIds
+      }
     });
 
     return response.id;

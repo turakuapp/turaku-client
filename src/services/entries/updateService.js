@@ -2,11 +2,12 @@ import ApiService from "../apiService";
 import CryptoService from "../cryptoService";
 
 export default class UpdateService {
-  constructor(token, key, entryId, entry) {
+  constructor(token, key, entryId, entry, tagIds) {
     this.token = token;
     this.key = key;
     this.entryId = entryId;
     this.entry = entry;
+    this.tagIds = tagIds;
   }
 
   async execute() {
@@ -19,7 +20,7 @@ export default class UpdateService {
     // Send the encrypted entry to the server.
     const api = new ApiService(this.token);
     const response = await api.patch(`entries/${this.entryId}`, {
-      entry: { encrypted_data: encryptedEntry }
+      entry: { encrypted_data: encryptedEntry, tag_ids: this.tagIds }
     });
 
     return response.id;
