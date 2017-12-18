@@ -39,7 +39,11 @@ export default class Tags extends React.Component {
     }
 
     return _.map(this.props.appState.tags, tag => {
-      return <span>{tag.name}</span>;
+      return (
+        <div>
+          <a href="#">{tag.name}</a>
+        </div>
+      );
     });
   }
 
