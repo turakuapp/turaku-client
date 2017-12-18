@@ -22,7 +22,7 @@ export default class CreateService {
     });
 
     return {
-      id: response.id,
+      id: "" + response.id,
       name: this.tag.name,
       encryptedName: response.encrypted_name,
       nameHash: response.name_hash

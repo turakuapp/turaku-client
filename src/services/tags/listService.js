@@ -12,7 +12,7 @@ export default class ListService {
 
     return response.tags.reduce((modifiedTags, tag) => {
       modifiedTags.push({
-        id: tag.id,
+        id: "" + tag.id,
         nameHash: tag.name_hash,
         encryptedName: tag.encrypted_name
       });
