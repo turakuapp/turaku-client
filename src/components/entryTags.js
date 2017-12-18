@@ -40,14 +40,16 @@ export default class EntryTags extends React.Component {
     const nameHash = await hashService.hexHash();
 
     // Check if client has tag in store.
-    const savedTag = _.find(this.props.appState.tags, tag => {
+    const savedTagId = _.findKey(this.props.appState.tags, tag => {
       return tag.nameHash === nameHash;
     });
+
+    const savedTag = this.props.appState.tags[savedTagId];
 
     let newTag = null;
 
     if (_.isObject(savedTag)) {
-      newTag = { id: savedTag.id };
+      newTag = { id: savedTagId };
     } else {
       // when client does not have tag in store, encrypt tag text...
       const cryptoService = new CryptoService(
