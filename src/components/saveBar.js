@@ -115,15 +115,14 @@ export default class SaveBar extends React.Component {
 
     // Clone unsaved entries to modify its list of tags.
     const unsavedEntriesClone = _.cloneDeep(this.props.appState.unsavedEntries);
+    const unsavedEntryTags = unsavedEntriesClone[unsavedEntryId].tags;
 
-    const oldTagIndex = _.findIndex(
-      unsavedEntriesClone[unsavedEntryId].tags,
-      oldTag => {
-        return oldTag.nameHash === savedTag.nameHash;
-      }
-    );
+    const oldTagIndex = _.findIndex(unsavedEntryTags, oldTag => {
+      return oldTag.nameHash === savedTag.nameHash;
+    });
 
-    unsavedEntriesClone[oldTagIndex] = { id: savedTag.id };
+    // Replace tag's full data with just the ID.
+    unsavedEntryTags[oldTagIndex] = { id: savedTag.id };
 
     // Now update both in appState.
     const updatedState = {
