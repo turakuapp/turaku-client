@@ -69,7 +69,7 @@ export default class SaveBar extends React.Component {
           console.log(
             `Tag with nameHash ${tag.nameHash} does not exist. Creating it...`
           );
-          this.createTag(unsavedEntryId, tag);
+          await this.createTag(unsavedEntryId, tag);
         }
       }
     }
@@ -137,7 +137,7 @@ export default class SaveBar extends React.Component {
   async updateEntry(entryId) {
     console.log(`Updating existing entry with ID ${entryId}`);
 
-    this.createMissingTags(entryId);
+    await this.createMissingTags(entryId);
 
     const updateService = new UpdateEntryService(
       this.props.appState.token,
@@ -173,7 +173,7 @@ export default class SaveBar extends React.Component {
   async createEntry(unsavedEntryId) {
     console.log("Creating new entry with temp ID: " + unsavedEntryId);
 
-    this.createMissingTags(unsavedEntryId);
+    await this.createMissingTags(unsavedEntryId);
 
     const createService = new CreateEntryService(
       this.props.appState.token,
