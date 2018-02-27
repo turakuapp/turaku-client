@@ -1,5 +1,6 @@
 type page =
-  | SignUp;
+  | SignUp
+  | SignIn;
 
 type state = {
   restorationAttempted: bool,
@@ -18,6 +19,7 @@ let str = ReasonReact.stringToElement;
 let currentComponent = (state, send) =>
   switch state.currentPage {
   | SignUp => <SignUp appState=state appSend=send />
+  | SignIn => <SignIn appState=state appSend=send />
   };
 
 let make = _children => {
@@ -33,7 +35,7 @@ let make = _children => {
       <div> (str("Restoring session...")) </div>;
     } else {
       <div>
-        (str("Session restoration complete."))
+         (currentComponent(state, send)) </div>;
         /* {!this.isSignedIn() && (
              <SignIn
                  appState={state}
@@ -45,8 +47,6 @@ let make = _children => {
              appState={state}
                  appSend={send}
            />} */
-        (currentComponent(state, send))
-      </div>;
     }
   /* <Teams
      appState={state}
