@@ -7,7 +7,30 @@ type action =
 
 let signUp = ReasonReact.reducerComponent("SignUp");
 
-let handleSubmit = _event => Js.log("Handle submission, somehow?");
+module Service = {
+  let signUp = (name, email, password) => {
+    Js.log("Attempting to sign up with username " ++ name ++ ", email " ++ email ++ ", and password " ++ password);
+  };
+};
+
+type domElement = {. "value": string};
+type document = {
+  .
+  [@bs.meth] "getElementById" : string => domElement
+};
+[@bs.val] external doc : document = "document";
+[@bs.send] external preventEventDefault : (ReactEventRe.Form.t) => unit = "preventDefault";
+
+let handleSubmit = event => {
+  preventEventDefault(event);
+  Js.log("Handle submission, somehow?");
+  let name = doc##getElementById("sign-up-form__name")##value;
+  let email = doc##getElementById("sign-up-form__email")##value;
+  let password = doc##getElementById("sign-up-form__password")##value;
+
+  Service.signUp(name, email, password);
+  ();
+};
 
 let make = (~appState, ~appSend, _children) => {
   ...signUp,
