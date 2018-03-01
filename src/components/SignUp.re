@@ -13,20 +13,12 @@ module Service = {
   };
 };
 
-type domElement = {. "value": string};
-type document = {
-  .
-  [@bs.meth] "getElementById" : string => domElement
-};
-[@bs.val] external doc : document = "document";
-[@bs.send] external preventEventDefault : (ReactEventRe.Form.t) => unit = "preventDefault";
-
 let handleSubmit = event => {
-  preventEventDefault(event);
+  DomUtils.preventEventDefault(event);
   Js.log("Handle submission, somehow?");
-  let name = doc##getElementById("sign-up-form__name")##value;
-  let email = doc##getElementById("sign-up-form__email")##value;
-  let password = doc##getElementById("sign-up-form__password")##value;
+  let name = DomUtils.document##getElementById("sign-up-form__name")##value;
+  let email = DomUtils.document##getElementById("sign-up-form__email")##value;
+  let password = DomUtils.document##getElementById("sign-up-form__password")##value;
 
   Service.signUp(name, email, password);
   ();
