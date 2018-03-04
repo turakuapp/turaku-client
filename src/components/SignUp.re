@@ -8,18 +8,23 @@ type action =
 let signUp = ReasonReact.reducerComponent("SignUp");
 
 module Service = {
-  let signUp = (name, email, password) => {
-    Js.log("Attempting to sign up with username " ++ name ++ ", email " ++ email ++ ", and password " ++ password);
-  };
+  let signUp = (name, email, password) =>
+    Js.log(
+      "Attempting to sign up with username "
+      ++ name
+      ++ ", email "
+      ++ email
+      ++ ", and password "
+      ++ password
+    );
 };
 
 let handleSubmit = event => {
-  DomUtils.preventEventDefault(event);
+  event |> DomUtils.preventEventDefault;
   Js.log("Handle submission, somehow?");
-  let name = DomUtils.document##getElementById("sign-up-form__name")##value;
-  let email = DomUtils.document##getElementById("sign-up-form__email")##value;
-  let password = DomUtils.document##getElementById("sign-up-form__password")##value;
-
+  let name = DomUtils.getValueOfInputById("sign-up-form__name");
+  let email = DomUtils.getValueOfInputById("sign-up-form__email");
+  let password = DomUtils.getValueOfInputById("sign-up-form__password");
   Service.signUp(name, email, password);
   ();
 };
@@ -31,7 +36,7 @@ let make = (~appState, ~appSend, _children) => {
     switch action {
     | CompleteSignUp => ReasonReact.Update({signUpComplete: true})
     },
-  render: ({state, send}) =>
+  render: _self =>
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
@@ -42,6 +47,7 @@ let make = (~appState, ~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__name"
                 placeholder="What should we call you?"
+                required=(Js.Boolean.to_js_boolean(true))
               />
             </div>
             <div className="form-group">
@@ -52,6 +58,7 @@ let make = (~appState, ~appSend, _children) => {
                 _type="email"
                 className="form-control"
                 id="sign-up-form__email"
+                required=(Js.Boolean.to_js_boolean(true))
               />
               <small id="emailHelp" className="form-text text-muted">
                 (str("We'll never share your email with anyone else."))
@@ -66,6 +73,7 @@ let make = (~appState, ~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__password"
                 placeholder="Password"
+                required=(Js.Boolean.to_js_boolean(true))
               />
             </div>
             <div className="form-group">
@@ -77,6 +85,7 @@ let make = (~appState, ~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__password-confirmation"
                 placeholder="Again, to be sure"
+                required=(Js.Boolean.to_js_boolean(true))
               />
               <small id="emailHelp" className="form-text text-muted">
                 (
