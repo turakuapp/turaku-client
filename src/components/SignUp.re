@@ -21,7 +21,6 @@ module Service = {
 
 let handleSubmit = event => {
   event |> DomUtils.preventEventDefault;
-  Js.log("Handle submission, somehow?");
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
   let password = DomUtils.getValueOfInputById("sign-up-form__password");

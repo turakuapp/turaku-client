@@ -1,12 +1,6 @@
 [@bs.send]
 external preventEventDefault : ReactEventRe.Form.t => unit = "preventDefault";
 
-let optionAttributeToString = optionalAttribute =>
-  switch optionalAttribute {
-  | Some(attribute) => attribute
-  | None => ""
-  };
-
 let unwrapUnsafely = data =>
   switch data {
   | Some(v) => v
