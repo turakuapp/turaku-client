@@ -1,25 +1,27 @@
-type arrayBuffer;
-
-[@bs.val] [@bs.scope ("window", "crypto", "subtle")]
-external digest : (string, arrayBuffer) => string = "";
-
-type textEncoder = {. [@bs.meth] "encode": string => arrayBuffer};
-
-[@bs.new] external createTextEncoder : string => textEncoder = "TextEncoder";
-
-let saltedString = (incomingString, salt) =>
+let saltedString = (incomingString: string, salt: option(string)) =>
   switch salt {
   | Some(salt) => incomingString ++ salt
   | None => incomingString
   };
 
 let saltedArray = (incomingString, salt) => {
-  let encoder = createTextEncoder("utf-8");
+  let encoder = TextEncoder.create("utf-8");
   encoder##encode(saltedString(incomingString, salt));
 };
 
 let hash = (incomingString, ~salt=?, ()) =>
-  digest("SHA-256", saltedArray(incomingString, salt));
+  CryptoUtils.digest("SHA-256", saltedArray(incomingString, salt));
+
+let hexHash = (incomingString, ~salt=?, ()) =>
+  (
+    switch salt {
+    | Some(salt) => hash(incomingString, ~salt, ())
+    | None => hash(incomingString, ())
+    }
+  )
+  |> Js.Promise.then_(digestArray =>
+       Js.Promise.resolve(arrayBufferToHexString(digestArray))
+     );
 /* hexHash(incomingString, salt) {
      console.log("Hashing ", this.password, this.authenticationSalt);
 
