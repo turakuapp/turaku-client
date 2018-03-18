@@ -10,7 +10,9 @@
   "bs-dependencies": [
     "reason-react",
     "bs-jest",
-    "bs-webapi"
+    "bs-webapi",
+    "bs-fetch",
+    "@glennsl/bs-json"
   ],
   "reason": {
     "react-jsx": 2

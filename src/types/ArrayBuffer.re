@@ -1,5 +1,6 @@
 type t;
 
+/* TODO: Clean up this toHexString function to remove raw JS. */
 let toHexString = (buffer: t) => {
   /* ReasonML is unaware that _jsArray is being used in raw JS. An underscored variable here avoids warning in the function declaration. */
   let _jsArray = buffer;
