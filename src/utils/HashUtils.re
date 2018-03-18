@@ -20,18 +20,5 @@ let hexHash = (incomingString, ~salt=?, ()) =>
     }
   )
   |> Js.Promise.then_(digestArray =>
-       Js.Promise.resolve(arrayBufferToHexString(digestArray))
+       Js.Promise.resolve(digestArray |> ArrayBuffer.toHexString)
      );
-/* hexHash(incomingString, salt) {
-     console.log("Hashing ", this.password, this.authenticationSalt);
-
-     return this.hash().then(hash => {
-       return Promise.resolve(this.arrayBufferToHexString(hash));
-     });
-   }
-
-   arrayBufferToHexString(buffer) {
-     return Array.prototype.map
-       .call(new Uint8Array(buffer), x => ("00" + x.toString(16)).slice(-2))
-       .join("");
-   } */
