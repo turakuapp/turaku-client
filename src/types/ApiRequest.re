@@ -1,6 +1,16 @@
+type requestMethod =
+  | Get
+  | Post
+  | Put
+  | Patch;
+
+type baseUrl =
+  | Some(string)
+  | DefaultBaseUrl;
+
 type t = {
-  token: string,
-  baseUrl: string
+  token: option(string),
+  baseUrl
 };
 
 type headers = {
@@ -8,6 +18,32 @@ type headers = {
   "Accept": string,
   "Content-Type": string,
   "Authorization": option(string)
+};
+
+let fetch = (apiRequest, path, method, ~body=?, ()) => {
+  let baseUrl =
+    switch apiRequest.baseUrl {
+    | Some(url) => url
+    | DefaultBaseUrl => "http://turaku.localhost/api/v0"
+    };
+  let fullUrl = baseUrl ++ "/" ++ path;
+  Js.log("Calling " ++ fullUrl);
+  /* if (body !== null) {
+       console.log(body);
+     }
+
+     return window
+       .fetch(this.fullUrl(path), {
+         method: method,
+         headers: this.headers(),
+         body: body
+       })
+       .then(this.parseResponse); */
+};
+
+let post = (path, params, apiRequest) => {
+  let body = Js.Json.stringify(params);
+  fetch(apiRequest, path, Post, ~body);
 };
 /* export default class ApiService {
      constructor(token) {

@@ -8,15 +8,55 @@ type action =
 let signUp = ReasonReact.reducerComponent("SignUp");
 
 module Service = {
-  let signUp = (name, email, password) =>
-    Js.log(
-      "Attempting to sign up with username "
-      ++ name
-      ++ ", email "
-      ++ email
-      ++ ", and password "
-      ++ password
-    );
+  let signUp = (name, email, password) => {
+    let apiRequest: ApiRequest.t = {
+      token: None,
+      baseUrl: ApiRequest.DefaultBaseUrl
+    };
+    ();
+    /* signUpService
+       .signUp(name, email, password)
+       .then(() => {
+         that.props.setAppState(
+           {
+             redirectFrom: "SignUp",
+             redirectTo: "SignIn"
+           },
+           () => {
+             that.setState({ signUpComplete: true });
+           }
+         );
+       })
+       .catch(exception => {
+         // Handle exception.
+         console.log(exception, "Sign up failed. <shrug>");
+       }); */
+    /* let api = new ApiService();
+       let salt = this.authenticationSalt();
+       let hashService = new HashService(password, salt);
+
+       return hashService.hexHash().then(hash => {
+         return api
+           .post("users", {
+             user: {
+               name: name,
+               email: email,
+               password: hash,
+               authentication_salt: salt
+             }
+           })
+           .then(response => {
+             console.log(response, "success");
+           })
+           .catch(response => {
+             console.log(response, "failure");
+             // TODO: What should be returned if sign up fails?
+             return Promise.reject(
+               new Error("Response from API indicated a failure.")
+             );
+           });
+       }); */
+  };
 };
 
 let handleSubmit = event => {
