@@ -1,36 +1,55 @@
-type requestMethod =
-  | Get
-  | Post
-  | Put
-  | Patch;
-
 type baseUrl =
   | Some(string)
   | DefaultBaseUrl;
 
 type t = {
   token: option(string),
-  baseUrl
+  baseUrl,
 };
+
+type purpose =
+  | SignUp;
+
+type method =
+  | Get
+  | Post
+  | Put
+  | Patch;
 
 type headers = {
   .
   "Accept": string,
   "Content-Type": string,
-  "Authorization": option(string)
+  "Authorization": option(string),
 };
 
-let fetch = (apiRequest, path, method, ~body=?, ()) => {
+let decode = (p, json) =>
+  switch (p) {
+  | SignUp => SignUp.Decode.response(json)
+  };
+
+let path = p =>
+  switch (p) {
+  | SignUp => "users/sign_up"
+  };
+
+/* let cast(givenType: ) */
+let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
   let baseUrl =
-    switch apiRequest.baseUrl {
+    switch (apiRequest.baseUrl) {
     | Some(url) => url
     | DefaultBaseUrl => "http://turaku.localhost/api/v0"
     };
-  let fullUrl = baseUrl ++ "/" ++ path;
+  let fullUrl = baseUrl ++ "/" ++ path(purpose);
   Js.log("Calling " ++ fullUrl);
+  Js.Promise.(
+    Fetch.fetch(fullUrl)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json |> decode(purpose) |> resolve)
+  );
   /* if (body !== null) {
        console.log(body);
-     }
+             }
 
      return window
        .fetch(this.fullUrl(path), {
@@ -41,9 +60,9 @@ let fetch = (apiRequest, path, method, ~body=?, ()) => {
        .then(this.parseResponse); */
 };
 
-let post = (path, params, apiRequest) => {
+let post = (p: purpose, params, apiRequest) => {
   let body = Js.Json.stringify(params);
-  fetch(apiRequest, path, Post, ~body);
+  fetch(apiRequest, p, Post, ~body);
 };
 /* export default class ApiService {
      constructor(token) {

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@glennsl/bs-json": "^1.2.0",
     "bootstrap": "^4.0.0",
     "bs-fetch": "^0.2.1",
     "jquery": "^3.3.1",

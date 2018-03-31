@@ -7,13 +7,29 @@ type action =
 
 let signUp = ReasonReact.reducerComponent("SignUp");
 
+module Encode = {
+  let hash = password =>
+    /* TODO: Bring back client-side hashing. */
+    password;
+  let request = (name, email, password) =>
+    Json.Encode.object_([
+      ("name", name |> Json.Encode.string),
+      ("email", email |> Json.Encode.string),
+      ("password", password |> Json.Encode.string),
+    ]);
+};
+
 module Service = {
   let signUp = (name, email, password) => {
     let apiRequest: ApiRequest.t = {
       token: None,
-      baseUrl: ApiRequest.DefaultBaseUrl
+      baseUrl: ApiRequest.DefaultBaseUrl,
     };
-    ();
+    apiRequest
+    |> ApiRequest.post(
+         ApiRequest.SignUp,
+         Encode.request(name, email, password),
+       );
     /* signUpService
        .signUp(name, email, password)
        .then(() => {
@@ -72,7 +88,7 @@ let make = (~appState, ~appSend, _children) => {
   ...signUp,
   initialState: () => {signUpComplete: false},
   reducer: (action, _state) =>
-    switch action {
+    switch (action) {
     | CompleteSignUp => ReasonReact.Update({signUpComplete: true})
     },
   render: _self =>
@@ -129,7 +145,7 @@ let make = (~appState, ~appSend, _children) => {
               <small id="emailHelp" className="form-text text-muted">
                 (
                   str(
-                    "Please store this password in your personal password manager. The Turaku team cannot recover your data if you forget your password. "
+                    "Please store this password in your personal password manager. The Turaku team cannot recover your data if you forget your password. ",
                   )
                 )
                 <a href="help.turaku.com/security">
@@ -147,7 +163,7 @@ let make = (~appState, ~appSend, _children) => {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
 };
 /* export default class SignUp extends React.Component {
      constructor(props) {
