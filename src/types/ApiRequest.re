@@ -23,9 +23,13 @@ type headers = {
   "Authorization": option(string),
 };
 
+module DecodeSignUp = {
+  let response = json => {};
+};
+
 let decode = (p, json) =>
   switch (p) {
-  | SignUp => SignUp.Decode.response(json)
+  | SignUp => DecodeSignUp.response(json)
   };
 
 let path = p =>
