@@ -12,9 +12,7 @@ type purpose =
 
 type method =
   | Get
-  | Post
-  | Put
-  | Patch;
+  | Post;
 
 type headers = {
   .
@@ -23,8 +21,19 @@ type headers = {
   "Authorization": option(string),
 };
 
+type user = {
+  id: int,
+  name: string,
+  email: string,
+};
+
 module DecodeSignUp = {
-  let response = json => {};
+  let response = json =>
+    Json.Decode.{
+      id: json |> field("id", int),
+      name: json |> field("name", string),
+      email: json |> field("email", string),
+    };
 };
 
 let decode = (p, json) =>
@@ -34,20 +43,43 @@ let decode = (p, json) =>
 
 let path = p =>
   switch (p) {
-  | SignUp => "users/sign_up"
+  | SignUp => "users"
   };
+
+let fetchPost = (url, body) =>
+  Fetch.fetchWithInit(
+    url,
+    Fetch.RequestInit.make(
+      ~method_=Post,
+      ~body=Fetch.BodyInit.make(body),
+      ~headers=Fetch.HeadersInit.make({"Content-Type": "application/json"}),
+      (),
+    ),
+  );
+
+let fetchGet = url => Fetch.fetch(url);
 
 /* let cast(givenType: ) */
 let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
-  let baseUrl =
+  let resolvedBaseUrl =
     switch (apiRequest.baseUrl) {
     | Some(url) => url
     | DefaultBaseUrl => "http://turaku.localhost/api/v0"
     };
-  let fullUrl = baseUrl ++ "/" ++ path(purpose);
-  Js.log("Calling " ++ fullUrl);
+  let fullRequestUrl = resolvedBaseUrl ++ "/" ++ path(purpose);
+  Js.log("Calling " ++ fullRequestUrl);
+  let requestBody =
+    switch (body) {
+    | Some(body) => body
+    | None => "{}"
+    };
+  let fetch =
+    switch (method) {
+    | Post => fetchPost(fullRequestUrl, requestBody)
+    | Get => fetchGet(fullRequestUrl)
+    };
   Js.Promise.(
-    Fetch.fetch(fullUrl)
+    fetch
     |> then_(Fetch.Response.json)
     |> then_(json => json |> decode(purpose) |> resolve)
   );
@@ -66,7 +98,8 @@ let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
 
 let post = (p: purpose, params, apiRequest) => {
   let body = Js.Json.stringify(params);
-  fetch(apiRequest, p, Post, ~body);
+  Js.log("Calling fetch for apiRequest with body " ++ body);
+  fetch(apiRequest, p, Post, ~body, ());
 };
 /* export default class ApiService {
      constructor(token) {

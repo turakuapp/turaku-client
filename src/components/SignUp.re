@@ -25,6 +25,7 @@ module Service = {
       token: None,
       baseUrl: ApiRequest.DefaultBaseUrl,
     };
+    Js.log("Created a apiRequest.");
     apiRequest
     |> ApiRequest.post(
          ApiRequest.SignUp,
@@ -80,6 +81,14 @@ let handleSubmit = event => {
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
   let password = DomUtils.getValueOfInputById("sign-up-form__password");
+  Js.log(
+    "Calling Service.signUp for "
+    ++ name
+    ++ " ("
+    ++ email
+    ++ ") with password "
+    ++ password,
+  );
   Service.signUp(name, email, password);
   ();
 };
