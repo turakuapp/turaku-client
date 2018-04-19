@@ -21,28 +21,24 @@ module Encode = {
 
 module Service = {
   let saltPossibleCharacters = "1234567890abcdef";
-  /* TODO: This uses insecure Math.random. Use cryptographically secure alternative in production. */
-  let rec authenticationSalt = (~salt="", ~remainingLength=64, ()) =>
-    if (remainingLength > 0) {
-      let randomPosition =
-        Js.Math.floor(
-          Js.Math.random()
-          *. float_of_int(String.length(saltPossibleCharacters)),
-        );
-      let saltCharacter =
-        saltPossibleCharacters |> Js.String.charAt(randomPosition);
-      authenticationSalt(
-        ~salt=salt ++ saltCharacter,
-        ~remainingLength=remainingLength - 1,
-        (),
-      );
-    } else {
-      salt;
-    };
+  /* TODO: This uses a potentially insecure randomization method. Use cryptographically secure alternative in production. */
+  let authenticationSalt = length => {
+    let rec aux = (salt, remainingLength) =>
+      if (remainingLength > 0) {
+        let randomPosition =
+          Random.int(String.length(saltPossibleCharacters));
+        let saltCharacter =
+          Js.String.charAt(randomPosition, saltPossibleCharacters);
+        aux(salt ++ saltCharacter, remainingLength - 1);
+      } else {
+        salt;
+      };
+    aux("", length);
+  };
   let signUp = (name, email, password) => {
     /* TODO: Use the salt to hash the password before sending it. */
     /* TODO: Send the salt along with the hashed password */
-    let salt = authenticationSalt();
+    let salt = authenticationSalt(64);
     let apiRequest: ApiRequest.t = {
       token: None,
       baseUrl: ApiRequest.DefaultBaseUrl,
