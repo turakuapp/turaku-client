@@ -51,10 +51,10 @@ module Service = {
               ApiRequest.SignUp,
               Encode.request(name, email, hexHash, salt),
             )
-         |> Js.Promise.then_(response => {
-              Js.log(response);
-              Js.Promise.resolve();
-            });
+         |> Js.Promise.resolve;
+       })
+    |> Js.Promise.then_(response => {
+         Js.log(response);
          Js.Promise.resolve();
        });
     /* signUpService
