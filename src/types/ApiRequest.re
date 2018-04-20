@@ -57,8 +57,6 @@ let fetchPost = (url, body) =>
     ),
   );
 
-let fetchGet = url => Fetch.fetch(url);
-
 /* let cast(givenType: ) */
 let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
   let resolvedBaseUrl =
@@ -76,7 +74,7 @@ let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
   let fetch =
     switch (method) {
     | Post => fetchPost(fullRequestUrl, requestBody)
-    | Get => fetchGet(fullRequestUrl)
+    | Get => Fetch.fetch(fullRequestUrl)
     };
   Js.Promise.(
     fetch

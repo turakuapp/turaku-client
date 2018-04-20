@@ -8,14 +8,16 @@ type action =
 let signUp = ReasonReact.reducerComponent("SignUp");
 
 module Encode = {
-  let hash = password =>
-    /* TODO: Bring back client-side hashing. */
-    password;
-  let request = (name, email, password) =>
+  let user = (name, email, password, authenticationSalt) =>
     Json.Encode.object_([
       ("name", name |> Json.Encode.string),
       ("email", email |> Json.Encode.string),
       ("password", password |> Json.Encode.string),
+      ("authentication_salt", authenticationSalt |> Json.Encode.string),
+    ]);
+  let request = (name, email, password, authenticationSalt) =>
+    Json.Encode.object_([
+      ("user", user(name, email, password, authenticationSalt)),
     ]);
 };
 
@@ -36,19 +38,21 @@ module Service = {
     aux("", length);
   };
   let signUp = (name, email, password) => {
-    /* TODO: Use the salt to hash the password before sending it. */
-    /* TODO: Send the salt along with the hashed password */
     let salt = authenticationSalt(64);
-    let apiRequest: ApiRequest.t = {
-      token: None,
-      baseUrl: ApiRequest.DefaultBaseUrl,
-    };
-    Js.log("Created a apiRequest.");
-    apiRequest
-    |> ApiRequest.post(
-         ApiRequest.SignUp,
-         Encode.request(name, email, password),
-       );
+    HashUtils.hexHash(password, ~salt, ())
+    |> Js.Promise.then_(hexHash => {
+         let apiRequest: ApiRequest.t = {
+           token: None,
+           baseUrl: ApiRequest.DefaultBaseUrl,
+         };
+         Js.log("Created a apiRequest.");
+         apiRequest
+         |> ApiRequest.post(
+              ApiRequest.SignUp,
+              Encode.request(name, email, hexHash, salt),
+            );
+         Js.Promise.resolve();
+       });
     /* signUpService
        .signUp(name, email, password)
        .then(() => {
