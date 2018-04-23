@@ -50,59 +50,16 @@ module Service = {
          |> ApiRequest.post(
               ApiRequest.SignUp,
               Encode.request(name, email, hexHash, salt),
-            )
-         |> Js.Promise.resolve;
+            );
        })
     |> Js.Promise.then_(response => {
          Js.log(response);
-         Js.Promise.resolve();
+         Js.Promise.resolve(response);
        });
-    /* signUpService
-       .signUp(name, email, password)
-       .then(() => {
-         that.props.setAppState(
-           {
-             redirectFrom: "SignUp",
-             redirectTo: "SignIn"
-           },
-           () => {
-             that.setState({ signUpComplete: true });
-           }
-         );
-       })
-       .catch(exception => {
-         // Handle exception.
-         console.log(exception, "Sign up failed. <shrug>");
-       }); */
-    /* let api = new ApiService();
-       let salt = this.authenticationSalt();
-       let hashService = new HashService(password, salt);
-
-       return hashService.hexHash().then(hash => {
-         return api
-           .post("users", {
-             user: {
-               name: name,
-               email: email,
-               password: hash,
-               authentication_salt: salt
-             }
-           })
-           .then(response => {
-             console.log(response, "success");
-           })
-           .catch(response => {
-             console.log(response, "failure");
-             // TODO: What should be returned if sign up fails?
-             return Promise.reject(
-               new Error("Response from API indicated a failure.")
-             );
-           });
-       }); */
   };
 };
 
-let handleSubmit = event => {
+let handleSubmit = (appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
@@ -115,7 +72,11 @@ let handleSubmit = event => {
     ++ ") with password "
     ++ password,
   );
-  Service.signUp(name, email, password);
+  Service.signUp(name, email, password)
+  |> Js.Promise.then_((response: ApiRequest.user) => {
+       appSend(Turaku.SignedUp);
+       Js.Promise.resolve();
+     });
   ();
 };
 
@@ -130,7 +91,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          <form onSubmit=handleSubmit>
+          <form onSubmit=(handleSubmit(appSend))>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input
@@ -200,59 +161,3 @@ let make = (~appState, ~appSend, _children) => {
       </div>
     </div>,
 };
-/* export default class SignUp extends React.Component {
-     constructor(props) {
-       super(props);
-
-       this.state = {
-         signUpComplete: false
-       };
-
-       this.submit = this.submit.bind(this);
-     }
-
-     submit(event) {
-       event.preventDefault();
-
-       let name = document.getElementById("sign-up-form__name").value;
-       let email = document.getElementById("sign-up-form__email").value;
-       let password = document.getElementById("sign-up-form__password").value;
-
-       // TODO: Compare the confirmation against the supplied password.
-       // let passwordConfirmation = document.getElementById(
-       //   "sign-up-form__password-confirmation"
-       // ).value;
-
-       let signUpService = new SignUpService();
-       let that = this;
-
-       signUpService
-         .signUp(name, email, password)
-         .then(() => {
-           that.props.setAppState(
-             {
-               redirectFrom: "SignUp",
-               redirectTo: "SignIn"
-             },
-             () => {
-               that.setState({ signUpComplete: true });
-             }
-           );
-         })
-         .catch(exception => {
-           // Handle exception.
-           console.log(exception, "Sign up failed. <shrug>");
-         });
-     }
-
-     render() {
-       if (this.state.signUpComplete === true) {
-         return <Redirect to="/sign_in" />;
-       }
-
-       return (
-
-       );
-     }
-   }
-    */

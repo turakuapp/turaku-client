@@ -4,11 +4,8 @@ type page =
 
 type state = {
   restorationAttempted: bool,
-  currentPage: page
+  currentPage: page,
 };
-
-type action =
-  | AttemptRestoration;
 
 let app = ReasonReact.reducerComponent("App");
 
@@ -17,7 +14,7 @@ let isSignedIn = () => true;
 let str = ReasonReact.stringToElement;
 
 let currentComponent = (state, send) =>
-  switch state.currentPage {
+  switch (state.currentPage) {
   | SignUp => <SignUp appState=state appSend=send />
   | SignIn => <SignIn appState=state appSend=send />
   };
@@ -25,10 +22,12 @@ let currentComponent = (state, send) =>
 let make = _children => {
   ...app,
   initialState: () => {restorationAttempted: true, currentPage: SignUp},
-  reducer: (action, state) =>
-    switch action {
+  reducer: (action: Turaku.action, state) =>
+    switch (action) {
     | AttemptRestoration =>
       ReasonReact.Update({...state, restorationAttempted: true})
+    | SignedIn => ReasonReact.NoUpdate
+    | SignedUp => ReasonReact.Update({...state, currentPage: SignIn})
     },
   render: ({state, send}) =>
     if (! state.restorationAttempted) {
@@ -47,7 +46,7 @@ let make = _children => {
              appState={state}
                  appSend={send}
            />} */
-    }
+    },
   /* <Teams
      appState={state}
      appSend={send}
