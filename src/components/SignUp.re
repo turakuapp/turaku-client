@@ -72,11 +72,12 @@ let handleSubmit = (appSend, event) => {
     ++ ") with password "
     ++ password,
   );
-  Service.signUp(name, email, password)
-  |> Js.Promise.then_((response: ApiRequest.user) => {
-       appSend(Turaku.SignedUp);
-       Js.Promise.resolve();
-     });
+  let _ =
+    Service.signUp(name, email, password)
+    |> Js.Promise.then_((_response: ApiRequest.user) => {
+         appSend(Turaku.SignedUp);
+         Js.Promise.resolve();
+       });
   ();
 };
 
