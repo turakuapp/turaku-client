@@ -1,22 +1,35 @@
-type state = {signInComplete: bool};
-
-type action =
-  | CompleteSignIn;
-
-let signIn = ReasonReact.reducerComponent("SignIn");
+let signIn = ReasonReact.statelessComponent("SignIn");
 
 let str = ReasonReact.stringToElement;
 
 let justSignedUp = () => true;
 
-let submit = _event => Js.log("Handle submit.");
+module Service = {
+  let signIn = (email: string, password: string) => {};
+};
+
+let handleSubmit = (appSend, event) => {
+  event |> DomUtils.preventEventDefault;
+  let email = DomUtils.getValueOfInputById("sign-in-form__email");
+  let password = DomUtils.getValueOfInputById("sign-in-form__password");
+  Js.log(
+    "Calling Service.signIn for " ++ email ++ " with password " ++ password,
+  );
+  let _ =
+    Service.signIn(email, password)
+    |> Js.Promise.then_((_response: ApiRequest.user) => {
+         appSend(Turaku.SignedIn);
+         Js.Promise.resolve();
+       });
+  ();
+};
 
 let signedUpAlert = () =>
   if (justSignedUp()) {
     <div className="alert alert-success" role="alert">
       (
         str(
-          "Thank you for signing up! Please confirm your email address before signing in."
+          "Thank you for signing up! Please confirm your email address before signing in.",
         )
       )
     </div>;
@@ -26,34 +39,33 @@ let signedUpAlert = () =>
 
 let make = (~appState, ~appSend, _children) => {
   ...signIn,
-  initialState: () => {signInComplete: false},
-  reducer: (action, _state) =>
-    switch action {
-    | CompleteSignIn => ReasonReact.Update({signInComplete: true})
-    },
-  render: ({state, send}) =>
+  render: _self =>
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
           (signedUpAlert())
-          <form onSubmit=submit>
+          <form onSubmit=(handleSubmit(appSend))>
             <div className="form-group">
-              <label htmlFor="sign-in-email"> (str("Email address")) </label>
+              <label htmlFor="sign-in-form__email">
+                (str("Email address"))
+              </label>
               <input
                 required=(Js.Boolean.to_js_boolean(true))
                 _type="email"
                 className="form-control"
-                id="sign-in-email"
+                id="sign-in-form__email"
                 placeholder="Your registered email address"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="sign-in-password"> (str("Password")) </label>
+              <label htmlFor="sign-in-form__password">
+                (str("Password"))
+              </label>
               <input
                 required=(Js.Boolean.to_js_boolean(true))
                 _type="password"
                 className="form-control"
-                id="sign-in-password"
+                id="sign-in-form__password"
                 placeholder="Password"
               />
             </div>
@@ -66,7 +78,7 @@ let make = (~appState, ~appSend, _children) => {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
 };
 /* export default class SignIn extends React.Component {
      componentWillMount() {

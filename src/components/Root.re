@@ -1,6 +1,7 @@
 type page =
   | SignUp
-  | SignIn;
+  | SignIn
+  | Dashboard;
 
 type state = {
   restorationAttempted: bool,
@@ -17,6 +18,7 @@ let currentComponent = (state, send) =>
   switch (state.currentPage) {
   | SignUp => <SignUp appState=state appSend=send />
   | SignIn => <SignIn appState=state appSend=send />
+  | Dashboard => <Dashboard appState=state appSend=send />
   };
 
 let make = _children => {
