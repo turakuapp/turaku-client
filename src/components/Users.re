@@ -1,10 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
-import _ from "lodash";
-import ListUsersService from "../services/teams/listUsersService";
-import CreateInvitationService from "../services/invitations/createService";
+let str = ReasonReact.stringToElement;
 
-export default class Users extends React.Component {
+let component = ReasonReact.statelessComponent("Users");
+
+let make = (~appState, ~appSend, _children) => {
+  ...component,
+  render: (_self) => <div>(str("Users"))</div>
+};
+
+/* export default class Users extends React.Component {
   constructor(props) {
     super(props);
 
@@ -158,9 +161,4 @@ export default class Users extends React.Component {
       </div>
     );
   }
-}
-
-Users.propTypes = {
-  appState: PropTypes.object.isRequired,
-  setAppState: PropTypes.func.isRequired
-};
+} */

@@ -5,7 +5,7 @@ let str = ReasonReact.stringToElement;
 let justSignedUp = () => true;
 
 module Service = {
-  let signIn = (email: string, password: string) => {};
+  let signIn = (email: string, password: string) => { };
 };
 
 let handleSubmit = (appSend, event) => {
@@ -15,12 +15,12 @@ let handleSubmit = (appSend, event) => {
   Js.log(
     "Calling Service.signIn for " ++ email ++ " with password " ++ password,
   );
-  let _ =
+  /* let _ =
     Service.signIn(email, password)
     |> Js.Promise.then_((_response: ApiRequest.user) => {
          appSend(Turaku.SignedIn);
          Js.Promise.resolve();
-       });
+       }); */
   ();
 };
 

@@ -1,36 +1,52 @@
+type t = {
+  id,
+  title: string,
+  fields: list(Field.t)
+} and id = int;
+
 let str = ReasonReact.stringToElement;
 
 let component = ReasonReact.statelessComponent("Entry");
 
 let handleTitleChange = (_event) => ();
 
-let fields = (appState, appSend) => {
-  /* entry.fields.map.each do |field| */
-  /* TODO: The key passed to Field may have to be 'more unique'. */
-  <Field
-  appState={this.props.appState}
-  setAppState={this.props.setAppState}
-  field={field}
-  key={field.name}
-/>
+let fields = (appState, appSend, entry: t) => {
+  List.map((field: Field.t) => {
+    <Field appState=appState appSend=appSend field=field/>
+  }, entry.fields);
 };
 
 /* Is an entry selected? */
 let entrySelected = () => true;
 
+let selectedEntry = (appState) => {
+  /* TODO: Figure out how to get currently selected entry. */
+  /* switch(appState.currentFocus) {
+  | Dashboard(EntrySelected(id)) =>
+  | _ => failwith("Entry.selectedEntry called when no entry was selected!")
+  }; */
+
+  {
+    id: 1,
+    title: "Foo",
+    fields: []
+  };
+};
+
 let selectedEntry = (appState, appSend) => {
-  /* let entry = findEntry(); */
+  let entry = selectedEntry(appState);
 
   <div>
   <div className="row">
     <div className="col offset-sm-2">
     <input
-      type="text"
+      _type="text"
       value=entry.title
       onChange=handleTitleChange
       className="my-2"
       placeholder="Entry Title"
     />
+    (fields(appState, appSend, entry) |> Array.of_list |> ReasonReact.arrayToElement)
   </div>
 </div>
 
@@ -43,7 +59,7 @@ let selectEntryMessage = () => <p>(str("Select an entry, or create a new one."))
 let make = (~appState, ~appSend, _children) => {
   ...component,
   render: (self) => {
-    entrySelected() ? selectedEntry() : selectEntryMessage()
+    entrySelected() ? selectedEntry(appState, appSend) : selectEntryMessage()
   }
 };
 

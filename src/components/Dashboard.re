@@ -1,4 +1,9 @@
 /* import "./dashboard.css"; */
+
+type selectable =
+  | NothingSelected
+  | EntrySelected(Entry.id);
+
 type state = {signingOut: bool};
 
 let str = ReasonReact.stringToElement;
@@ -8,17 +13,19 @@ type action =
 
 let component = ReasonReact.reducerComponent("Dashboard");
 
+let signOut = (_event) => { /* Sign out, somehow? */ (); };
+
 let signOutButton = (signingOut) => {
-if (signingOut) {
-<button className="btn btn-secondary btn-sm">Signing out...</button>
-} else {
+  if (signingOut) {
+    <button className="btn btn-secondary btn-sm">(str("Signing out..."))</button>
+  } else {
                    <button
                      className="btn btn-secondary btn-sm"
-                     onClick={this.signOut}
+                     onClick={signOut}
                    >
-                     Sign Out
+                     (str("Sign Out"))
                    </button>
-}
+  }
 };
 
 let make = (~appState, ~appSend, _children) => {
@@ -26,8 +33,8 @@ let make = (~appState, ~appSend, _children) => {
   initialState: () => {signingOut: false},
   reducer: (action, state) => {
     switch(action) {
-    | SignOut => ReasonReact.update(...state, signingOut: true)
-    }
+    | SignOut => ReasonReact.Update({...state, signingOut: true})
+    };
   },
   render: ({state, send}) => {
     <div className="container-fluid">
@@ -36,16 +43,16 @@ let make = (~appState, ~appSend, _children) => {
           <Tags appState=appState appSend=appSend />
           <hr />
           <div>
-            <a href="#">Teams</a>
+            <a href="#">(str("Teams"))</a>
           </div>
 
           <div>
-          <a href="#">Users</a>
+          <a href="#">(str("Users"))</a>
           </div>
 
           <hr />
 
-          signOutButton(state.signingOut)
+          (signOutButton(state.signingOut))
         </div>
 
         <div className="col-10 dashboard__content">

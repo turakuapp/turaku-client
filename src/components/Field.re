@@ -1,10 +1,17 @@
-import React from "react";
-import PropTypes from "prop-types";
-import _ from "lodash";
-import EyeIcon from "mdi-react/EyeIcon";
-import EyeOffIcon from "mdi-react/EyeOffIcon";
+type t = {
+  name: string
+};
 
-export default class Field extends React.Component {
+let str = ReasonReact.stringToElement;
+
+let component = ReasonReact.statelessComponent("Field");
+
+let make = (~appState, ~appSend, ~field, _children) => {
+  ...component,
+  render: (_self) => <div>(str("Field"))</div>
+};
+
+/* export default class Field extends React.Component {
   constructor(props) {
     super(props);
 
@@ -88,10 +95,4 @@ export default class Field extends React.Component {
       </div>
     );
   }
-}
-
-Field.propTypes = {
-  appState: PropTypes.object.isRequired,
-  setAppState: PropTypes.func.isRequired,
-  field: PropTypes.object.isRequired
-};
+} */

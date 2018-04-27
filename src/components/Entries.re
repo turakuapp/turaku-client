@@ -5,7 +5,10 @@ let component = ReasonReact.statelessComponent("Entries");
 
 let addEntry = (_event) => Js.log("Add an entry, maybe?");
 
-let entryChoices = () => ();
+let entryChoices = () => {
+  /* TODO: Actually write this, maybe? */
+  [||]
+};
 
 let make = (~appState, ~appSend, _children) => {
   ...component,
@@ -14,7 +17,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="col-3">
       <div className="entries__nav">
         <div className="pt-2">
-          <input type="text" placeholder="Search" className="mr-2" />
+          <input _type="text" placeholder="Search" className="mr-2" />
           <button
             className="btn btn-primary btn-sm"
             onClick={addEntry}
@@ -23,14 +26,11 @@ let make = (~appState, ~appSend, _children) => {
           </button>
         </div>
 
-        (entryChoices())
+        (entryChoices() |> ReasonReact.arrayToElement)
       </div>
     </div>
     <div className="col-8">
-      <Entry
-        setAppState={this.props.setAppState}
-        appState={this.props.appState}
-      />
+      <Entry appState appSend/>
     </div>
   </div>
   }

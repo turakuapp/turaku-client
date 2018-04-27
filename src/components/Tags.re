@@ -1,11 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
-import ListTagsService from "../services/tags/listService";
-import CryptoService from "../services/cryptoService";
-import _ from "lodash";
+let str = ReasonReact.stringToElement;
 
-export default class Tags extends React.Component {
+let component = ReasonReact.statelessComponent("Tags");
+
+let make = (~appState, ~appSend, _children) => {
+  ...component,
+  render: (_self) => <div>(str("Tags"))</div>
+};
+
+/* export default class Tags extends React.Component {
   componentDidMount() {
     const listService = new ListTagsService(
       this.props.appState.token,
@@ -59,9 +61,4 @@ export default class Tags extends React.Component {
       </div>
     );
   }
-}
-
-Tags.propTypes = {
-  appState: PropTypes.object.isRequired,
-  setAppState: PropTypes.func.isRequired
-};
+} */

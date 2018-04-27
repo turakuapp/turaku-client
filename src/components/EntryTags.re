@@ -1,11 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
-import _ from "lodash";
-import { WithContext as ReactTags } from "react-tag-input";
-import HashService from "../services/hashService";
-import CryptoService from "../services/cryptoService";
+let str = ReasonReact.stringToElement;
 
-export default class EntryTags extends React.Component {
+let component = ReasonReact.statelessComponent("EntryTags");
+
+let make = (~appState, ~appSend, ~entry, _children) => {
+  ...component,
+  render: (_self) => <div><code>(str("EntryTags"))</code></div>
+};
+
+/* export default class EntryTags extends React.Component {
   constructor(props) {
     super(props);
 
@@ -119,10 +121,4 @@ export default class EntryTags extends React.Component {
       </div>
     );
   }
-}
-
-EntryTags.propTypes = {
-  appState: PropTypes.object.isRequired,
-  setAppState: PropTypes.func.isRequired,
-  entry: PropTypes.object.isRequired
-};
+} */
