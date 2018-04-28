@@ -48,7 +48,7 @@ module Service = {
          Js.log("Created a apiRequest.");
          apiRequest
          |> ApiRequest.post(
-              ApiRequest.SignUp,
+              ApiRequest.SignUpPurpose,
               Encode.request(name, email, hexHash, salt),
             );
        })
@@ -74,7 +74,7 @@ let handleSubmit = (appSend, event) => {
   );
   let _ =
     Service.signUp(name, email, password)
-    |> Js.Promise.then_((_response: ApiRequest.user) => {
+    |> Js.Promise.then_((_response: User.t) => {
          appSend(Turaku.SignedUp);
          Js.Promise.resolve();
        });

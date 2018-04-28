@@ -1,6 +1,6 @@
 type baseUrl =
-  | Some(string)
-  | DefaultBaseUrl;
+  | DefaultBaseUrl
+  | CustomBaseUrl(string);
 
 type t = {
   token: option(string),
@@ -8,7 +8,7 @@ type t = {
 };
 
 type purpose =
-  | SignUp;
+  | SignUpPurpose;
 
 type method =
   | Get
@@ -21,29 +21,14 @@ type headers = {
   "Authorization": option(string),
 };
 
-type user = {
-  id: int,
-  name: string,
-  email: string,
-};
-
-module DecodeSignUp = {
-  let response = json =>
-    Json.Decode.{
-      id: json |> field("id", int),
-      name: json |> field("name", string),
-      email: json |> field("email", string),
-    };
-};
-
 let decode = (p, json) =>
   switch (p) {
-  | SignUp => DecodeSignUp.response(json)
+  | SignUpPurpose => User.Codec.decode(json)
   };
 
 let path = p =>
   switch (p) {
-  | SignUp => "users"
+  | SignUpPurpose => "users"
   };
 
 let fetchPost = (url, body) =>
@@ -61,7 +46,7 @@ let fetchPost = (url, body) =>
 let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
   let resolvedBaseUrl =
     switch (apiRequest.baseUrl) {
-    | Some(url) => url
+    | CustomBaseUrl(url) => url
     | DefaultBaseUrl => "http://turaku.localhost/api/v0"
     };
   let fullRequestUrl = resolvedBaseUrl ++ "/" ++ path(purpose);
