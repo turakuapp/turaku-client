@@ -2,10 +2,31 @@ let signIn = ReasonReact.statelessComponent("SignIn");
 
 let str = ReasonReact.stringToElement;
 
-let justSignedUp = () => true;
+type response = int;
 
 module Service = {
-  let signIn = (email: string, password: string) => { };
+  let signIn = (email: string, password: string) => {
+    let a: response = 1;
+    Js.Promise.resolve(a);
+    /* return this.loadAuthenticationSalt()
+       .then(authenticationSalt => {
+         return this.signInWithHashedPassword(authenticationSalt);
+       })
+       .then(authenticationResponse => {
+         // Store the authentication response to avoid losing it during the next step.
+         this.resolvedObject = authenticationResponse;
+
+         return this.createEncryptionHash(authenticationResponse.encryptionSalt);
+       })
+       .then(hash => {
+         this.resolvedObject.encryptionHash = hash;
+
+         // Save both the token and the encryption hash in session to allow restoration.
+         this.saveSession(this.resolvedObject.token, hash);
+
+         return Promise.resolve(this.resolvedObject);
+       }); */
+  };
 };
 
 let handleSubmit = (appSend, event) => {
@@ -15,17 +36,17 @@ let handleSubmit = (appSend, event) => {
   Js.log(
     "Calling Service.signIn for " ++ email ++ " with password " ++ password,
   );
-  /* let _ =
+  let _ =
     Service.signIn(email, password)
-    |> Js.Promise.then_((_response: ApiRequest.user) => {
+    |> Js.Promise.then_((_response: response) => {
          appSend(Turaku.SignedIn);
          Js.Promise.resolve();
-       }); */
+       });
   ();
 };
 
-let signedUpAlert = () =>
-  if (justSignedUp()) {
+let signedUpAlert = (appState: Turaku.state) =>
+  if (appState.flags.justSignedUp) {
     <div className="alert alert-success" role="alert">
       (
         str(
@@ -43,7 +64,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          (signedUpAlert())
+          (signedUpAlert(appState))
           <form onSubmit=(handleSubmit(appSend))>
             <div className="form-group">
               <label htmlFor="sign-in-form__email">

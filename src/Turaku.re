@@ -7,14 +7,43 @@ type page =
   | SignInPage
   | DashboardPage(Dashboard.selectable);
 
-type state = {
+type flags = {
   restorationAttempted: bool,
+  justSignedUp: bool,
+};
+
+type state = {
   session: Session.t,
-  currentPage: page
+  currentPage: page,
+  flags,
 };
 
 let initialState = {
-  restorationAttempted: true,
   session: Session.SignedOut,
-  currentPage: SignUpPage
+  currentPage: SignUpPage,
+  flags: {
+    restorationAttempted: true,
+    justSignedUp: false,
+  },
 };
+
+let reducer = (action, state) =>
+  switch (action) {
+  | SignedIn =>
+    ReasonReact.Update({
+      ...state,
+      flags: {
+        ...state.flags,
+        justSignedUp: false,
+      },
+    })
+  | SignedUp =>
+    ReasonReact.Update({
+      ...state,
+      currentPage: SignInPage,
+      flags: {
+        ...state.flags,
+        justSignedUp: true,
+      },
+    })
+  };

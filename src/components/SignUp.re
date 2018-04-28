@@ -142,11 +142,11 @@ let make = (~appState, ~appSend, _children) => {
               <small id="emailHelp" className="form-text text-muted">
                 (
                   str(
-                    "Please store this password in your personal password manager. The Turaku team cannot recover your data if you forget your password. ",
+                    "Please store this password in your personal password manager. If you forget your password, you will need another team admin to invite you back in. Read about ",
                   )
                 )
                 <a href="help.turaku.com/security">
-                  (str("Read about Turaku's security"))
+                  (str("how Turaku secures your data"))
                 </a>
                 (str(" to learn more."))
               </small>

@@ -14,13 +14,9 @@ let currentComponent = (state, send) =>
 let make = _children => {
   ...app,
   initialState: () => initialState,
-  reducer: (action, state) =>
-    switch (action) {
-    | SignedIn => ReasonReact.NoUpdate
-    | SignedUp => ReasonReact.Update({...state, currentPage: SignInPage})
-    },
-  render: ({state, send}) => {
-    if (!state.restorationAttempted) {
+  reducer,
+  render: ({state, send}) =>
+    if (! state.flags.restorationAttempted) {
       <div> (str("Restoring session...")) </div>;
     } else {
       <div>
@@ -36,8 +32,7 @@ let make = _children => {
              appState={state}
                  appSend={send}
            />} */
-    }
-  }
+    },
   /* <Teams
      appState={state}
      appSend={send}
