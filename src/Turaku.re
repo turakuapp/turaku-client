@@ -1,5 +1,4 @@
 type action =
-  | AttemptRestoration
   | SignedUp
   | SignedIn;
 
@@ -9,6 +8,13 @@ type page =
   | DashboardPage(Dashboard.selectable);
 
 type state = {
+  restorationAttempted: bool,
   session: Session.t,
-  currentFocus: page
+  currentPage: page
+};
+
+let initialState = {
+  restorationAttempted: true,
+  session: Session.SignedOut,
+  currentPage: SignUpPage
 };
