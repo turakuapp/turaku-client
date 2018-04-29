@@ -1,9 +1,4 @@
 /* import "./dashboard.css"; */
-
-type selectable =
-  | NothingSelected
-  | EntrySelected(Entry.id);
-
 type state = {signingOut: bool};
 
 let str = ReasonReact.stringToElement;
@@ -13,59 +8,47 @@ type action =
 
 let component = ReasonReact.reducerComponent("Dashboard");
 
-let signOut = (_event) => { /* Sign out, somehow? */ (); };
+let signOut = _event => () /* Sign out, somehow? */;
 
-let signOutButton = (signingOut) => {
+let signOutButton = signingOut =>
   if (signingOut) {
-    <button className="btn btn-secondary btn-sm">(str("Signing out..."))</button>
+    <button className="btn btn-secondary btn-sm">
+      (str("Signing out..."))
+    </button>;
   } else {
-                   <button
-                     className="btn btn-secondary btn-sm"
-                     onClick={signOut}
-                   >
-                     (str("Sign Out"))
-                   </button>
-  }
-};
+    <button className="btn btn-secondary btn-sm" onClick=signOut>
+      (str("Sign Out"))
+    </button>;
+  };
 
 let make = (~appState, ~appSend, _children) => {
   ...component,
   initialState: () => {signingOut: false},
-  reducer: (action, state) => {
-    switch(action) {
+  reducer: (action, state) =>
+    switch (action) {
     | SignOut => ReasonReact.Update({...state, signingOut: true})
-    };
-  },
-  render: ({state, send}) => {
+    },
+  render: ({state, send}) =>
     <div className="container-fluid">
-      <div className="row">
-        <div className="col dashboard__navigation">
-          <Tags appState=appState appSend=appSend />
-          <hr />
-          <div>
-            <a href="#">(str("Teams"))</a>
+
+        <div className="row">
+          <div className="col dashboard__navigation">
+            <Tags appState appSend />
+            <hr />
+            <div> <a href="#"> (str("Teams")) </a> </div>
+            <div> <a href="#"> (str("Users")) </a> </div>
+            <hr />
+            (signOutButton(state.signingOut))
           </div>
-
-          <div>
-          <a href="#">(str("Users"))</a>
+          <div className="col-10 dashboard__content">
+            <Entries appState appSend />
+            <Users appState appSend />
           </div>
-
-          <hr />
-
-          (signOutButton(state.signingOut))
         </div>
-
-        <div className="col-10 dashboard__content">
-          <Entries appState=appState appSend=appSend />
-          <Users appState=appState appSend=appSend />
-        </div>
-      </div>
-
+      </div>,
       /* {this.haveUnsavedEntries() && ( */
-        /* <SaveBar appState=appState appSend=appSend /> */
+      /* <SaveBar appState=appState appSend=appSend /> */
       /* )} */
-    </div>
-  }
 };
 /* export default class Dashboard extends React.Component {
      constructor(props) {

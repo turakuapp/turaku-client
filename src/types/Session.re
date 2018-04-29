@@ -1,9 +1,3 @@
-type otherTeams = list(Team.t);
-
-type currentTeam = (Team.id, Secrets.t);
-
-type teams = (option(currentTeam), otherTeams);
-
 type credentials = {
   token: string,
   encryptionHash: string,
@@ -11,7 +5,7 @@ type credentials = {
 
 type t =
   | SignedOut
-  | SignedIn(credentials, teams);
+  | SignedIn(credentials);
 
 let shouldRestore = () : bool => true;
 
