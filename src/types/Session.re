@@ -1,8 +1,3 @@
-/* TODO: Figure out if we still need to track this. */
-/* restorationAttempted: bool */
-
-type invitations = list(Invitation.t);
-
 type otherTeams = list(Team.t);
 
 type currentTeam = (Team.id, Secrets.t);
@@ -16,11 +11,9 @@ type credentials = {
 
 type t =
   | SignedOut
-  | SignedIn(credentials, teams, invitations);
+  | SignedIn(credentials, teams);
 
-let shouldRestore = (): bool => {
+let shouldRestore = () : bool => true;
+
 /* Dom.Storage.sessionStorage */
-true
-};
-
-let restore = (session: t) => { () };
+let restore = (session: t) => ();

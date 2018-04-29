@@ -16,6 +16,7 @@ type state = {
   session: Session.t,
   currentPage: page,
   flags,
+  invitations: list(Invitation.t),
 };
 
 let initialState = {
@@ -25,6 +26,7 @@ let initialState = {
     restorationAttempted: true,
     justSignedUp: false,
   },
+  invitations: [],
 };
 
 let reducer = (action, state) =>
