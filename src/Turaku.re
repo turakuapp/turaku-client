@@ -16,11 +16,7 @@ type flags = {
   justSignedUp: bool,
 };
 
-type otherTeams = list(Team.t);
-
-type currentTeam = (Team.id, Secrets.t);
-
-type teams = (option(currentTeam), otherTeams);
+type teams = list(Team.t);
 
 type entries = list(Entry.t);
 
@@ -32,6 +28,7 @@ type state = {
   flags,
   invitations: list(Invitation.t),
   teams,
+  currentTeam: option(Team.t),
   entries,
   unsavedEntries,
 };
@@ -44,7 +41,8 @@ let initialState = {
     justSignedUp: false,
   },
   invitations: [],
-  teams: (None, []),
+  teams: [],
+  currentTeam: None,
   entries: [],
   unsavedEntries: [],
 };
