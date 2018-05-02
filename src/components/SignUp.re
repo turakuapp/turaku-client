@@ -81,6 +81,9 @@ let handleSubmit = (appSend, event) => {
   ();
 };
 
+let gotoSignIn = (appSend, _event) =>
+  appSend(Turaku.(Navigate(SignInPage)));
+
 let make = (~appState, ~appSend, _children) => {
   ...signUp,
   initialState: () => {signUpComplete: false},
@@ -154,7 +157,9 @@ let make = (~appState, ~appSend, _children) => {
             <button _type="submit" className="mt-2 btn btn-primary">
               (str("Submit"))
             </button>
-            <button className="mt-2 ml-2 btn btn-secondary">
+            <button
+              onClick=(gotoSignIn(appSend))
+              className="mt-2 ml-2 btn btn-secondary">
               (str("Sign In"))
             </button>
           </form>

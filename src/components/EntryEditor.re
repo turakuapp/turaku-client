@@ -6,7 +6,7 @@ let handleTitleChange = _event => ();
 
 let fields = (appState, appSend, entry: Entry.t) =>
   List.map(
-    (field: Field.t) => <Field appState appSend field />,
+    (field: Field.t) => <EntryField appState appSend field />,
     entry.fields,
   );
 

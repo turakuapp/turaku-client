@@ -58,6 +58,9 @@ let signedUpAlert = (appState: Turaku.state) =>
     ReasonReact.nullElement;
   };
 
+let gotoSignUp = (appSend, _event) =>
+  appSend(Turaku.(Navigate(SignUpPage)));
+
 let make = (~appState, ~appSend, _children) => {
   ...signIn,
   render: _self =>
@@ -93,7 +96,9 @@ let make = (~appState, ~appSend, _children) => {
             <button _type="submit" className="mt-2 btn btn-primary">
               (str("Sign In"))
             </button>
-            <button className="mt-2 ml-2 btn btn-secondary">
+            <button
+              onClick=(gotoSignUp(appSend))
+              className="mt-2 ml-2 btn btn-secondary">
               (str("Sign Up"))
             </button>
           </form>

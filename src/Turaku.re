@@ -1,7 +1,3 @@
-type action =
-  | SignedUp
-  | SignedIn;
-
 type selectable =
   | NothingSelected
   | EntrySelected(Entry.id);
@@ -10,6 +6,11 @@ type page =
   | SignUpPage
   | SignInPage
   | DashboardPage(selectable);
+
+type action =
+  | SignedUp
+  | SignedIn
+  | Navigate(page);
 
 type flags = {
   restorationAttempted: bool,
@@ -66,4 +67,6 @@ let reducer = (action, state) =>
         justSignedUp: true,
       },
     })
+  | Navigate(destination) =>
+    ReasonReact.Update({...state, currentPage: destination})
   };
