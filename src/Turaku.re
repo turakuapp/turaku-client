@@ -36,7 +36,7 @@ type state = {
 
 let initialState = {
   session: Session.SignedOut,
-  currentPage: SignUpPage,
+  currentPage: SignInPage,
   flags: {
     restorationAttempted: true,
     justSignedUp: false,
