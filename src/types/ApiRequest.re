@@ -2,17 +2,19 @@ type baseUrl =
   | DefaultBaseUrl
   | CustomBaseUrl(string);
 
-type t = {
-  token: option(string),
-  baseUrl,
-};
-
 type purpose =
-  | SignUpPurpose;
+  | SignUp
+  | SignIn;
 
 type method =
   | Get
   | Post;
+
+type t = {
+  token: option(string),
+  baseUrl,
+  purpose,
+};
 
 type headers = {
   .
@@ -21,14 +23,16 @@ type headers = {
   "Authorization": option(string),
 };
 
-let decode = (p, json) =>
-  switch (p) {
-  | SignUpPurpose => User.Codec.decode(json)
-  };
+let create = (~purpose, ~token=?, ()) => {
+  token,
+  baseUrl: DefaultBaseUrl,
+  purpose,
+};
 
 let path = p =>
   switch (p) {
-  | SignUpPurpose => "users"
+  | SignUp => "users"
+  | SignIn => "sessions"
   };
 
 let fetchPost = (url, body) =>
@@ -42,47 +46,32 @@ let fetchPost = (url, body) =>
     ),
   );
 
+let methodForPurpose = purpose =>
+  switch (purpose) {
+  | SignIn
+  | SignUp => Post
+  };
+
 /* let cast(givenType: ) */
-let fetch = (apiRequest, purpose, method, ~body=?, ()) => {
+let fetch = (~apiRequest, ~params=?, ()) => {
   let resolvedBaseUrl =
     switch (apiRequest.baseUrl) {
     | CustomBaseUrl(url) => url
     | DefaultBaseUrl => "http://turaku.localhost/api/v0"
     };
-  let fullRequestUrl = resolvedBaseUrl ++ "/" ++ path(purpose);
+  let fullRequestUrl = resolvedBaseUrl ++ "/" ++ path(apiRequest.purpose);
   Js.log("Calling " ++ fullRequestUrl);
   let requestBody =
-    switch (body) {
-    | Some(body) => body
+    switch (params) {
+    | Some(p) => Js.Json.stringify(p)
     | None => "{}"
     };
-  let fetch =
-    switch (method) {
+  let performedFetch =
+    switch (apiRequest.purpose |> methodForPurpose) {
     | Post => fetchPost(fullRequestUrl, requestBody)
     | Get => Fetch.fetch(fullRequestUrl)
     };
-  Js.Promise.(
-    fetch
-    |> then_(Fetch.Response.json)
-    |> then_(json => json |> decode(purpose) |> resolve)
-  );
-  /* if (body !== null) {
-       console.log(body);
-             }
-
-     return window
-       .fetch(this.fullUrl(path), {
-         method: method,
-         headers: this.headers(),
-         body: body
-       })
-       .then(this.parseResponse); */
-};
-
-let post = (p: purpose, params, apiRequest) => {
-  let body = Js.Json.stringify(params);
-  Js.log("Calling fetch for apiRequest with body " ++ body);
-  fetch(apiRequest, p, Post, ~body, ());
+  performedFetch |> Js.Promise.then_(Fetch.Response.json);
 };
 /* export default class ApiService {
      constructor(token) {

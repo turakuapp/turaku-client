@@ -8,25 +8,50 @@ module Service = {
   let signIn = (email: string, password: string) => {
     let a: response = 1;
     Js.Promise.resolve(a);
-    /* return this.loadAuthenticationSalt()
-       .then(authenticationSalt => {
-         return this.signInWithHashedPassword(authenticationSalt);
+    loadAuthenticationSalt(~email)
+    |> Js.Promise.then_(authenticationSalt =>
+         signInWithHashedPassword(~email, ~password, ~authenticationSalt)
+       )
+    |> Js.Promise.then_(authenticationResponse => {
+         decodedResponse = SignIn.Codec.decode(authenticationResponse);
+         let encryptionHash =
+           createEncryptionHash(
+             ~password,
+             ~encryptionSalt=decodedResponse.encryptionSalt,
+             decodedResponse,
+             encryptionHash,
+           )
+           |> Js.Promise.resolve;
+         ();
        })
-       .then(authenticationResponse => {
-         // Store the authentication response to avoid losing it during the next step.
-         this.resolvedObject = authenticationResponse;
-
-         return this.createEncryptionHash(authenticationResponse.encryptionSalt);
-       })
-       .then(hash => {
-         this.resolvedObject.encryptionHash = hash;
-
-         // Save both the token and the encryption hash in session to allow restoration.
-         this.saveSession(this.resolvedObject.token, hash);
-
-         return Promise.resolve(this.resolvedObject);
-       }); */
+    |> Js.Promise.then_(responseAndHash => {
+         let (decodedResponse, encryptionHash) = responseAndHash;
+         saveSession(~decodedResponse, ~encryptionHash);
+         Js.Promise.resolve(responseAndHash);
+       });
   };
+  let loadAuthenticationSalt = (~email) => {
+    let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn, ());
+    ();
+  };
+  /* loadAuthenticationSalt() {
+       let api = new ApiService();
+
+       return api
+         .get("users/authentication_salt", { email: this.email })
+         .then(response => {
+           console.log(response, "GET users/authentication_salt -> success");
+
+           return Promise.resolve(response.salt);
+         })
+         .catch(response => {
+           console.log(response, "GET users/authentication_salt -> failure");
+           // TODO: What should be returned if load authentication fails?
+           return Promise.reject(
+             new Error("Response from API indicated a failure.")
+           );
+         });
+     } */
 };
 
 let handleSubmit = (appSend, event) => {

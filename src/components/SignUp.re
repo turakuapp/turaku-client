@@ -7,7 +7,7 @@ type action =
 
 let signUp = ReasonReact.reducerComponent("SignUp");
 
-module Encode = {
+module Codec = {
   let user = (name, email, password, authenticationSalt) =>
     Json.Encode.object_([
       ("name", name |> Json.Encode.string),
@@ -15,10 +15,16 @@ module Encode = {
       ("password", password |> Json.Encode.string),
       ("authentication_salt", authenticationSalt |> Json.Encode.string),
     ]);
-  let request = (name, email, password, authenticationSalt) =>
+  let encode = (name, email, password, authenticationSalt) =>
     Json.Encode.object_([
       ("user", user(name, email, password, authenticationSalt)),
     ]);
+  let decode = json : User.t =>
+    Json.Decode.{
+      id: json |> field("id", int),
+      name: json |> field("name", string),
+      email: json |> field("email", string),
+    };
 };
 
 module Service = {
@@ -41,20 +47,14 @@ module Service = {
     let salt = authenticationSalt(64);
     HashUtils.hexHash(password, ~salt, ())
     |> Js.Promise.then_(hexHash => {
-         let apiRequest: ApiRequest.t = {
-           token: None,
-           baseUrl: ApiRequest.DefaultBaseUrl,
-         };
+         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignUp, ());
          Js.log("Created a apiRequest.");
-         apiRequest
-         |> ApiRequest.post(
-              ApiRequest.SignUpPurpose,
-              Encode.request(name, email, hexHash, salt),
-            );
+         let params = Codec.encode(name, email, hexHash, salt);
+         ApiRequest.fetch(~apiRequest, ~params, ());
        })
     |> Js.Promise.then_(response => {
          Js.log(response);
-         Js.Promise.resolve(response);
+         Codec.decode(response) |> Js.Promise.resolve;
        });
   };
 };
