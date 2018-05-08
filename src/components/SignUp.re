@@ -47,10 +47,10 @@ module Service = {
     let salt = authenticationSalt(64);
     HashUtils.hexHash(password, ~salt, ())
     |> Js.Promise.then_(hexHash => {
-         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignUp, ());
+         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignUp);
          Js.log("Created a apiRequest.");
          let params = Codec.encode(name, email, hexHash, salt);
-         ApiRequest.fetch(~apiRequest, ~params, ());
+         ApiRequest.fetch(~apiRequest, ~params);
        })
     |> Js.Promise.then_(response => {
          Js.log(response);

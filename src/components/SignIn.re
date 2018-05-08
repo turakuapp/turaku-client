@@ -4,7 +4,61 @@ let str = ReasonReact.stringToElement;
 
 type response = int;
 
+module Codec = {
+  let encodeEmail = email =>
+    Json.Encode.object_([("email", email |> Json.Encode.string)]);
+  let encodeEmailAndPassword = (~email, ~password) =>
+    Json.Encode.object_([
+      ("email", email |> Json.Encode.string),
+      ("password", password |> Json.Encode.string),
+    ]);
+};
+
 module Service = {
+  let loadAuthenticationSalt = (~email) => {
+    let apiRequest =
+      ApiRequest.create(~purpose=ApiRequest.GetAuthenticationSalt);
+    let params = email |> Codec.encodeEmail;
+    ApiRequest.fetch(~apiRequest, ~params);
+  };
+  let signInWithHashedPassword = (~email, ~password, ~authenticationSalt) =>
+    HashUtils.hexHash(password, ~salt=authenticationSalt, ())
+    |> Js.Promise.then_(hash => {
+         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn);
+         Codec.encodeEmailAndPassword(~email, ~password)
+         |> ApiRequest.fetch(~apiRequest);
+       });
+  /* signInWithHashedPassword(authenticationSalt) {
+       let api = new ApiService();
+
+       let hashService = new HashService(this.password, authenticationSalt);
+
+       return hashService.hexHash().then(hash => {
+         return api
+           .post("sessions", {
+             session: {
+               email: this.email,
+               password: hash
+             }
+           })
+           .then(response => {
+             console.log(response, "POST sessions -> success");
+             return Promise.resolve({
+               token: response.token,
+               encryptionSalt: response.user.encryption_salt,
+               teams: response.teams,
+               incomingInvitations: response.incoming_invitations
+             });
+           })
+           .catch(response => {
+             console.log(response, "POST sessions -> failure");
+             // TODO: What should be returned if sign in fails?
+             return Promise.reject(
+               new Error("Response from API indicated a failure.")
+             );
+           });
+       });
+     } */
   let signIn = (email: string, password: string) => {
     let a: response = 1;
     Js.Promise.resolve(a);
@@ -30,28 +84,6 @@ module Service = {
          Js.Promise.resolve(responseAndHash);
        });
   };
-  let loadAuthenticationSalt = (~email) => {
-    let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn, ());
-    ();
-  };
-  /* loadAuthenticationSalt() {
-       let api = new ApiService();
-
-       return api
-         .get("users/authentication_salt", { email: this.email })
-         .then(response => {
-           console.log(response, "GET users/authentication_salt -> success");
-
-           return Promise.resolve(response.salt);
-         })
-         .catch(response => {
-           console.log(response, "GET users/authentication_salt -> failure");
-           // TODO: What should be returned if load authentication fails?
-           return Promise.reject(
-             new Error("Response from API indicated a failure.")
-           );
-         });
-     } */
 };
 
 let handleSubmit = (appSend, event) => {

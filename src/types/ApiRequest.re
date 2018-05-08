@@ -4,7 +4,8 @@ type baseUrl =
 
 type purpose =
   | SignUp
-  | SignIn;
+  | SignIn
+  | GetAuthenticationSalt;
 
 type method =
   | Get
@@ -16,6 +17,9 @@ type t = {
   purpose,
 };
 
+[@bs.module "query-string"]
+external stringifyParams : Js.Json.t => string = "stringify";
+
 type headers = {
   .
   "Accept": string,
@@ -23,8 +27,10 @@ type headers = {
   "Authorization": option(string),
 };
 
-let create = (~purpose, ~token=?, ()) => {
-  token,
+let create = (~purpose) => {token: None, baseUrl: DefaultBaseUrl, purpose};
+
+let createWithToken = (~purpose, ~token) => {
+  token: Some(token),
   baseUrl: DefaultBaseUrl,
   purpose,
 };
@@ -33,6 +39,7 @@ let path = p =>
   switch (p) {
   | SignUp => "users"
   | SignIn => "sessions"
+  | GetAuthenticationSalt => "users/authentication_salt"
   };
 
 let fetchPost = (url, body) =>
@@ -50,10 +57,10 @@ let methodForPurpose = purpose =>
   switch (purpose) {
   | SignIn
   | SignUp => Post
+  | GetAuthenticationSalt => Get
   };
 
-/* let cast(givenType: ) */
-let fetch = (~apiRequest, ~params=?, ()) => {
+let fetch = (~apiRequest, ~params) => {
   let resolvedBaseUrl =
     switch (apiRequest.baseUrl) {
     | CustomBaseUrl(url) => url
@@ -61,15 +68,11 @@ let fetch = (~apiRequest, ~params=?, ()) => {
     };
   let fullRequestUrl = resolvedBaseUrl ++ "/" ++ path(apiRequest.purpose);
   Js.log("Calling " ++ fullRequestUrl);
-  let requestBody =
-    switch (params) {
-    | Some(p) => Js.Json.stringify(p)
-    | None => "{}"
-    };
+  /* We either send the params as JSON body, or as part of the URL, depending on HTTP method. */
   let performedFetch =
     switch (apiRequest.purpose |> methodForPurpose) {
-    | Post => fetchPost(fullRequestUrl, requestBody)
-    | Get => Fetch.fetch(fullRequestUrl)
+    | Post => fetchPost(fullRequestUrl, Js.Json.stringify(params))
+    | Get => Fetch.fetch(fullRequestUrl ++ "?" ++ stringifyParams(params))
     };
   performedFetch |> Js.Promise.then_(Fetch.Response.json);
 };
