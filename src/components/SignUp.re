@@ -19,7 +19,7 @@ module Codec = {
     Json.Encode.object_([
       ("user", user(name, email, password, authenticationSalt)),
     ]);
-  let decode = json : User.t =>
+  let decode = json : NewUser.t =>
     Json.Decode.{
       id: json |> field("id", int),
       name: json |> field("name", string),

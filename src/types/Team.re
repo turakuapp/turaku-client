@@ -1,5 +1,6 @@
 type t = {
-  id: id,
+  id,
   name: string,
-  /* and more */
-} and id = int;
+  encryptedPassword: string,
+}
+and id = int;

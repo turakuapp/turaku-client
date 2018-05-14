@@ -7,7 +7,7 @@ let str = ReasonReact.stringToElement;
 let currentComponent = (state, send) =>
   switch (state.currentPage) {
   | SignUpPage => <SignUp appState=state appSend=send />
-  | SignInPage => <SignIn appState=state appSend=send />
+  | SignInPage => <SignInMenu appState=state appSend=send />
   | DashboardPage(_) => <Dashboard appState=state appSend=send />
   };
 

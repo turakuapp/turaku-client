@@ -1,7 +1,11 @@
 type t = {
-  id: int,
-  team,
+  id,
+  invitingTeam,
   invitingUser,
 }
-and team = {name: string}
+and id = int
+and invitingTeam = {
+  id: Team.id,
+  name: string,
+}
 and invitingUser = {email: string};

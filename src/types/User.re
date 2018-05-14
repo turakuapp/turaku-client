@@ -1,5 +1,7 @@
 type t = {
-  id: int,
+  id,
   name: string,
   email: string,
-};
+  encryptionSalt: string,
+}
+and id = int;

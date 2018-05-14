@@ -1,8 +1,6 @@
-let signIn = ReasonReact.statelessComponent("SignIn");
+let component = ReasonReact.statelessComponent("SignInMenu");
 
 let str = ReasonReact.stringToElement;
-
-type response = int;
 
 module Codec = {
   let encodeEmail = email =>
@@ -12,6 +10,10 @@ module Codec = {
       ("email", email |> Json.Encode.string),
       ("password", password |> Json.Encode.string),
     ]);
+  let decodeAuthenticationSalt = json =>
+    json |> Json.Decode.field("salt", Json.Decode.string);
+  let decodeSignInResponse = json =>
+    json |> Json.Decode.field("salt", Json.Decode.string);
 };
 
 module Service = {
@@ -19,14 +21,19 @@ module Service = {
     let apiRequest =
       ApiRequest.create(~purpose=ApiRequest.GetAuthenticationSalt);
     let params = email |> Codec.encodeEmail;
-    ApiRequest.fetch(~apiRequest, ~params);
+    ApiRequest.fetch(~apiRequest, ~params)
+    |> Js.Promise.then_(response =>
+         response |> Codec.decodeAuthenticationSalt |> Js.Promise.resolve
+       );
   };
   let signInWithHashedPassword = (~email, ~password, ~authenticationSalt) =>
     HashUtils.hexHash(password, ~salt=authenticationSalt, ())
     |> Js.Promise.then_(hash => {
          let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn);
-         Codec.encodeEmailAndPassword(~email, ~password)
-         |> ApiRequest.fetch(~apiRequest);
+         let params = Codec.encodeEmailAndPassword(~email, ~password=hash);
+         ApiRequest.fetch(~apiRequest, ~params)
+         |> Codec.decodeSignInResponse
+         |> Js.Promise.resolve;
        });
   /* signInWithHashedPassword(authenticationSalt) {
        let api = new ApiService();
@@ -59,9 +66,7 @@ module Service = {
            });
        });
      } */
-  let signIn = (email: string, password: string) => {
-    let a: response = 1;
-    Js.Promise.resolve(a);
+  let signIn = (email: string, password: string) =>
     loadAuthenticationSalt(~email)
     |> Js.Promise.then_(authenticationSalt =>
          signInWithHashedPassword(~email, ~password, ~authenticationSalt)
@@ -83,7 +88,6 @@ module Service = {
          saveSession(~decodedResponse, ~encryptionHash);
          Js.Promise.resolve(responseAndHash);
        });
-  };
 };
 
 let handleSubmit = (appSend, event) => {
@@ -119,7 +123,7 @@ let gotoSignUp = (appSend, _event) =>
   appSend(Turaku.(Navigate(SignUpPage)));
 
 let make = (~appState, ~appSend, _children) => {
-  ...signIn,
+  ...component,
   render: _self =>
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
