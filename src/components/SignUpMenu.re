@@ -5,7 +5,7 @@ type state = {signUpComplete: bool};
 type action =
   | CompleteSignUp;
 
-let signUp = ReasonReact.reducerComponent("SignUp");
+let signUp = ReasonReact.reducerComponent("SignUpMenu");
 
 module Codec = {
   let user = (name, email, password, authenticationSalt) =>
@@ -74,7 +74,7 @@ let handleSubmit = (appSend, event) => {
   );
   let _ =
     Service.signUp(name, email, password)
-    |> Js.Promise.then_((_response: User.t) => {
+    |> Js.Promise.then_(_response => {
          appSend(Turaku.SignedUp);
          Js.Promise.resolve();
        });

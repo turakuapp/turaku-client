@@ -28,10 +28,10 @@ let make =
   render: ({state, send}) =>
     <div className="card mb-3">
       <div className="card-body">
-        <h4 className="card-title"> (str(invitation.team.name)) </h4>
+        <h4 className="card-title"> (str(invitation |> Invitation.name)) </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           (str("from"))
-          <code> (str(invitation.invitingUser.email)) </code>
+          <code> (str(invitation |> Invitation.email)) </code>
         </h6>
         <p className="card-text">
           <input

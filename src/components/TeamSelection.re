@@ -30,10 +30,7 @@ let invitations = (appState: Turaku.state, appSend) =>
 
 let selectTeam = (team, appSend, _event) =>
   /* TODO: See how to select a team with old selectTeam function below. */
-  Js.log2(
-    "Select this team: ",
-    team,
-  );
+  Js.log2("Select this team: ", team);
 
 let teams = (appState: Turaku.state, appSend) =>
   if (appState.teams |> List.length > 0) {
@@ -48,7 +45,7 @@ let teams = (appState: Turaku.state, appSend) =>
                    <button
                      onClick=(selectTeam(team, appSend))
                      className="btn btn-sm btn-outline-dark">
-                     (str(team.name))
+                     (str(team |> Team.name))
                    </button>
                  </li>
                )

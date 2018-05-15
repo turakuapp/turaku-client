@@ -9,7 +9,7 @@ type page =
 
 type action =
   | SignedUp
-  | SignedIn
+  | SignedIn(string, list(Team.t), list(Invitation.t), string)
   | Navigate(page);
 
 type flags = {
@@ -35,7 +35,7 @@ type state = {
 };
 
 let initialState = {
-  session: Session.SignedOut,
+  session: Session.signOut(),
   currentPage: SignInPage,
   flags: {
     restorationAttempted: true,
@@ -50,9 +50,12 @@ let initialState = {
 
 let reducer = (action, state) =>
   switch (action) {
-  | SignedIn =>
+  | SignedIn(token, teams, invitations, encryptionHash) =>
     ReasonReact.Update({
       ...state,
+      session: Session.signIn(~token, ~encryptionHash),
+      teams,
+      invitations,
       flags: {
         ...state.flags,
         justSignedUp: false,

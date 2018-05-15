@@ -1,5 +1,5 @@
 type t = {
-  id: User.id,
+  id: int,
   name: string,
   email: string,
 };

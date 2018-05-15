@@ -1,6 +1,14 @@
 type t = {
-  id,
+  id: int,
   name: string,
   encryptedPassword: string,
-}
-and id = int;
+};
+
+let decode = json =>
+  Json.Decode.{
+    id: json |> field("id", int),
+    name: json |> field("name", string),
+    encryptedPassword: json |> field("encrypted_password", string),
+  };
+
+let name = team => team.name;

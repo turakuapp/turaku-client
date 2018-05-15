@@ -2,4 +2,4 @@ type t;
 
 let decode: Js.Json.t => t;
 
-let name: t => string;
+let encryptionSalt: t => string;

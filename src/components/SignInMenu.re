@@ -2,6 +2,15 @@ let component = ReasonReact.statelessComponent("SignInMenu");
 
 let str = ReasonReact.stringToElement;
 
+type createSessionResponse = {
+  id: int,
+  name: string,
+  token: string,
+  user: User.t,
+  teams: list(Team.t),
+  invitations: list(Invitation.t),
+};
+
 module Codec = {
   let encodeEmail = email =>
     Json.Encode.object_([("email", email |> Json.Encode.string)]);
@@ -13,7 +22,14 @@ module Codec = {
   let decodeAuthenticationSalt = json =>
     json |> Json.Decode.field("salt", Json.Decode.string);
   let decodeSignInResponse = json =>
-    json |> Json.Decode.field("salt", Json.Decode.string);
+    Json.Decode.{
+      id: json |> field("id", int),
+      name: json |> field("name", string),
+      token: json |> field("token", string),
+      user: json |> field("user", User.decode),
+      teams: json |> field("teams", list(Team.decode)),
+      invitations: json |> field("invitations", list(Invitation.decode)),
+    };
 };
 
 module Service = {
@@ -31,61 +47,36 @@ module Service = {
     |> Js.Promise.then_(hash => {
          let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn);
          let params = Codec.encodeEmailAndPassword(~email, ~password=hash);
-         ApiRequest.fetch(~apiRequest, ~params)
-         |> Codec.decodeSignInResponse
-         |> Js.Promise.resolve;
-       });
-  /* signInWithHashedPassword(authenticationSalt) {
-       let api = new ApiService();
-
-       let hashService = new HashService(this.password, authenticationSalt);
-
-       return hashService.hexHash().then(hash => {
-         return api
-           .post("sessions", {
-             session: {
-               email: this.email,
-               password: hash
-             }
-           })
-           .then(response => {
-             console.log(response, "POST sessions -> success");
-             return Promise.resolve({
-               token: response.token,
-               encryptionSalt: response.user.encryption_salt,
-               teams: response.teams,
-               incomingInvitations: response.incoming_invitations
-             });
-           })
-           .catch(response => {
-             console.log(response, "POST sessions -> failure");
-             // TODO: What should be returned if sign in fails?
-             return Promise.reject(
-               new Error("Response from API indicated a failure.")
-             );
-           });
-       });
-     } */
+         ApiRequest.fetch(~apiRequest, ~params);
+       })
+    |> Js.Promise.then_(encodedResponse =>
+         encodedResponse |> Codec.decodeSignInResponse |> Js.Promise.resolve
+       );
+  /* Save the session in storage to allow it to be restored without signing in again on a page reload. */
+  let saveSession = (~token, ~encryptionHash) => {
+    Dom.Storage.setItem("token", token, Dom.Storage.sessionStorage);
+    Dom.Storage.setItem(
+      "encryptionHash",
+      encryptionHash,
+      Dom.Storage.sessionStorage,
+    );
+  };
   let signIn = (email: string, password: string) =>
     loadAuthenticationSalt(~email)
     |> Js.Promise.then_(authenticationSalt =>
          signInWithHashedPassword(~email, ~password, ~authenticationSalt)
        )
-    |> Js.Promise.then_(authenticationResponse => {
-         decodedResponse = SignIn.Codec.decode(authenticationResponse);
-         let encryptionHash =
-           createEncryptionHash(
-             ~password,
-             ~encryptionSalt=decodedResponse.encryptionSalt,
-             decodedResponse,
-             encryptionHash,
-           )
-           |> Js.Promise.resolve;
-         ();
+    |> Js.Promise.then_(decodedResponse => {
+         let encryptionSalt = decodedResponse.user |> User.encryptionSalt;
+         HashUtils.hexHash(password, ~salt=encryptionSalt, ())
+         |> Js.Promise.then_(encryptionHash =>
+              Js.Promise.resolve((decodedResponse, encryptionHash))
+            );
        })
     |> Js.Promise.then_(responseAndHash => {
          let (decodedResponse, encryptionHash) = responseAndHash;
-         saveSession(~decodedResponse, ~encryptionHash);
+         let token = decodedResponse.token;
+         saveSession(~token, ~encryptionHash);
          Js.Promise.resolve(responseAndHash);
        });
 };
@@ -99,8 +90,16 @@ let handleSubmit = (appSend, event) => {
   );
   let _ =
     Service.signIn(email, password)
-    |> Js.Promise.then_((_response: response) => {
-         appSend(Turaku.SignedIn);
+    |> Js.Promise.then_(responseAndHash => {
+         let (response, encryptionHash) = responseAndHash;
+         appSend(
+           Turaku.SignedIn(
+             response.token,
+             response.teams,
+             response.invitations,
+             encryptionHash,
+           ),
+         );
          Js.Promise.resolve();
        });
   ();
