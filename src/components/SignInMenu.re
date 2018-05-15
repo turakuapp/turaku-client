@@ -4,7 +4,6 @@ let str = ReasonReact.stringToElement;
 
 type createSessionResponse = {
   id: int,
-  name: string,
   token: string,
   user: User.t,
   teams: list(Team.t),
@@ -16,19 +15,24 @@ module Codec = {
     Json.Encode.object_([("email", email |> Json.Encode.string)]);
   let encodeEmailAndPassword = (~email, ~password) =>
     Json.Encode.object_([
-      ("email", email |> Json.Encode.string),
-      ("password", password |> Json.Encode.string),
+      (
+        "session",
+        Json.Encode.object_([
+          ("email", email |> Json.Encode.string),
+          ("password", password |> Json.Encode.string),
+        ]),
+      ),
     ]);
   let decodeAuthenticationSalt = json =>
     json |> Json.Decode.field("salt", Json.Decode.string);
   let decodeSignInResponse = json =>
     Json.Decode.{
       id: json |> field("id", int),
-      name: json |> field("name", string),
       token: json |> field("token", string),
       user: json |> field("user", User.decode),
       teams: json |> field("teams", list(Team.decode)),
-      invitations: json |> field("invitations", list(Invitation.decode)),
+      invitations:
+        json |> field("incoming_invitations", list(Invitation.decode)),
     };
 };
 
