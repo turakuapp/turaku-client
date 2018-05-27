@@ -9,10 +9,14 @@
   ],
   "bs-dependencies": [
     "reason-react",
+    "reason-apollo",
     "@glennsl/bs-jest",
     "@glennsl/bs-json",
     "bs-webapi",
     "bs-fetch"
+  ],
+  "ppx-flags": [
+    "graphql_ppx/ppx"
   ],
   "reason": {
     "react-jsx": 2

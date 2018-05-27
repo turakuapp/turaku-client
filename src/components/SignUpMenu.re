@@ -7,82 +7,88 @@ type action =
 
 let signUp = ReasonReact.reducerComponent("SignUpMenu");
 
-module Codec = {
-  let user = (name, email, password, authenticationSalt) =>
-    Json.Encode.object_([
-      ("name", name |> Json.Encode.string),
-      ("email", email |> Json.Encode.string),
-      ("password", password |> Json.Encode.string),
-      ("authentication_salt", authenticationSalt |> Json.Encode.string),
-    ]);
-  let encode = (name, email, password, authenticationSalt) =>
-    Json.Encode.object_([
-      ("user", user(name, email, password, authenticationSalt)),
-    ]);
-  let decode = json : NewUser.t =>
-    Json.Decode.{
-      id: json |> field("id", int),
-      name: json |> field("name", string),
-      email: json |> field("email", string),
-    };
-};
+/* Create a GraphQL Query by using the graphql_ppx */
+module CreateUser = [%graphql
+  {|
+  mutation createUser($name: String!, $email: String!, $authenticationSalt: String!, $password: String!) {
+    createUser(input: {name: $name, email: $email, authentication_salt: $authenticationSalt, password: $password}) {
+      id
+    }
+  }
+|}
+];
 
-module Service = {
-  let saltPossibleCharacters = "1234567890abcdef";
-  /* TODO: This uses a potentially insecure randomization method. Use cryptographically secure alternative in production. */
-  let authenticationSalt = length => {
-    let rec aux = (salt, remainingLength) =>
-      if (remainingLength > 0) {
-        let randomPosition =
-          Random.int(String.length(saltPossibleCharacters));
-        let saltCharacter =
-          Js.String.charAt(randomPosition, saltPossibleCharacters);
-        aux(salt ++ saltCharacter, remainingLength - 1);
-      } else {
-        salt;
-      };
-    aux("", length);
-  };
-  let signUp = (name, email, password) => {
-    let salt = authenticationSalt(64);
-    HashUtils.hexHash(password, ~salt, ())
-    |> Js.Promise.then_(hexHash => {
-         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignUp);
-         Js.log("Created a apiRequest.");
-         let params = Codec.encode(name, email, hexHash, salt);
-         ApiRequest.fetch(~apiRequest, ~params);
-       })
-    |> Js.Promise.then_(response => {
-         Js.log(response);
-         Codec.decode(response) |> Js.Promise.resolve;
-       });
-  };
-};
-
-let handleSubmit = (appSend, event) => {
-  event |> DomUtils.preventEventDefault;
-  let name = DomUtils.getValueOfInputById("sign-up-form__name");
-  let email = DomUtils.getValueOfInputById("sign-up-form__email");
-  let password = DomUtils.getValueOfInputById("sign-up-form__password");
-  Js.log(
-    "Calling Service.signUp for "
-    ++ name
-    ++ " ("
-    ++ email
-    ++ ") with password "
-    ++ password,
-  );
-  let _ =
-    Service.signUp(name, email, password)
-    |> Js.Promise.then_(_response => {
-         appSend(Turaku.SignedUp);
-         Js.Promise.resolve();
-       });
-  ();
-};
+module CreateUserMutation = ReasonApollo.CreateMutation(CreateUser);
 
 let gotoSignIn = (appSend, _event) =>
   appSend(Turaku.(Navigate(SignInPage)));
+
+let newCreatePersonMutation = () => {
+  let name = DomUtils.getValueOfInputById("sign-up-form__name");
+  let email = DomUtils.getValueOfInputById("sign-up-form__email");
+  let password = DomUtils.getValueOfInputById("sign-up-form__password");
+  let authenticationSalt = Salt.create(64);
+  HashUtils.hexHash(password, ~salt=authenticationSalt, ())
+  |> Js.Promise.then_(hexHash => {
+       Js.log("Using CreateUserMutation...");
+       CreateUser.make(
+         ~name,
+         ~email,
+         ~password=hexHash,
+         ~authenticationSalt,
+         (),
+       )
+       |> Js.Promise.resolve;
+     });
+};
+
+/* TODO: submitButton() should probably be extracted as another component. */
+let submitButton = appSend =>
+  <CreateUserMutation>
+    ...(
+         (mutation, {result}) =>
+           <div>
+             <button
+               onClick=(
+                 event => {
+                   event |> DomUtils.preventMouseEventDefault;
+                   newCreatePersonMutation()
+                   |> Js.Promise.then_(createPersonMutation =>
+                        mutation(
+                          ~variables=createPersonMutation##variables,
+                          (),
+                        )
+                      )
+                   |> Js.Promise.then_(result => {
+                        appSend(Turaku.SignedUp);
+                        Js.Promise.resolve(result);
+                      })
+                   |> ignore;
+                 }
+               )>
+               ("Submit" |> str)
+             </button>
+             <span>
+               (
+                 switch (result) {
+                 | NotCalled =>
+                   Js.log("Not called");
+                   "" |> str;
+                 | Data(d) =>
+                   Js.log2("data", d);
+                   "Submission complete" |> str;
+                 | Error(e) =>
+                   Js.log2("error", e);
+                   "ERROR" |> str;
+                 | Loading =>
+                   Js.log("Loading");
+                   "Loading" |> str;
+                 }
+               )
+             </span>
+           </div>
+       )
+  </CreateUserMutation>;
 
 let make = (~appState, ~appSend, _children) => {
   ...signUp,
@@ -95,7 +101,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          <form onSubmit=(handleSubmit(appSend))>
+          <form>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input
@@ -154,9 +160,7 @@ let make = (~appState, ~appSend, _children) => {
                 (str(" to learn more."))
               </small>
             </div>
-            <button _type="submit" className="mt-2 btn btn-primary">
-              (str("Submit"))
-            </button>
+            (submitButton(appSend))
             <button
               onClick=(gotoSignIn(appSend))
               className="mt-2 ml-2 btn btn-secondary">

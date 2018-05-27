@@ -14,6 +14,9 @@
 /types
 .merlin
 
+# GraphQL Schema
+graphql_schema.json
+
 # misc
 .DS_Store
 .env.local
