@@ -10,9 +10,12 @@ let signUp = ReasonReact.reducerComponent("SignUpMenu");
 /* Create a GraphQL Query by using the graphql_ppx */
 module CreateUser = [%graphql
   {|
-  mutation createUser($name: String!, $email: String!, $authenticationSalt: String!, $password: String!) {
-    createUser(input: {name: $name, email: $email, authentication_salt: $authenticationSalt, password: $password}) {
-      id
+  mutation($name: String!, $email: String!, $authenticationSalt: String!, $password: String!) {
+    createUser(name: $name, email: $email, authenticationSalt: $authenticationSalt, password: $password) {
+      user {
+        id
+      }
+      errors
     }
   }
 |}
@@ -23,14 +26,14 @@ module CreateUserMutation = ReasonApollo.CreateMutation(CreateUser);
 let gotoSignIn = (appSend, _event) =>
   appSend(Turaku.(Navigate(SignInPage)));
 
-let newCreatePersonMutation = () => {
+let newCreateUserMutation = () => {
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
   let password = DomUtils.getValueOfInputById("sign-up-form__password");
   let authenticationSalt = Salt.create(64);
   HashUtils.hexHash(password, ~salt=authenticationSalt, ())
   |> Js.Promise.then_(hexHash => {
-       Js.log("Using CreateUserMutation...");
+       Js.log("Using CreateUser...");
        CreateUser.make(
          ~name,
          ~email,
@@ -42,32 +45,42 @@ let newCreatePersonMutation = () => {
      });
 };
 
+let handleResult = (appSend, promise) =>
+  promise
+  |> Js.Promise.then_(data => {
+       let parsedData = CreateUserMutation.convertJsInputToReason(data);
+       switch (parsedData.data) {
+       | None => Js.log("Callback: Some unhandled error occured.")
+       | Some(response) =>
+         let errors = response##createUser##errors;
+         if (errors |> Js.Array.length == 0) {
+           appSend(Turaku.SignedUp);
+         } else {
+           Js.log("Errors: " ++ (errors |> Js.Array.joinWith(", ")));
+         };
+       };
+       Js.Promise.resolve(data);
+     });
+
 /* TODO: submitButton() should probably be extracted as another component. */
 let submitButton = appSend =>
   <CreateUserMutation>
     ...(
          (mutation, {result}) =>
-           <div>
-             <button
-               onClick=(
-                 event => {
-                   event |> DomUtils.preventMouseEventDefault;
-                   newCreatePersonMutation()
-                   |> Js.Promise.then_(createPersonMutation =>
-                        mutation(
-                          ~variables=createPersonMutation##variables,
-                          (),
-                        )
-                      )
-                   |> Js.Promise.then_(result => {
-                        appSend(Turaku.SignedUp);
-                        Js.Promise.resolve(result);
-                      })
-                   |> ignore;
-                 }
-               )>
-               ("Submit" |> str)
-             </button>
+           <button
+             className="mt-2 btn btn-primary"
+             onClick=(
+               event => {
+                 event |> DomUtils.preventMouseEventDefault;
+                 newCreateUserMutation()
+                 |> Js.Promise.then_(createUserMutation =>
+                      mutation(~variables=createUserMutation##variables, ())
+                    )
+                 |> handleResult(appSend)
+                 |> ignore;
+               }
+             )>
+             ("Sign Up" |> str)
              <span>
                (
                  switch (result) {
@@ -86,7 +99,7 @@ let submitButton = appSend =>
                  }
                )
              </span>
-           </div>
+           </button>
        )
   </CreateUserMutation>;
 
