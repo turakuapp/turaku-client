@@ -80,25 +80,16 @@ let submitButton = appSend =>
                  |> ignore;
                }
              )>
+             (
+               switch (result) {
+               | NotCalled => <Icon kind=Icon.Submit />
+               | Data(_d) => <Icon kind=Icon.Submit />
+               | Error(_e) => <Icon kind=Icon.Error />
+               | Loading => <Icon kind=Icon.Loading />
+               }
+             )
+             (" " |> str)
              ("Sign Up" |> str)
-             <span>
-               (
-                 switch (result) {
-                 | NotCalled =>
-                   Js.log("Not called");
-                   "" |> str;
-                 | Data(d) =>
-                   Js.log2("data", d);
-                   "Submission complete" |> str;
-                 | Error(e) =>
-                   Js.log2("error", e);
-                   "ERROR" |> str;
-                 | Loading =>
-                   Js.log("Loading");
-                   "Loading" |> str;
-                 }
-               )
-             </span>
            </button>
        )
   </CreateUserMutation>;
