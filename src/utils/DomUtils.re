@@ -1,10 +1,6 @@
 [@bs.send]
 external preventEventDefault : ReactEventRe.Form.t => unit = "preventDefault";
 
-[@bs.send]
-external preventMouseEventDefault : ReactEventRe.Mouse.t => unit =
-  "preventDefault";
-
 let unwrapUnsafely = data =>
   switch (data) {
   | Some(v) => v

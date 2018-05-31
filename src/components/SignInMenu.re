@@ -53,47 +53,6 @@ module SignInConfig = [%graphql
   |}
 ];
 
-module GetAuthenticationSaltQuery =
-  ReasonApollo.CreateQuery(GetAuthenticationSaltConfig);
-
-module SignInMutation = ReasonApollo.CreateMutation(SignInConfig);
-
-let handleSignIn = (appSend, event) => {
-  event |> DomUtils.preventEventDefault;
-  let email = DomUtils.getValueOfInputById("sign-in-form__email");
-  let password = DomUtils.getValueOfInputById("sign-in-form__password");
-  let query = GetAuthenticationSaltConfig.make(~email, ());
-  <GetAuthenticationSaltQuery variables=query##variables>
-    ...(
-         ({result}) =>
-           <button
-             className="mt-2 btn btn-primary"
-             onClick=(
-               event => {
-                 event |> DomUtils.preventMouseEventDefault;
-                 newCreateUserMutation()
-                 |> Js.Promise.then_(createUserMutation =>
-                      mutation(~variables=createUserMutation##variables, ())
-                    )
-                 |> handleResult(appSend)
-                 |> ignore;
-               }
-             )>
-             (
-               switch (result) {
-               | NotCalled => <Icon kind=Icon.Submit />
-               | Data(_d) => <Icon kind=Icon.Submit />
-               | Error(_e) => <Icon kind=Icon.Error />
-               | Loading => <Icon kind=Icon.Loading />
-               }
-             )
-             (" " |> str)
-             ("Sign Up" |> str)
-           </button>
-       )
-  </GetAuthenticationSaltQuery>;
-};
-
 module Codec = {
   let encodeEmail = email =>
     Json.Encode.object_([("email", email |> Json.Encode.string)]);

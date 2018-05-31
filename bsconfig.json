@@ -9,7 +9,6 @@
   ],
   "bs-dependencies": [
     "reason-react",
-    "reason-apollo",
     "@glennsl/bs-jest",
     "@glennsl/bs-json",
     "bs-webapi",

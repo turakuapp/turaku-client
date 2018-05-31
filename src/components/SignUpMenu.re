@@ -8,7 +8,7 @@ type action =
 let signUp = ReasonReact.reducerComponent("SignUpMenu");
 
 /* Create a GraphQL Query by using the graphql_ppx */
-module CreateUser = [%graphql
+module CreateUserQuery = [%graphql
   {|
   mutation($name: String!, $email: String!, $authenticationSalt: String!, $password: String!) {
     createUser(name: $name, email: $email, authenticationSalt: $authenticationSalt, password: $password) {
@@ -21,78 +21,38 @@ module CreateUser = [%graphql
 |}
 ];
 
-module CreateUserMutation = ReasonApollo.CreateMutation(CreateUser);
-
 let gotoSignIn = (appSend, _event) =>
   appSend(Turaku.(Navigate(SignInPage)));
 
-let newCreateUserMutation = () => {
+let handleSignUp = (appSend, event) => {
+  event |> DomUtils.preventEventDefault;
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
   let password = DomUtils.getValueOfInputById("sign-up-form__password");
   let authenticationSalt = Salt.create(64);
+  /* Hash the password with the newly generated salt before using it to register an account. */
   HashUtils.hexHash(password, ~salt=authenticationSalt, ())
-  |> Js.Promise.then_(hexHash => {
-       Js.log("Using CreateUser...");
-       CreateUser.make(
+  |> Js.Promise.then_(hexHash =>
+       CreateUserQuery.make(
          ~name,
          ~email,
          ~password=hexHash,
          ~authenticationSalt,
          (),
        )
-       |> Js.Promise.resolve;
-     });
-};
-
-let handleResult = (appSend, promise) =>
-  promise
-  |> Js.Promise.then_(data => {
-       let parsedData = CreateUserMutation.convertJsInputToReason(data);
-       switch (parsedData.data) {
-       | None => Js.log("Callback: Some unhandled error occured.")
-       | Some(response) =>
-         let errors = response##createUser##errors;
-         if (errors |> Js.Array.length == 0) {
-           appSend(Turaku.SignedUp);
-         } else {
-           Js.log("Errors: " ++ (errors |> Js.Array.joinWith(", ")));
-         };
+       |> Api.sendQuery
+     )
+  |> Js.Promise.then_(response => {
+       let errors = response##createUser##errors;
+       if (errors |> Js.Array.length == 0) {
+         appSend(Turaku.SignedUp);
+       } else {
+         Js.log(Js.Array.joinWith(", ", errors));
        };
-       Js.Promise.resolve(data);
-     });
-
-/* TODO: submitButton() should probably be extracted as another component. */
-let submitButton = appSend =>
-  <CreateUserMutation>
-    ...(
-         (mutation, {result}) =>
-           <button
-             className="mt-2 btn btn-primary"
-             onClick=(
-               event => {
-                 event |> DomUtils.preventMouseEventDefault;
-                 newCreateUserMutation()
-                 |> Js.Promise.then_(createUserMutation =>
-                      mutation(~variables=createUserMutation##variables, ())
-                    )
-                 |> handleResult(appSend)
-                 |> ignore;
-               }
-             )>
-             (
-               switch (result) {
-               | NotCalled => <Icon kind=Icon.Submit />
-               | Data(_d) => <Icon kind=Icon.Submit />
-               | Error(_e) => <Icon kind=Icon.Error />
-               | Loading => <Icon kind=Icon.Loading />
-               }
-             )
-             (" " |> str)
-             ("Sign Up" |> str)
-           </button>
-       )
-  </CreateUserMutation>;
+       Js.Promise.resolve(response);
+     })
+  |> ignore;
+};
 
 let make = (~appState, ~appSend, _children) => {
   ...signUp,
@@ -105,7 +65,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          <form>
+          <form onSubmit=(handleSignUp(appSend))>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input
@@ -164,7 +124,9 @@ let make = (~appState, ~appSend, _children) => {
                 (str(" to learn more."))
               </small>
             </div>
-            (submitButton(appSend))
+            <button _type="submit" className="mt-2 btn btn-primary">
+              (str("Sign Up"))
+            </button>
             <button
               onClick=(gotoSignIn(appSend))
               className="mt-2 ml-2 btn btn-secondary">
