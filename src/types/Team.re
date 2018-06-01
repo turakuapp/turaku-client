@@ -1,14 +1,10 @@
 type t = {
-  id: int,
+  id,
   name: string,
-  encryptedPassword: string,
-};
-
-let decode = json =>
-  Json.Decode.{
-    id: json |> field("id", int),
-    name: json |> field("name", string),
-    encryptedPassword: json |> field("encrypted_password", string),
-  };
+  encryptedPassword: EncryptedData.t,
+}
+and id = string;
 
 let name = team => team.name;
+
+let create = (id, name, encryptedPassword) => {id, name, encryptedPassword};

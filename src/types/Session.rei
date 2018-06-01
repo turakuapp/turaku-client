@@ -1,5 +1,5 @@
 type t;
 
-let signIn: (~token: string, ~encryptionHash: string) => t;
+let create: (~token: AccessToken.t, ~encryptionHash: EncryptionHash.t) => t;
 
-let signOut: unit => t;
+let signedOut: unit => t;

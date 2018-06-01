@@ -9,6 +9,7 @@ let currentComponent = (state, send) =>
   | SignUpPage => <SignUpMenu appState=state appSend=send />
   | SignInPage => <SignInMenu appState=state appSend=send />
   | DashboardPage(_) => <Dashboard appState=state appSend=send />
+  | TeamSelectionPage => <TeamSelection appState=state appSend=send />
   };
 
 let make = _children => {

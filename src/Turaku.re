@@ -5,11 +5,17 @@ type selectable =
 type page =
   | SignUpPage
   | SignInPage
-  | DashboardPage(selectable);
+  | DashboardPage(selectable)
+  | TeamSelectionPage;
 
 type action =
   | SignedUp
-  | SignedIn(string, list(Team.t), list(Invitation.t), string)
+  | SignedIn(
+      AccessToken.t,
+      list(Team.t),
+      list(Invitation.t),
+      EncryptionHash.t,
+    )
   | Navigate(page);
 
 type flags = {
@@ -35,7 +41,7 @@ type state = {
 };
 
 let initialState = {
-  session: Session.signOut(),
+  session: Session.signedOut(),
   currentPage: SignInPage,
   flags: {
     restorationAttempted: true,
@@ -53,7 +59,8 @@ let reducer = (action, state) =>
   | SignedIn(token, teams, invitations, encryptionHash) =>
     ReasonReact.Update({
       ...state,
-      session: Session.signIn(~token, ~encryptionHash),
+      currentPage: TeamSelectionPage,
+      session: Session.create(~token, ~encryptionHash),
       teams,
       invitations,
       flags: {

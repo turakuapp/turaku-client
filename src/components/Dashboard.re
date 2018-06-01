@@ -24,31 +24,30 @@ let signOutButton = signingOut =>
 let make = (~appState, ~appSend, _children) => {
   ...component,
   initialState: () => {signingOut: false},
-  reducer: (action, state) =>
+  reducer: (action, _state) =>
     switch (action) {
-    | SignOut => ReasonReact.Update({...state, signingOut: true})
+    | SignOut => ReasonReact.Update({signingOut: true})
     },
-  render: ({state, send}) =>
+  render: ({state}) =>
     <div className="container-fluid">
-
-        <div className="row">
-          <div className="col dashboard__navigation">
-            <Tags appState appSend />
-            <hr />
-            <div> <a href="#"> (str("Teams")) </a> </div>
-            <div> <a href="#"> (str("Users")) </a> </div>
-            <hr />
-            (signOutButton(state.signingOut))
-          </div>
-          <div className="col-10 dashboard__content">
-            <Entries appState appSend />
-            <Users appState appSend />
-          </div>
+      <div className="row">
+        <div className="col dashboard__navigation">
+          <Tags appState appSend />
+          <hr />
+          <div> <a href="#"> (str("Teams")) </a> </div>
+          <div> <a href="#"> (str("Users")) </a> </div>
+          <hr />
+          (signOutButton(state.signingOut))
         </div>
-      </div>,
-      /* {this.haveUnsavedEntries() && ( */
-      /* <SaveBar appState=appState appSend=appSend /> */
-      /* )} */
+        <div className="col-10 dashboard__content">
+          <Entries appState appSend />
+          <Users appState appSend />
+        </div>
+      </div>
+    </div>,
+  /* {this.haveUnsavedEntries() && ( */
+  /* <SaveBar appState=appState appSend=appSend /> */
+  /* )} */
 };
 /* export default class Dashboard extends React.Component {
      constructor(props) {

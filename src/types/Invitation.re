@@ -1,30 +1,22 @@
 type t = {
-  id: int,
+  id,
   invitingTeam,
   invitingUser,
 }
-and invitingTeam = {
-  id: int,
-  name: string,
-}
-and invitingUser = {email: string};
-
-let decodeInvitingTeam = json =>
-  Json.Decode.{
-    id: json |> field("id", int),
-    name: json |> field("name", string),
-  };
-
-let decodeInvitingUser = json =>
-  Json.Decode.{email: json |> field("email", string)};
-
-let decode = json =>
-  Json.Decode.{
-    id: json |> field("id", int),
-    invitingTeam: json |> field("team", decodeInvitingTeam),
-    invitingUser: json |> field("inviting_user", decodeInvitingUser),
-  };
+and invitingTeam = {name: string}
+and invitingUser = {email: string}
+and id = string;
 
 let email = invitation => invitation.invitingUser.email;
 
 let name = invitation => invitation.invitingTeam.name;
+
+let create = (id, ~teamName, ~userEmail) => {
+  id,
+  invitingTeam: {
+    name: teamName,
+  },
+  invitingUser: {
+    email: userEmail,
+  },
+};

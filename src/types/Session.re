@@ -1,6 +1,6 @@
 type credentials = {
-  token: string,
-  encryptionHash: string,
+  token: AccessToken.t,
+  encryptionHash: EncryptionHash.t,
 };
 
 type t =
@@ -12,6 +12,6 @@ let shouldRestore = () : bool => true;
 /* Dom.Storage.sessionStorage */
 let restore = (session: t) => ();
 
-let signIn = (~token, ~encryptionHash) => SignedIn({token, encryptionHash});
+let create = (~token, ~encryptionHash) => SignedIn({token, encryptionHash});
 
-let signOut = () => SignedOut;
+let signedOut = () => SignedOut;

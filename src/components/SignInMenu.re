@@ -41,7 +41,6 @@ module SignInQuery = [%graphql
             incomingInvitations {
               id
               team {
-                id
                 name
               }
               invitingUser {
@@ -104,9 +103,28 @@ let handleSubmit = (appSend, event) => {
        saveSession(~token, ~encryptionHash);
        appSend(
          Turaku.SignedIn(
-           session##token |> Token.create,
-           session##user##teams |> Team.fromJsonArray,
-           session##user##incomingInvitations |> Invitation.fromJsonArray,
+           session##token |> AccessToken.create,
+           session##user##teams
+           |> Array.map(team =>
+                Team.create(
+                  team##id,
+                  team##name,
+                  EncryptedData.create(
+                    team##encryptedPassword##iv,
+                    team##encryptedPassword##ciphertext,
+                  ),
+                )
+              )
+           |> Array.to_list,
+           session##user##incomingInvitations
+           |> Array.map(i =>
+                Invitation.create(
+                  i##id,
+                  ~teamName=i##team##name,
+                  ~userEmail=i##invitingUser##email,
+                )
+              )
+           |> Array.to_list,
            encryptionHash |> EncryptionHash.create,
          ),
        );
@@ -176,55 +194,3 @@ let make = (~appState, ~appSend, _children) => {
       </div>
     </div>,
 };
-/* export default class SignIn extends React.Component {
-     componentWillMount() {
-       if (this.props.appState.justSignedUp) {
-         this.props.setAppState({ justSignedUp: false, signedUp: true });
-       }
-     }
-
-     submit(event) {
-       event.preventDefault();
-       let email = document.getElementById("sign-in-email").value;
-       let password = document.getElementById("sign-in-password").value;
-       let signInService = new SignInService(email, password);
-
-       signInService
-         .signIn()
-         .then(authorization => {
-           console.log("Signed in.");
-           this.props.setAppState(
-             {
-               token: authorization.token,
-               teams: authorization.teams,
-               incomingInvitations: authorization.incomingInvitations,
-               encryptionHash: authorization.encryptionHash
-             },
-             () => {
-               this.setState({ signInComplete: true });
-             }
-           );
-         })
-         .catch(exception => {
-           // Handle invalid credentials / exception.
-           console.log(exception, "Sign in failed.");
-         });
-     }
-
-     justSignedUp() {
-       return (
-         this.props.appState.redirectFrom === "SignUp" &&
-         this.props.appState.redirectTo === "SignIn"
-       );
-     }
-
-     render() {
-       if (this.state.signInComplete === true) {
-         return <Redirect to="/teams" />;
-       }
-
-       return (
-
-       );
-     }
-   } */
