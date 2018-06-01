@@ -1,3 +1,5 @@
+exception AuthenticationFailure(array(string));
+
 let component = ReasonReact.statelessComponent("SignInMenu");
 
 let str = ReasonReact.stringToElement;
@@ -10,7 +12,7 @@ type createSessionResponse = {
   invitations: list(Invitation.t),
 };
 
-module GetAuthenticationSaltConfig = [%graphql
+module GetAuthenticationSaltQuery = [%graphql
   {|
   query($email: String!) {
     user(email: $email) {
@@ -20,7 +22,7 @@ module GetAuthenticationSaltConfig = [%graphql
   |}
 ];
 
-module SignInConfig = [%graphql
+module SignInQuery = [%graphql
   {|
     mutation ($email: String!, $password: String!) {
       createSession(email: $email, password: $password) {
@@ -48,84 +50,20 @@ module SignInConfig = [%graphql
             }
           }
         }
+        errors
       }
     }
   |}
 ];
 
-module Codec = {
-  let encodeEmail = email =>
-    Json.Encode.object_([("email", email |> Json.Encode.string)]);
-  let encodeEmailAndPassword = (~email, ~password) =>
-    Json.Encode.object_([
-      (
-        "session",
-        Json.Encode.object_([
-          ("email", email |> Json.Encode.string),
-          ("password", password |> Json.Encode.string),
-        ]),
-      ),
-    ]);
-  let decodeAuthenticationSalt = json =>
-    json |> Json.Decode.field("salt", Json.Decode.string);
-  let decodeSignInResponse = json =>
-    Json.Decode.{
-      id: json |> field("id", int),
-      token: json |> field("token", string),
-      user: json |> field("user", User.decode),
-      teams: json |> field("teams", list(Team.decode)),
-      invitations:
-        json |> field("incoming_invitations", list(Invitation.decode)),
-    };
-};
-
-module Service = {
-  let loadAuthenticationSalt = (~email) => {
-    let apiRequest =
-      ApiRequest.create(~purpose=ApiRequest.GetAuthenticationSalt);
-    let params = email |> Codec.encodeEmail;
-    ApiRequest.fetch(~apiRequest, ~params)
-    |> Js.Promise.then_(response =>
-         response |> Codec.decodeAuthenticationSalt |> Js.Promise.resolve
-       );
-  };
-  let signInWithHashedPassword = (~email, ~password, ~authenticationSalt) =>
-    HashUtils.hexHash(password, ~salt=authenticationSalt, ())
-    |> Js.Promise.then_(hash => {
-         let apiRequest = ApiRequest.create(~purpose=ApiRequest.SignIn);
-         let params = Codec.encodeEmailAndPassword(~email, ~password=hash);
-         ApiRequest.fetch(~apiRequest, ~params);
-       })
-    |> Js.Promise.then_(encodedResponse =>
-         encodedResponse |> Codec.decodeSignInResponse |> Js.Promise.resolve
-       );
-  /* Save the session in storage to allow it to be restored without signing in again on a page reload. */
-  let saveSession = (~token, ~encryptionHash) => {
-    Dom.Storage.setItem("token", token, Dom.Storage.sessionStorage);
-    Dom.Storage.setItem(
-      "encryptionHash",
-      encryptionHash,
-      Dom.Storage.sessionStorage,
-    );
-  };
-  let signIn = (email: string, password: string) =>
-    loadAuthenticationSalt(~email)
-    |> Js.Promise.then_(authenticationSalt =>
-         signInWithHashedPassword(~email, ~password, ~authenticationSalt)
-       )
-    |> Js.Promise.then_(decodedResponse => {
-         let encryptionSalt = decodedResponse.user |> User.encryptionSalt;
-         HashUtils.hexHash(password, ~salt=encryptionSalt, ())
-         |> Js.Promise.then_(encryptionHash =>
-              Js.Promise.resolve((decodedResponse, encryptionHash))
-            );
-       })
-    |> Js.Promise.then_(responseAndHash => {
-         let (decodedResponse, encryptionHash) = responseAndHash;
-         let token = decodedResponse.token;
-         saveSession(~token, ~encryptionHash);
-         Js.Promise.resolve(responseAndHash);
-       });
+/* Save the session in storage to allow it to be restored without signing in again on a page reload. */
+let saveSession = (~token, ~encryptionHash) => {
+  Dom.Storage.setItem("token", token, Dom.Storage.sessionStorage);
+  Dom.Storage.setItem(
+    "encryptionHash",
+    encryptionHash,
+    Dom.Storage.sessionStorage,
+  );
 };
 
 let handleSubmit = (appSend, event) => {
@@ -133,23 +71,48 @@ let handleSubmit = (appSend, event) => {
   let email = DomUtils.getValueOfInputById("sign-in-form__email");
   let password = DomUtils.getValueOfInputById("sign-in-form__password");
   Js.log(
-    "Calling Service.signIn for " ++ email ++ " with password " ++ password,
+    "Attempting to sign in with email "
+    ++ email
+    ++ " and password "
+    ++ password,
   );
-  let _ =
-    Service.signIn(email, password)
-    |> Js.Promise.then_(responseAndHash => {
-         let (response, encryptionHash) = responseAndHash;
-         appSend(
-           Turaku.SignedIn(
-             response.token,
-             response.teams,
-             response.invitations,
-             encryptionHash,
-           ),
-         );
-         Js.Promise.resolve();
-       });
-  ();
+  /* Fetch the authentication salt to hash the password before attempting to sign in. */
+  GetAuthenticationSaltQuery.make(~email, ())
+  |> Api.sendQuery
+  |> Js.Promise.then_(response => {
+       let salt = response##user##authenticationSalt;
+       HashUtils.hexHash(password, ~salt, ());
+     })
+  |> Js.Promise.then_(hexHash =>
+       SignInQuery.make(~email, ~password=hexHash, ()) |> Api.sendQuery
+     )
+  |> Js.Promise.then_(rawResponse => {
+       let response = rawResponse##createSession;
+       switch (response##session) {
+       | Some(session) =>
+         let encryptionSalt = session##user##encryptionSalt;
+         HashUtils.hexHash(password, ~salt=encryptionSalt, ())
+         |> Js.Promise.then_(encryptionHash =>
+              Js.Promise.resolve((session, encryptionHash))
+            );
+       | None => Js.Promise.reject(AuthenticationFailure(response##errors))
+       };
+     })
+  |> Js.Promise.then_(sessionAndHash => {
+       let (session, encryptionHash) = sessionAndHash;
+       let token = session##token;
+       saveSession(~token, ~encryptionHash);
+       appSend(
+         Turaku.SignedIn(
+           session##token |> Token.create,
+           session##user##teams |> Team.fromJsonArray,
+           session##user##incomingInvitations |> Invitation.fromJsonArray,
+           encryptionHash |> EncryptionHash.create,
+         ),
+       );
+       Js.Promise.resolve();
+     })
+  |> ignore;
 };
 
 let signedUpAlert = (appState: Turaku.state) =>

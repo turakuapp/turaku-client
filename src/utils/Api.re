@@ -16,10 +16,10 @@ let fetchPost = (url, body) =>
     ),
   );
 
-let sendQuery = q =>
+let sendQuery = query =>
   Js.Dict.fromList([
-    ("query", Js.Json.string(q##query)),
-    ("variables", q##variables),
+    ("query", Js.Json.string(query##query)),
+    ("variables", query##variables),
   ])
   |> Js.Json.object_
   |> Js.Json.stringify
@@ -38,7 +38,7 @@ let sendQuery = q =>
   |> Js.Promise.then_(json =>
        switch (Js.Json.decodeObject(json)) {
        | Some(obj) =>
-         Js.Dict.unsafeGet(obj, "data") |> q##parse |> Js.Promise.resolve
+         Js.Dict.unsafeGet(obj, "data") |> query##parse |> Js.Promise.resolve
        | None => Js.Promise.reject(GraphQLError("Response is not an object"))
        }
      );
