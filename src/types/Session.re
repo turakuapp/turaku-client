@@ -1,5 +1,5 @@
 type credentials = {
-  token: AccessToken.t,
+  accessToken: AccessToken.t,
   encryptionHash: EncryptionHash.t,
 };
 
@@ -9,14 +9,22 @@ type t =
 
 let shouldRestore = () : bool => true;
 
-let create = (token, encryptionHash) => SignedIn({token, encryptionHash});
+let create = (accessToken, encryptionHash) =>
+  SignedIn({accessToken, encryptionHash});
 
 let signedOut = () => SignedOut;
 
 /* Save the token in storage to allow it to be restored without signing in again on a page reload. */
-let saveInLocalStorage = (email, token) => {
-  Dom.Storage.setItem("sessionEmail", email, Dom.Storage.sessionStorage);
-  Dom.Storage.setItem("sessionToken", token, Dom.Storage.sessionStorage);
-};
+let saveInLocalStorage = t =>
+  switch (t) {
+  | SignedOut => ()
+  | SignedIn(c) =>
+    Dom.Storage.setItem("token", c.accessToken, Dom.Storage.sessionStorage);
+    Dom.Storage.setItem(
+      "encryptionHash",
+      c.encryptionHash,
+      Dom.Storage.sessionStorage,
+    );
+  };
 
-let attemptRestoration = () => {};
+let attemptRestoration = () => SignedOut;

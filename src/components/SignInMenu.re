@@ -57,7 +57,8 @@ module SignInQuery = [%graphql
 
 let handleSubmit = (appSend, event) => {
   event |> DomUtils.preventEventDefault;
-  let email = DomUtils.getValueOfInputById("sign-in-form__email");
+  let email =
+    DomUtils.getValueOfInputById("sign-in-form__email") |> Email.create;
   let password = DomUtils.getValueOfInputById("sign-in-form__password");
   Js.log(
     "Attempting to sign in with email "
@@ -81,16 +82,18 @@ let handleSubmit = (appSend, event) => {
        | Some(session) =>
          let encryptionSalt = session##user##encryptionSalt;
          HashUtils.hexHash(password, ~salt=encryptionSalt, ())
-         |> Js.Promise.then_(encryptionHash =>
-              Js.Promise.resolve((session, encryptionHash))
-            );
+         |> Js.Promise.then_(hash => {
+              let encryptionHash = hash |> EncryptionHash.create;
+              Js.Promise.resolve((session, encryptionHash));
+            });
        | None => Js.Promise.reject(AuthenticationFailure(response##errors))
        };
      })
   |> Js.Promise.then_(sessionAndHash => {
        let (session, encryptionHash) = sessionAndHash;
        let accessToken = session##token |> AccessToken.create;
-       accessToken |> Session.saveInLocalStorage;
+       Session.create(accessToken, encryptionHash)
+       |> Session.saveInLocalStorage;
        appSend(
          Turaku.SignedIn(
            accessToken,

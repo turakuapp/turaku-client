@@ -6,4 +6,4 @@ let signedOut: unit => t;
 
 let attemptRestoration: unit => t;
 
-let saveInLocalStorage: (string, AccessToken.t) => unit;
+let saveInLocalStorage: t => unit;

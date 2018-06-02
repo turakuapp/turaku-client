@@ -58,7 +58,7 @@ let reducer = (action, state) =>
     ReasonReact.Update({
       ...state,
       currentPage: TeamSelectionPage,
-      session: Session.create(~token, ~encryptionHash),
+      session: Session.create(token, encryptionHash),
       teams,
       invitations,
       flags: {

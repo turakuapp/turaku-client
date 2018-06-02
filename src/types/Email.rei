@@ -1,5 +1,3 @@
-type t;
+type t = string;
 
 let create: string => t;
-
-let toString: t => string;
