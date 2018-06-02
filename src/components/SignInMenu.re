@@ -55,16 +55,6 @@ module SignInQuery = [%graphql
   |}
 ];
 
-/* Save the session in storage to allow it to be restored without signing in again on a page reload. */
-let saveSession = (~token, ~encryptionHash) => {
-  Dom.Storage.setItem("token", token, Dom.Storage.sessionStorage);
-  Dom.Storage.setItem(
-    "encryptionHash",
-    encryptionHash,
-    Dom.Storage.sessionStorage,
-  );
-};
-
 let handleSubmit = (appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let email = DomUtils.getValueOfInputById("sign-in-form__email");
@@ -99,11 +89,11 @@ let handleSubmit = (appSend, event) => {
      })
   |> Js.Promise.then_(sessionAndHash => {
        let (session, encryptionHash) = sessionAndHash;
-       let token = session##token;
-       saveSession(~token, ~encryptionHash);
+       let accessToken = session##token |> AccessToken.create;
+       accessToken |> Session.saveInLocalStorage;
        appSend(
          Turaku.SignedIn(
-           session##token |> AccessToken.create,
+           accessToken,
            session##user##teams
            |> Array.map(team =>
                 Team.create(

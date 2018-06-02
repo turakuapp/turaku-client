@@ -6,7 +6,8 @@ type page =
   | SignUpPage
   | SignInPage
   | DashboardPage(selectable)
-  | TeamSelectionPage;
+  | TeamSelectionPage
+  | LoadingPage;
 
 type action =
   | SignedUp
@@ -16,12 +17,10 @@ type action =
       list(Invitation.t),
       EncryptionHash.t,
     )
-  | Navigate(page);
+  | Navigate(page)
+  | LoadingComplete(Session.t);
 
-type flags = {
-  restorationAttempted: bool,
-  justSignedUp: bool,
-};
+type flags = {justSignedUp: bool};
 
 type teams = list(Team.t);
 
@@ -42,9 +41,8 @@ type state = {
 
 let initialState = {
   session: Session.signedOut(),
-  currentPage: SignInPage,
+  currentPage: LoadingPage,
   flags: {
-    restorationAttempted: true,
     justSignedUp: false,
   },
   invitations: [],
@@ -64,7 +62,6 @@ let reducer = (action, state) =>
       teams,
       invitations,
       flags: {
-        ...state.flags,
         justSignedUp: false,
       },
     })
@@ -73,10 +70,10 @@ let reducer = (action, state) =>
       ...state,
       currentPage: SignInPage,
       flags: {
-        ...state.flags,
         justSignedUp: true,
       },
     })
   | Navigate(destination) =>
     ReasonReact.Update({...state, currentPage: destination})
+  | LoadingComplete(session) => ReasonReact.Update({...state, session})
   };

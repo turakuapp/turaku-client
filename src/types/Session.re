@@ -9,9 +9,14 @@ type t =
 
 let shouldRestore = () : bool => true;
 
-/* Dom.Storage.sessionStorage */
-let restore = (session: t) => ();
-
-let create = (~token, ~encryptionHash) => SignedIn({token, encryptionHash});
+let create = (token, encryptionHash) => SignedIn({token, encryptionHash});
 
 let signedOut = () => SignedOut;
+
+/* Save the token in storage to allow it to be restored without signing in again on a page reload. */
+let saveInLocalStorage = (email, token) => {
+  Dom.Storage.setItem("sessionEmail", email, Dom.Storage.sessionStorage);
+  Dom.Storage.setItem("sessionToken", token, Dom.Storage.sessionStorage);
+};
+
+let attemptRestoration = () => {};
