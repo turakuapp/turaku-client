@@ -24,7 +24,7 @@ module CreateUserQuery = [%graphql
 let gotoSignIn = (appSend, _event) =>
   appSend(Turaku.(Navigate(SignInPage)));
 
-let handleSignUp = (appSend, event) => {
+let handleSignUp = ({Turaku.session}, appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
@@ -40,12 +40,12 @@ let handleSignUp = (appSend, event) => {
          ~authenticationSalt,
          (),
        )
-       |> Api.sendQuery
+       |> Api.sendQuery(session)
      )
   |> Js.Promise.then_(response => {
        let errors = response##createUser##errors;
        if (errors |> Js.Array.length == 0) {
-         appSend(Turaku.SignedUp);
+         appSend(Turaku.SignUp);
        } else {
          Js.log(Js.Array.joinWith(", ", errors));
        };
@@ -65,7 +65,7 @@ let make = (~appState, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          <form onSubmit=(handleSignUp(appSend))>
+          <form onSubmit=(handleSignUp(appState, appSend))>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input

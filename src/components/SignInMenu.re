@@ -55,7 +55,7 @@ module SignInQuery = [%graphql
   |}
 ];
 
-let handleSubmit = (appSend, event) => {
+let handleSubmit = ({Turaku.session}, appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let email =
     DomUtils.getValueOfInputById("sign-in-form__email") |> Email.create;
@@ -68,13 +68,14 @@ let handleSubmit = (appSend, event) => {
   );
   /* Fetch the authentication salt to hash the password before attempting to sign in. */
   GetAuthenticationSaltQuery.make(~email, ())
-  |> Api.sendQuery
+  |> Api.sendQuery(session)
   |> Js.Promise.then_(response => {
        let salt = response##user##authenticationSalt;
        HashUtils.hexHash(password, ~salt, ());
      })
   |> Js.Promise.then_(hexHash =>
-       SignInQuery.make(~email, ~password=hexHash, ()) |> Api.sendQuery
+       SignInQuery.make(~email, ~password=hexHash, ())
+       |> Api.sendQuery(session)
      )
   |> Js.Promise.then_(rawResponse => {
        let response = rawResponse##createSession;
@@ -95,7 +96,7 @@ let handleSubmit = (appSend, event) => {
        Session.create(accessToken, encryptionHash)
        |> Session.saveInLocalStorage;
        appSend(
-         Turaku.SignedIn(
+         Turaku.SignIn(
            accessToken,
            session##user##teams
            |> Array.map(team =>
@@ -149,7 +150,7 @@ let make = (~appState, ~appSend, _children) => {
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
           (signedUpAlert(appState))
-          <form onSubmit=(handleSubmit(appSend))>
+          <form onSubmit=(handleSubmit(appState, appSend))>
             <div className="form-group">
               <label htmlFor="sign-in-form__email">
                 (str("Email address"))

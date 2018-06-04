@@ -12,7 +12,9 @@ let shouldRestore = () : bool => true;
 let create = (accessToken, encryptionHash) =>
   SignedIn({accessToken, encryptionHash});
 
-let signedOut = () => SignedOut;
+let signOut = () => SignedOut;
+
+let signedOut = t => t == SignedOut;
 
 /** Handles conversion a set of credentials to and from JSON, for compatibility with local storage. */
 module Codec = {
@@ -50,3 +52,13 @@ let attemptRestoration = () =>
     let credentials = c |> Json.parseOrRaise |> Codec.decode;
     SignedIn(credentials);
   };
+
+let getCredentials = t =>
+  switch (t) {
+  | SignedOut => None
+  | SignedIn(credentials) => Some(credentials)
+  };
+
+let getAccessToken = c => c.accessToken;
+
+let getEncryptionHash = c => c.encryptionHash;

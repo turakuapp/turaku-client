@@ -10,15 +10,15 @@ type page =
   | LoadingPage;
 
 type action =
-  | SignedUp
-  | SignedIn(
+  | SignUp
+  | SignIn(
       AccessToken.t,
       list(Team.t),
       list(Invitation.t),
       EncryptionHash.t,
     )
   | Navigate(page)
-  | LoadingComplete(Session.t);
+  | SkipLoading;
 
 type flags = {justSignedUp: bool};
 
@@ -40,7 +40,7 @@ type state = {
 };
 
 let initialState = {
-  session: Session.signedOut(),
+  session: Session.signOut(),
   currentPage: LoadingPage,
   flags: {
     justSignedUp: false,
@@ -52,9 +52,11 @@ let initialState = {
   unsavedEntries: [],
 };
 
+/* TODO: COMPLICATED REFACTOR: The SignIn action accepts token and encryption hash, when it should be accepting the session, BUT only a signed in session. */
+/* https://stackoverflow.com/questions/24653301/accepting-only-one-variant-of-sum-type-as-ocaml-function-parameter */
 let reducer = (action, state) =>
   switch (action) {
-  | SignedIn(token, teams, invitations, encryptionHash) =>
+  | SignIn(token, teams, invitations, encryptionHash) =>
     ReasonReact.Update({
       ...state,
       currentPage: TeamSelectionPage,
@@ -65,7 +67,7 @@ let reducer = (action, state) =>
         justSignedUp: false,
       },
     })
-  | SignedUp =>
+  | SignUp =>
     ReasonReact.Update({
       ...state,
       currentPage: SignInPage,
@@ -75,5 +77,5 @@ let reducer = (action, state) =>
     })
   | Navigate(destination) =>
     ReasonReact.Update({...state, currentPage: destination})
-  | LoadingComplete(session) => ReasonReact.Update({...state, session})
+  | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
   };
