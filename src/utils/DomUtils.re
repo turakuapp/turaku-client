@@ -1,12 +1,6 @@
 [@bs.send]
 external preventEventDefault : ReactEventRe.Form.t => unit = "preventDefault";
 
-let unwrapUnsafely = data =>
-  switch (data) {
-  | Some(v) => v
-  | None => raise(Invalid_argument("unwrapUnsafely called on None"))
-  };
-
 let getValueOfInputById = id => {
   let inputElement =
     Webapi.Dom.document |> Webapi.Dom.Document.getElementById(id);
@@ -14,7 +8,7 @@ let getValueOfInputById = id => {
   | Some(element) =>
     element
     |> Webapi.Dom.Element.asHtmlElement
-    |> unwrapUnsafely
+    |> Belt.Option.getExn
     |> Webapi.Dom.HtmlElement.value
   | None => ""
   };

@@ -5,6 +5,8 @@ type t = {
 }
 and id = string;
 
-let name = team => team.name;
+let getName = t => t.name;
+
+let getId = t => t.id;
 
 let create = (id, name, encryptedPassword) => {id, name, encryptedPassword};

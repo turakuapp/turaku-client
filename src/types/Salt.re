@@ -1,7 +1,11 @@
+type t = string;
+
 let saltPossibleCharacters = "1234567890abcdef";
 
+let fromString = (s: string) : t => s;
+
 /* TODO: This uses a potentially insecure randomization method. Use cryptographically secure alternative in production. */
-let create = length => {
+let create = length : t => {
   let rec aux = (salt, remainingLength) =>
     if (remainingLength > 0) {
       let randomPosition = Random.int(String.length(saltPossibleCharacters));
@@ -13,3 +17,5 @@ let create = length => {
     };
   aux("", length);
 };
+
+let empty = () : t => "";

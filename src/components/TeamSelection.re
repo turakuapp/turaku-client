@@ -2,11 +2,13 @@
 type state = {
   createFormVisible: bool,
   teamPassword: string,
+  teamName: string,
 };
 
 type action =
   | ToggleCreateForm
-  | UpdateTeamPassword(string);
+  | UpdateTeamPassword(string)
+  | UpdateTeamName(string);
 
 let str = ReasonReact.stringToElement;
 
@@ -41,11 +43,11 @@ let teams = (appState: Turaku.state, appSend) =>
           (
             appState.teams
             |> List.map((team: Team.t) =>
-                 <li className="mb-1">
+                 <li key=(team |> Team.getId) className="mb-1">
                    <button
                      onClick=(selectTeam(team, appSend))
                      className="btn btn-sm btn-outline-dark">
-                     (str(team |> Team.name))
+                     (str(team |> Team.getName))
                    </button>
                  </li>
                )
@@ -70,11 +72,19 @@ let createTeamButton = (state, send) =>
     </button>;
   };
 
-let createTeam = event => event |> DomUtils.preventEventDefault;
+let createTeam = event => {
+  event |> DomUtils.preventEventDefault;
+  Js.log("Create a team! Whoo!");
+};
 
 let updateTeamPassword = (send, _event) => {
   let password = DomUtils.getValueOfInputById("teams__form-password");
   send(UpdateTeamPassword(password));
+};
+
+let updateTeamName = (send, _event) => {
+  let name = DomUtils.getValueOfInputById("teams__form-name");
+  send(UpdateTeamName(name));
 };
 
 let createTeamForm = (state, send) =>
@@ -86,6 +96,7 @@ let createTeamForm = (state, send) =>
           className="form-control"
           id="teams__form-name"
           placeholder="Enter your team's name"
+          onChange=(updateTeamName(send))
         />
         <small id="teams__form-name-help" className="form-text text-muted">
           (str("You can add team members later."))
@@ -137,9 +148,9 @@ let createTeamForm = (state, send) =>
 let make = (~appState, ~appSend, _children) => {
   ...component,
   initialState: () => {
-    /* TODO: Start with a random new value for teamPassword. See showCreateForm function in old code below. */
     createFormVisible: false,
-    teamPassword: "",
+    teamPassword: TeamPassword.create() |> TeamPassword.toString,
+    teamName: "",
   },
   reducer: (action, state) =>
     switch (action) {
@@ -151,6 +162,7 @@ let make = (~appState, ~appSend, _children) => {
     | UpdateTeamPassword(password) =>
       /* TODO: Hash the password every time it is updated. See old code below in function updateTeamPassword. */
       ReasonReact.Update({...state, teamPassword: password})
+    | UpdateTeamName(name) => ReasonReact.Update({...state, teamName: name})
     },
   render: ({state, send}) =>
     <div className="container">

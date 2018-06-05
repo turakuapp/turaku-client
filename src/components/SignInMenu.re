@@ -70,8 +70,8 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
   GetAuthenticationSaltQuery.make(~email, ())
   |> Api.sendQuery(session)
   |> Js.Promise.then_(response => {
-       let salt = response##user##authenticationSalt;
-       HashUtils.hexHash(password, ~salt, ());
+       let salt = response##user##authenticationSalt |> Salt.fromString;
+       Hash.create(password, salt);
      })
   |> Js.Promise.then_(hexHash =>
        SignInQuery.make(~email, ~password=hexHash, ())
@@ -82,7 +82,7 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
        switch (response##session) {
        | Some(session) =>
          let encryptionSalt = session##user##encryptionSalt;
-         HashUtils.hexHash(password, ~salt=encryptionSalt, ())
+         Hash.create(password, encryptionSalt)
          |> Js.Promise.then_(hash => {
               let encryptionHash = hash |> EncryptionHash.create;
               Js.Promise.resolve((session, encryptionHash));
