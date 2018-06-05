@@ -1,18 +1,20 @@
-type t = Uint8Array.t;
+type t = UnsignedByteArray.t;
 
 let create = () : t => {
-  let array = Uint8Array.createWithLength(32);
+  let array = UnsignedByteArray.createWithLength(32);
   /* getRandomValues modifies the array, and so returns unit. */
-  array |> Uint8Array.getRandomValues;
+  array |> UnsignedByteArray.getRandomValues;
   array;
 };
 
-let toString = (t: t) => t |> Uint8Array.toBase64String;
+let toString = (t: t) => t |> UnsignedByteArray.toBase64String;
 
 let fromString = s : Js.Promise.t(t) =>
   s
-  |> Uint8Array.encode
-  |> Uint8Array.digest("SHA-256")
+  |> UnsignedByteArray.encode
+  |> UnsignedByteArray.digest("SHA-256")
   |> Js.Promise.then_(arrayBuffer =>
-       arrayBuffer |> Uint8Array.createFromArrayBuffer |> Js.Promise.resolve
+       arrayBuffer
+       |> UnsignedByteArray.createFromArrayBuffer
+       |> Js.Promise.resolve
      );
