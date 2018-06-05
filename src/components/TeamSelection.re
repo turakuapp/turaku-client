@@ -1,13 +1,13 @@
 /* import "./teams.css"; */
 type state = {
   createFormVisible: bool,
-  teamPassword: string,
+  teamPassword: TeamPassword.t,
   teamName: string,
 };
 
 type action =
   | ToggleCreateForm
-  | UpdateTeamPassword(string)
+  | UpdateTeamPassword(TeamPassword.t)
   | UpdateTeamName(string);
 
 let str = ReasonReact.stringToElement;
@@ -77,10 +77,14 @@ let createTeam = event => {
   Js.log("Create a team! Whoo!");
 };
 
-let updateTeamPassword = (send, _event) => {
-  let password = DomUtils.getValueOfInputById("teams__form-password");
-  send(UpdateTeamPassword(password));
-};
+let updateTeamPassword = (send, _event) =>
+  DomUtils.getValueOfInputById("teams__form-password")
+  |> TeamPassword.fromString
+  |> Js.Promise.then_(password => {
+       send(UpdateTeamPassword(password));
+       Js.Promise.resolve();
+     })
+  |> ignore;
 
 let updateTeamName = (send, _event) => {
   let name = DomUtils.getValueOfInputById("teams__form-name");
@@ -107,7 +111,7 @@ let createTeamForm = (state, send) =>
         <input
           className="form-control"
           id="teams__form-password"
-          value=state.teamPassword
+          value=(state.teamPassword |> TeamPassword.toString)
           onChange=(updateTeamPassword(send))
         />
         <small id="teams__form-password-help" className="form-text text-muted">
@@ -149,7 +153,7 @@ let make = (~appState, ~appSend, _children) => {
   ...component,
   initialState: () => {
     createFormVisible: false,
-    teamPassword: TeamPassword.create() |> TeamPassword.toString,
+    teamPassword: TeamPassword.create(),
     teamName: "",
   },
   reducer: (action, state) =>
