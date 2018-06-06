@@ -11,6 +11,7 @@ module InitializationVector = {
 
 module CipherText = {
   type t = ArrayBuffer.t;
+  let create = (t: ArrayBuffer.t) : t => t;
   let toString = (t: t) =>
     t |> UnsignedByteArray.fromArrayBuffer |> UnsignedByteArray.toBase64String;
   let fromString = s : t => s |> UnsignedByteArray.fromBase64String;
@@ -27,38 +28,41 @@ type encryptionAlgorithm = {
   "iv": InitializationVector.t,
 };
 
-[@bs.val] [@bs.scope ("window", "crypto", "subtle", "encrypt")]
+[@bs.val] [@bs.scope ("window", "crypto", "subtle")]
 external subtleEncrypt :
   (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
-  CipherText.t =
+  Js.Promise.t(CipherText.t) =
   "encrypt";
 
-[@bs.val] [@bs.scope ("window", "crypto", "subtle", "encrypt")]
-external subtleDecrypt : (
-  encryptionAlgorithm,
-  CryptographicKey.t,
-  UnsignedByteArray.t,
-) =
+[@bs.val] [@bs.scope ("window", "crypto", "subtle")]
+external subtleDecrypt :
+  (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
+  Js.Promise.t(string) =
   "decrypt";
 
 type encryptionKey =
   | EncryptionHashAsKey(EncryptionHash.t)
   | TeamPasswordAsKey(TeamPassword.t);
 
-let encrypt = (k, s) : t => {
-  let cryptoKey =
+let encrypt = (k, s) => {
+  let iv = InitializationVector.create();
+  let algorithm: encryptionAlgorithm = {"name": "AES-CBC", "iv": iv};
+  (
     switch (k) {
     | EncryptionHashAsKey(unsignedByteArray)
     | TeamPasswordAsKey(unsignedByteArray) =>
-      CryptographicKey.create(unsignedByteArray)
-    };
-  let iv = InitializationVector.create();
-  let algorithm: encryptionAlgorithm = {"name": "AES-CBC", "iv": iv};
-  {
-    iv,
-    ciphertext:
-      s |> UnsignedByteArray.encode |> subtleEncrypt(algorithm, cryptoKey),
-  };
+      unsignedByteArray
+      |> CryptographicKey.create
+      |> Js.Promise.then_(cryptoKey =>
+           s
+           |> UnsignedByteArray.encode
+           |> subtleEncrypt(algorithm, cryptoKey)
+         )
+    }
+  )
+  |> Js.Promise.then_(ciphertext =>
+       {iv, ciphertext: ciphertext |> CipherText.create} |> Js.Promise.resolve
+     );
 };
 
 let decrypt = (k, t) : string => "Hello";

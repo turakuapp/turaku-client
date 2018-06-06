@@ -9,6 +9,11 @@ let create = () : t => {
 
 let toString = (t: t) => t |> UnsignedByteArray.toBase64String;
 
+/**
+ * TODO: If the length of string is less than 16, create a random value instead
+ * of deriving from it. This is to protect against the user inputting single
+ * values, removing whole text, etc.
+ */
 let recreate = s : Js.Promise.t(t) =>
   s
   |> UnsignedByteArray.encode

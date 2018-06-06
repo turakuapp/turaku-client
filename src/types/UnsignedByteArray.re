@@ -17,6 +17,7 @@ external fromBase64String : string => t = "toByteArray";
 [@bs.val] [@bs.scope ("window", "crypto")]
 external getRandomValues : t => unit = "getRandomValues";
 
+/* TODO: Move digest into ArrayBuffer module */
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
 external digest : (string, t) => Js.Promise.t(ArrayBuffer.t) = "";
 

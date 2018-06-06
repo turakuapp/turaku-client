@@ -18,7 +18,8 @@ type action =
       EncryptionHash.t,
     )
   | Navigate(page)
-  | SkipLoading;
+  | SkipLoading
+  | CreateTeam(Team.t);
 
 type flags = {justSignedUp: bool};
 
@@ -78,4 +79,10 @@ let reducer = (action, state) =>
   | Navigate(destination) =>
     ReasonReact.Update({...state, currentPage: destination})
   | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
+  | CreateTeam(team) =>
+    ReasonReact.Update({
+      ...state,
+      teams: [team, ...state.teams],
+      currentTeam: Some(team),
+    })
   };

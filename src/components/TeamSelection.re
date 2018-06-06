@@ -74,17 +74,18 @@ let createTeamButton = (state, send) =>
 
 module CreateTeamQuery = [%graphql
   {|
-  mutation($email: String! $iv: String!, $ciphertext: String!) {
-    createTeam(email: $email, encryptedPassword: {iv: $iv, ciphertext: $ciphertext}) {
+  mutation($name: String! $iv: String!, $ciphertext: String!) {
+    createTeam(name: $name, encryptedPassword: {iv: $iv, ciphertext: $ciphertext}) {
       team {
         id
       }
+      errors
     }
   }
   |}
 ];
 
-let createTeam = (state, event) => {
+let createTeam = ({Turaku.session}, appSend, state, event) => {
   event |> DomUtils.preventEventDefault;
   Js.log(
     "Creating a team with name "
@@ -92,6 +93,46 @@ let createTeam = (state, event) => {
     ++ " and password (B64) "
     ++ (state.teamPassword |> TeamPassword.toString),
   );
+  let encryptionKey =
+    EncryptedData.EncryptionHashAsKey(
+      session
+      |> Session.getCredentials
+      |> Belt.Option.getExn
+      |> Session.getEncryptionHash,
+    );
+  EncryptedData.encrypt(
+    encryptionKey,
+    state.teamPassword |> TeamPassword.toString,
+  )
+  |> Js.Promise.then_((encryptedData: EncryptedData.t) =>
+       CreateTeamQuery.make(
+         ~name=state.teamName,
+         ~iv=encryptedData.iv |> EncryptedData.InitializationVector.toString,
+         ~ciphertext=
+           encryptedData.ciphertext |> EncryptedData.CipherText.toString,
+         (),
+       )
+       |> Api.sendQuery(session)
+       |> Js.Promise.then_(response =>
+            Js.Promise.resolve((response, encryptedData))
+          )
+     )
+  |> Js.Promise.then_(responseAndEncryptedData => {
+       let (response, encryptedData) = responseAndEncryptedData;
+       let team = response##createTeam##team;
+       switch (team) {
+       | None =>
+         Js.log2(
+           "Something went wrong when trying to create a team. Errors: ",
+           response##createTeam##errors |> Js.Array.joinWith(", "),
+         )
+       | Some(t) =>
+         let team = Team.create(t##id, state.teamName, encryptedData);
+         appSend(Turaku.CreateTeam(team));
+       };
+       Js.Promise.resolve();
+     })
+  |> ignore;
 };
 
 let updateTeamPassword = (send, _event) =>
@@ -108,9 +149,9 @@ let updateTeamName = (send, _event) => {
   send(UpdateTeamName(name));
 };
 
-let createTeamForm = (state, send) =>
+let createTeamForm = (appState, appSend, state, send) =>
   if (state.createFormVisible) {
-    <form onSubmit=(createTeam(state))>
+    <form onSubmit=(createTeam(appState, appSend, state))>
       <div className="form-group">
         <label htmlFor="teams__form-name"> (str("Name of your team")) </label>
         <input
@@ -194,7 +235,7 @@ let make = (~appState, ~appSend, _children) => {
           (invitations(appState, appSend))
           (teams(appState, appSend))
           (createTeamButton(state, send))
-          (createTeamForm(state, send))
+          (createTeamForm(appState, appSend, state, send))
         </div>
       </div>
     </div>,
