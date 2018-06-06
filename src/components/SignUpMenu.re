@@ -31,12 +31,12 @@ let handleSignUp = ({Turaku.session}, appSend, event) => {
   let password = DomUtils.getValueOfInputById("sign-up-form__password");
   let authenticationSalt = Salt.create(64);
   /* Hash the password with the newly generated salt before using it to register an account. */
-  Hash.create(password, authenticationSalt)
-  |> Js.Promise.then_(hexHash =>
+  AuthenticationHash.create(password, authenticationSalt)
+  |> Js.Promise.then_(authenticationHash =>
        CreateUserQuery.make(
          ~name,
          ~email,
-         ~password=hexHash,
+         ~password=authenticationHash,
          ~authenticationSalt,
          (),
        )

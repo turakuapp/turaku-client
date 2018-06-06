@@ -71,10 +71,10 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
   |> Api.sendQuery(session)
   |> Js.Promise.then_(response => {
        let salt = response##user##authenticationSalt |> Salt.fromString;
-       Hash.create(password, salt);
+       AuthenticationHash.create(password, salt);
      })
-  |> Js.Promise.then_(hexHash =>
-       SignInQuery.make(~email, ~password=hexHash, ())
+  |> Js.Promise.then_(authenticationHash =>
+       SignInQuery.make(~email, ~password=authenticationHash, ())
        |> Api.sendQuery(session)
      )
   |> Js.Promise.then_(rawResponse => {
@@ -82,11 +82,10 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
        switch (response##session) {
        | Some(session) =>
          let encryptionSalt = session##user##encryptionSalt;
-         Hash.create(password, encryptionSalt)
-         |> Js.Promise.then_(hash => {
-              let encryptionHash = hash |> EncryptionHash.create;
-              Js.Promise.resolve((session, encryptionHash));
-            });
+         EncryptionHash.create(password, encryptionSalt)
+         |> Js.Promise.then_(encryptionHash =>
+              Js.Promise.resolve((session, encryptionHash))
+            );
        | None => Js.Promise.reject(AuthenticationFailure(response##errors))
        };
      })
@@ -104,8 +103,10 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
                   team##id,
                   team##name,
                   EncryptedData.create(
-                    team##encryptedPassword##iv,
-                    team##encryptedPassword##ciphertext,
+                    team##encryptedPassword##iv
+                    |> EncryptedData.InitializationVector.fromString,
+                    team##encryptedPassword##ciphertext
+                    |> EncryptedData.CipherText.fromString,
                   ),
                 )
               )
@@ -119,7 +120,7 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
                 )
               )
            |> Array.to_list,
-           encryptionHash |> EncryptionHash.create,
+           encryptionHash,
          ),
        );
        Js.Promise.resolve();

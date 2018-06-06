@@ -22,14 +22,17 @@ module Codec = {
     Json.Encode.(
       object_([
         ("accessToken", c.accessToken |> string),
-        ("encryptionHash", c.encryptionHash |> string),
+        (
+          "encryptionHash",
+          c.encryptionHash |> EncryptionHash.toString |> string,
+        ),
       ])
     );
   let decode = json =>
     Json.Decode.{
       accessToken: json |> field("accessToken", string) |> AccessToken.create,
       encryptionHash:
-        json |> field("encryptionHash", string) |> EncryptionHash.create,
+        json |> field("encryptionHash", string) |> EncryptionHash.fromString,
     };
 };
 

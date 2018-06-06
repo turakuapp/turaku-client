@@ -52,8 +52,10 @@ let make = (~appState, ~appSend, _children) => {
                     team##id,
                     team##name,
                     EncryptedData.create(
-                      team##encryptedPassword##iv,
-                      team##encryptedPassword##ciphertext,
+                      team##encryptedPassword##iv
+                      |> EncryptedData.InitializationVector.fromString,
+                      team##encryptedPassword##ciphertext
+                      |> EncryptedData.CipherText.fromString,
                     ),
                   )
                 )

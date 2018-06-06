@@ -72,14 +72,31 @@ let createTeamButton = (state, send) =>
     </button>;
   };
 
-let createTeam = event => {
+module CreateTeamQuery = [%graphql
+  {|
+  mutation($email: String! $iv: String!, $ciphertext: String!) {
+    createTeam(email: $email, encryptedPassword: {iv: $iv, ciphertext: $ciphertext}) {
+      team {
+        id
+      }
+    }
+  }
+  |}
+];
+
+let createTeam = (state, event) => {
   event |> DomUtils.preventEventDefault;
-  Js.log("Create a team! Whoo!");
+  Js.log(
+    "Creating a team with name "
+    ++ state.teamName
+    ++ " and password (B64) "
+    ++ (state.teamPassword |> TeamPassword.toString),
+  );
 };
 
 let updateTeamPassword = (send, _event) =>
   DomUtils.getValueOfInputById("teams__form-password")
-  |> TeamPassword.fromString
+  |> TeamPassword.recreate
   |> Js.Promise.then_(password => {
        send(UpdateTeamPassword(password));
        Js.Promise.resolve();
@@ -93,10 +110,11 @@ let updateTeamName = (send, _event) => {
 
 let createTeamForm = (state, send) =>
   if (state.createFormVisible) {
-    <form onSubmit=createTeam>
+    <form onSubmit=(createTeam(state))>
       <div className="form-group">
         <label htmlFor="teams__form-name"> (str("Name of your team")) </label>
         <input
+          required=(true |> Js.Boolean.to_js_boolean)
           className="form-control"
           id="teams__form-name"
           placeholder="Enter your team's name"
@@ -109,6 +127,7 @@ let createTeamForm = (state, send) =>
       <div className="form-group">
         <label htmlFor="teams__form-password"> (str("Team Password")) </label>
         <input
+          required=(true |> Js.Boolean.to_js_boolean)
           className="form-control"
           id="teams__form-password"
           value=(state.teamPassword |> TeamPassword.toString)

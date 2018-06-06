@@ -9,12 +9,10 @@ let create = () : t => {
 
 let toString = (t: t) => t |> UnsignedByteArray.toBase64String;
 
-let fromString = s : Js.Promise.t(t) =>
+let recreate = s : Js.Promise.t(t) =>
   s
   |> UnsignedByteArray.encode
   |> UnsignedByteArray.digest("SHA-256")
   |> Js.Promise.then_(arrayBuffer =>
-       arrayBuffer
-       |> UnsignedByteArray.createFromArrayBuffer
-       |> Js.Promise.resolve
+       arrayBuffer |> UnsignedByteArray.fromArrayBuffer |> Js.Promise.resolve
      );
