@@ -30,9 +30,11 @@ let invitations = (appState: Turaku.state, appSend) =>
     <span />;
   };
 
-let selectTeam = (team, appSend, _event) =>
+let selectTeam = (team, appSend, _event) => {
   /* TODO: See how to select a team with old selectTeam function below. */
-  Js.log2("Select this team: ", team);
+  Js.log2("Selecting this team: ", team);
+  appSend(Turaku.SelectTeam(team));
+};
 
 let teams = (appState: Turaku.state, appSend) =>
   if (appState.teams |> List.length > 0) {
@@ -240,109 +242,3 @@ let make = (~appState, ~appSend, _children) => {
       </div>
     </div>,
 };
-/* export default class Teams extends React.Component {
-     constructor(props) {
-       !!! EXTRACTED !!!
-     }
-
-     async selectTeam(team) {
-       // Decrypt the password and store that now that a team has been selected.
-       let password = await new CryptoService(
-         this.props.appState.encryptionHash
-       ).decrypt(team.encrypted_password);
-
-       let decryptedTeam = _.clone(team);
-       delete decryptedTeam.encrypted_password;
-       decryptedTeam.password = password;
-
-       this.props.setAppState({ team: decryptedTeam }, () => {
-         this.setState({ teamSelected: true }, () => {
-           // Store the team in session storage as well, so that when reloading,
-           // it can be automatically set as selected team.
-           sessionStorage.setItem("team", JSON.stringify(decryptedTeam));
-         });
-       });
-     }
-
-     currentTeams() {
-       !!! EXTRACTED !!!
-     }
-
-     createTeam(event) {
-       event.preventDefault();
-
-       let createService = new CreateService(
-         this.props.appState.token,
-         this.props.appState.encryptionHash
-       );
-
-       let name = document.getElementById("teams__form-name").value;
-       let that = this;
-
-       createService
-         .create(name, this.state.teamPassword)
-         .then(team => {
-           console.log("Created team.");
-
-           let updatedTeams = _.cloneDeep(that.props.appState.teams);
-           updatedTeams.push(team);
-
-           that.props.setAppState({ teams: updatedTeams }, () => {
-             that.setState({ createFormVisible: false });
-           });
-         })
-         .catch(exception => {
-           // Handle invalid credentials / exception.
-           console.log(exception, "Team creation failed.");
-         });
-     }
-
-     async updateTeamPassword(event) {
-       if (_.isObject(event)) {
-         console.log(
-           "Hashing " + event.target.value + " to get new team password..."
-         );
-
-         const updatedPassword = await new TeamPasswordService().updatePassword(
-           event.target.value
-         );
-
-         console.log("Updated team password is " + updatedPassword);
-
-         this.setState({ teamPassword: updatedPassword });
-       }
-     }
-
-     createForm() {
-       !!! EXTRACTED !!!
-     }
-
-     showCreateForm() {
-       this.setState({
-         createFormVisible: true,
-         teamPassword: new TeamPasswordService().newPassword()
-       });
-     }
-
-     hideCreateForm() {
-       this.setState({ createFormVisible: false });
-     }
-
-     incomingInvitations() {
-       !!! EXTRACTED !!!
-     }
-
-     render() {
-       if (!_.isArray(this.props.appState.teams)) {
-         return <Redirect to="/sign_in" />;
-       }
-
-       if (this.state.teamSelected) {
-         return <Redirect to="/dash" />;
-       }
-
-       return (
-         !!! EXTRACTED !!!
-       );
-     }
-   } */

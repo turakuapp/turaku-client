@@ -12,9 +12,12 @@ let shouldRestore = () : bool => true;
 let create = (accessToken, encryptionHash) =>
   SignedIn({accessToken, encryptionHash});
 
-let signOut = () => SignedOut;
+let signOut = (_t: t) => {
+  Dom.Storage.removeItem("credentials", Dom.Storage.sessionStorage);
+  SignedOut;
+};
 
-let signedOut = t => t == SignedOut;
+let signedOut = () => SignedOut;
 
 /** Handles conversion a set of credentials to and from JSON, for compatibility with local storage. */
 module Codec = {

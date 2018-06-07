@@ -1,4 +1,5 @@
-/* import "./dashboard.css"; */
+[%bs.raw {|require("./dashboard.css")|}];
+
 type state = {signingOut: bool};
 
 let str = ReasonReact.stringToElement;
@@ -8,27 +9,18 @@ type action =
 
 let component = ReasonReact.reducerComponent("Dashboard");
 
-let signOut = _event => () /* Sign out, somehow? */;
-
-let signOutButton = signingOut =>
-  if (signingOut) {
-    <button className="btn btn-secondary btn-sm">
-      (str("Signing out..."))
-    </button>;
-  } else {
-    <button className="btn btn-secondary btn-sm" onClick=signOut>
-      (str("Sign Out"))
-    </button>;
-  };
-
 let make = (~appState, ~appSend, _children) => {
   ...component,
   initialState: () => {signingOut: false},
   reducer: (action, _state) =>
     switch (action) {
-    | SignOut => ReasonReact.Update({signingOut: true})
+    | SignOut =>
+      ReasonReact.UpdateWithSideEffects(
+        {signingOut: true},
+        (_self => appSend(Turaku.SignOut)),
+      )
     },
-  render: ({state}) =>
+  render: ({state, send}) =>
     <div className="container-fluid">
       <div className="row">
         <div className="col dashboard__navigation">
@@ -37,12 +29,12 @@ let make = (~appState, ~appSend, _children) => {
           <div> <a href="#"> (str("Teams")) </a> </div>
           <div> <a href="#"> (str("Users")) </a> </div>
           <hr />
-          (signOutButton(state.signingOut))
+          <SignOutButton appSend appState />
         </div>
         <div className="col-10 dashboard__content">
-          <Entries appState appSend />
-          <Users appState appSend />
-        </div>
+          /* <Entries appState appSend />
+             <Users appState appSend /> */
+           <span /> </div>
       </div>
     </div>,
   /* {this.haveUnsavedEntries() && ( */

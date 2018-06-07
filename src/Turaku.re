@@ -19,7 +19,9 @@ type action =
     )
   | Navigate(page)
   | SkipLoading
-  | CreateTeam(Team.t);
+  | CreateTeam(Team.t)
+  | SelectTeam(Team.t)
+  | SignOut;
 
 type flags = {justSignedUp: bool};
 
@@ -41,7 +43,7 @@ type state = {
 };
 
 let initialState = {
-  session: Session.signOut(),
+  session: Session.signedOut(),
   currentPage: LoadingPage,
   flags: {
     justSignedUp: false,
@@ -79,10 +81,24 @@ let reducer = (action, state) =>
   | Navigate(destination) =>
     ReasonReact.Update({...state, currentPage: destination})
   | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
+  | SelectTeam(team) =>
+    ReasonReact.Update({
+      ...state,
+      currentTeam: Some(team),
+      currentPage: DashboardPage(NothingSelected),
+    })
   | CreateTeam(team) =>
     ReasonReact.Update({
       ...state,
       teams: [team, ...state.teams],
       currentTeam: Some(team),
+      currentPage: DashboardPage(NothingSelected),
+    })
+  | SignOut =>
+    ReasonReact.Update({
+      ...state,
+      session: state.session |> Session.signOut,
+      currentTeam: None,
+      currentPage: SignInPage,
     })
   };
