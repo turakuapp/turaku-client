@@ -11,12 +11,12 @@ let fields = (appState, appSend, entry: Entry.t) =>
   );
 
 /* Is an entry selected? */
-let entrySelected = () => true;
+let entrySelected = () => false;
 
 let selectedEntry = (appState: Turaku.state) =>
   /* TODO: This should actually return one of unsavedEntries, or entries. */
   switch (appState.currentPage) {
-  | DashboardPage(EntrySelected(id)) =>
+  | DashboardPage(_, EntrySelected(id)) =>
     appState.entries |> List.find((e: Entry.t) => e.id == id)
   | _ => failwith("Entry.selectedEntry called when no entry was selected!")
   };

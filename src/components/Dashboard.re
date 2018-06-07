@@ -32,9 +32,10 @@ let make = (~appState, ~appSend, _children) => {
           <SignOutButton appSend appState />
         </div>
         <div className="col-10 dashboard__content">
-          /* <Entries appState appSend />
-             <Users appState appSend /> */
-           <span /> </div>
+          <Entries appState appSend />
+          /* <Users appState appSend /> */
+          <span />
+        </div>
       </div>
     </div>,
   /* {this.haveUnsavedEntries() && ( */

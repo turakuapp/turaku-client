@@ -2,10 +2,12 @@ type selectable =
   | NothingSelected
   | EntrySelected(Entry.id);
 
+type selectedTeamId = Team.id;
+
 type page =
   | SignUpPage
   | SignInPage
-  | DashboardPage(selectable)
+  | DashboardPage(selectedTeamId, selectable)
   | TeamSelectionPage
   | LoadingPage;
 
@@ -37,7 +39,6 @@ type state = {
   flags,
   invitations: list(Invitation.t),
   teams,
-  currentTeam: option(Team.t),
   entries,
   unsavedEntries,
 };
@@ -50,7 +51,6 @@ let initialState = {
   },
   invitations: [],
   teams: [],
-  currentTeam: None,
   entries: [],
   unsavedEntries: [],
 };
@@ -84,21 +84,20 @@ let reducer = (action, state) =>
   | SelectTeam(team) =>
     ReasonReact.Update({
       ...state,
-      currentTeam: Some(team),
-      currentPage: DashboardPage(NothingSelected),
+      currentPage: DashboardPage(team |> Team.getId, NothingSelected),
     })
   | CreateTeam(team) =>
     ReasonReact.Update({
       ...state,
       teams: [team, ...state.teams],
-      currentTeam: Some(team),
-      currentPage: DashboardPage(NothingSelected),
+      currentPage: DashboardPage(team |> Team.getId, NothingSelected),
     })
   | SignOut =>
     ReasonReact.Update({
       ...state,
       session: state.session |> Session.signOut,
-      currentTeam: None,
       currentPage: SignInPage,
     })
   };
+
+let currentTeam = s => switch(s.page)

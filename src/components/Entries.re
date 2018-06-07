@@ -1,4 +1,5 @@
-/* import "./entries.css"; */
+[%bs.raw {|require("./entries.css")|}];
+
 let str = ReasonReact.stringToElement;
 
 let component = ReasonReact.statelessComponent("Entries");
@@ -7,9 +8,54 @@ let addEntry = _event => Js.log("Add an entry, maybe?");
 
 let entryChoices = () => [|/* TODO: Actually write this, maybe? */|];
 
+module EntriesQuery = [%graphql
+  {|
+  query($teamId: ID!) {
+    team(id: $teamId) {
+      entries {
+        id
+        encryptedData {
+          iv
+          ciphertext
+        }
+      }
+    }
+  }
+  |}
+];
+
+let loadEntries = (appState: Turaku.state, appSend) => {
+  let team = appState |> Turaku.currentTeam;
+  EntriesQuery.make(~teamId=team |> Team.getId, ())
+  |> Api.sendQuery(appState.session)
+  |> Js.Promise.then_(response => {
+       response##team##entries
+       |> Array.map(entry => {
+            let iv =
+              EncryptedData.InitializationVector.fromString(
+                entry##encryptedData##iv,
+              );
+            let ciphertext =
+              EncryptedData.CipherText.fromString(
+                entry##encryptedData##ciphertext,
+              );
+            let encryptedData = EncryptedData.create(iv, ciphertext);
+            /* Decode the entry to be able to access its data.
+               let title = decodedEntry.title; */
+            ();
+          })
+       |> ignore;
+       Js.Promise.resolve();
+     });
+};
+
 let make = (~appState, ~appSend, _children) => {
   ...component,
-  render: self =>
+  didMount: _self => {
+    loadEntries(appState, appSend);
+    ReasonReact.NoUpdate;
+  },
+  render: _self =>
     <div className="row">
       <div className="col-3">
         <div className="entries__nav">

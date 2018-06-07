@@ -4,4 +4,4 @@ type t = {
   fields: list(Field.t),
   persisted: bool,
 }
-and id = int;
+and id = string;
