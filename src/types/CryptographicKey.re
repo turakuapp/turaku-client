@@ -6,7 +6,21 @@ external subtleImportKey :
   Js.Promise.t(t) =
   "importKey";
 
-let create = keyData =>
+/** A CryptoKey can be generated from one of these sources. */
+type source =
+  | EncryptionHashAsKey(EncryptionHash.t)
+  | TeamPasswordAsKey(TeamPassword.t);
+
+let keyFromEncryptionHash = k => EncryptionHashAsKey(k);
+
+let keyFromTeamPassword = k => TeamPasswordAsKey(k);
+
+let create = key => {
+  let keyData =
+    switch (key) {
+    | EncryptionHashAsKey(k)
+    | TeamPasswordAsKey(k) => k
+    };
   subtleImportKey(
     "raw",
     keyData,
@@ -14,3 +28,4 @@ let create = keyData =>
     false,
     [|"encrypt", "decrypt"|],
   );
+};

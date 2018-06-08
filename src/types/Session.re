@@ -68,3 +68,10 @@ let getCredentials = t =>
 let getAccessToken = c => c.accessToken;
 
 let getEncryptionHash = c => c.encryptionHash;
+
+let getCryptographicKey = session =>
+  session
+  |> getCredentials
+  |> Belt.Option.getExn
+  |> getEncryptionHash
+  |> CryptographicKey.keyFromEncryptionHash;

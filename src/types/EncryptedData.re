@@ -37,34 +37,36 @@ external subtleEncrypt :
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
 external subtleDecrypt :
   (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
-  Js.Promise.t(string) =
+  Js.Promise.t(UnsignedByteArray.t) =
   "decrypt";
 
-type encryptionKey =
-  | EncryptionHashAsKey(EncryptionHash.t)
-  | TeamPasswordAsKey(TeamPassword.t);
+let algorithm = iv : encryptionAlgorithm => {"name": "AES-CBC", "iv": iv};
 
-let encrypt = (k, s) => {
+let encrypt = (key, plaintext) => {
   let iv = InitializationVector.create();
-  let algorithm: encryptionAlgorithm = {"name": "AES-CBC", "iv": iv};
-  (
-    switch (k) {
-    | EncryptionHashAsKey(unsignedByteArray)
-    | TeamPasswordAsKey(unsignedByteArray) =>
-      unsignedByteArray
-      |> CryptographicKey.create
-      |> Js.Promise.then_(cryptoKey =>
-           s
-           |> UnsignedByteArray.encode
-           |> subtleEncrypt(algorithm, cryptoKey)
-         )
-    }
-  )
+  key
+  |> CryptographicKey.create
+  |> Js.Promise.then_(cryptoKey =>
+       plaintext
+       |> UnsignedByteArray.encode
+       |> subtleEncrypt(iv |> algorithm, cryptoKey)
+     )
   |> Js.Promise.then_(ciphertext =>
        {iv, ciphertext: ciphertext |> CipherText.create} |> Js.Promise.resolve
      );
 };
 
-let decrypt = (k, t) : string => "Hello";
+let decrypt = (key, t) => {
+  Js.log2(key, t);
+  key
+  |> CryptographicKey.create
+  |> Js.Promise.then_(cryptoKey => {
+       Js.log(cryptoKey);
+       t.ciphertext |> subtleDecrypt(t.iv |> algorithm, cryptoKey);
+     })
+  |> Js.Promise.then_(byteArray =>
+       byteArray |> UnsignedByteArray.decode |> Js.Promise.resolve
+     );
+};
 
 let create = (iv, ciphertext) => {iv, ciphertext};

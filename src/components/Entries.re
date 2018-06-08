@@ -24,11 +24,14 @@ module EntriesQuery = [%graphql
   |}
 ];
 
-let loadEntries = (appState: Turaku.state, appSend) => {
-  let team = appState |> Turaku.currentTeam;
-  EntriesQuery.make(~teamId=team |> Team.getId, ())
-  |> Api.sendQuery(appState.session)
+let loadEntries = ({Turaku.session}, appSend, selectedTeam) =>
+  EntriesQuery.make(~teamId=selectedTeam |> SelectedTeam.getId, ())
+  |> Api.sendQuery(session)
   |> Js.Promise.then_(response => {
+       Js.log(
+         "Loaded entries! Count: "
+         ++ (response##team##entries |> Array.length |> string_of_int),
+       );
        response##team##entries
        |> Array.map(entry => {
             let iv =
@@ -39,20 +42,23 @@ let loadEntries = (appState: Turaku.state, appSend) => {
               EncryptedData.CipherText.fromString(
                 entry##encryptedData##ciphertext,
               );
-            let encryptedData = EncryptedData.create(iv, ciphertext);
-            /* Decode the entry to be able to access its data.
-               let title = decodedEntry.title; */
-            ();
+            let decryptionKey =
+              selectedTeam |> SelectedTeam.getCryptographicKey;
+            EncryptedData.create(iv, ciphertext)
+            |> EncryptedData.decrypt(decryptionKey)
+            |> Js.Promise.then_(plaintext => {
+                 Js.log(plaintext);
+                 Js.Promise.resolve();
+               });
           })
        |> ignore;
        Js.Promise.resolve();
      });
-};
 
-let make = (~appState, ~appSend, _children) => {
+let make = (~appState, ~appSend, ~selectedTeam, _children) => {
   ...component,
   didMount: _self => {
-    loadEntries(appState, appSend);
+    loadEntries(appState, appSend, selectedTeam) |> ignore;
     ReasonReact.NoUpdate;
   },
   render: _self =>

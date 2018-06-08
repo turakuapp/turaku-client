@@ -2,7 +2,11 @@ type t = ArrayBuffer.t;
 
 type textEncoder = {. [@bs.meth] "encode": string => t};
 
+type textDecoder = {. [@bs.meth] "decode": t => string};
+
 [@bs.new] external createTextEncoder : string => textEncoder = "TextEncoder";
+
+[@bs.new] external createTextDecoder : string => textDecoder = "TextDecoder";
 
 [@bs.new] external createWithLength : int => t = "Uint8Array";
 
@@ -24,4 +28,9 @@ external digest : (string, t) => Js.Promise.t(ArrayBuffer.t) = "";
 let encode = s => {
   let encoder = createTextEncoder("utf-8");
   encoder##encode(s);
+};
+
+let decode = t => {
+  let decoder = createTextDecoder("utf-8");
+  decoder##decode(t);
 };

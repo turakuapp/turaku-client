@@ -7,7 +7,7 @@ type selectedTeamId = Team.id;
 type page =
   | SignUpPage
   | SignInPage
-  | DashboardPage(selectedTeamId, selectable)
+  | DashboardPage(SelectedTeam.t, selectable)
   | TeamSelectionPage
   | LoadingPage;
 
@@ -21,8 +21,8 @@ type action =
     )
   | Navigate(page)
   | SkipLoading
-  | CreateTeam(Team.t)
-  | SelectTeam(Team.t)
+  | CreateTeam(Team.t, TeamPassword.t)
+  | SelectTeam(Team.t, TeamPassword.t)
   | SignOut;
 
 type flags = {justSignedUp: bool};
@@ -81,16 +81,24 @@ let reducer = (action, state) =>
   | Navigate(destination) =>
     ReasonReact.Update({...state, currentPage: destination})
   | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
-  | SelectTeam(team) =>
+  | SelectTeam(team, teamPassword) =>
     ReasonReact.Update({
       ...state,
-      currentPage: DashboardPage(team |> Team.getId, NothingSelected),
+      currentPage:
+        DashboardPage(
+          team |> Team.getId |> SelectedTeam.create(teamPassword),
+          NothingSelected,
+        ),
     })
-  | CreateTeam(team) =>
+  | CreateTeam(team, teamPassword) =>
     ReasonReact.Update({
       ...state,
       teams: [team, ...state.teams],
-      currentPage: DashboardPage(team |> Team.getId, NothingSelected),
+      currentPage:
+        DashboardPage(
+          team |> Team.getId |> SelectedTeam.create(teamPassword),
+          NothingSelected,
+        ),
     })
   | SignOut =>
     ReasonReact.Update({
@@ -100,4 +108,13 @@ let reducer = (action, state) =>
     })
   };
 
-let currentTeam = s => switch(s.page)
+let selectedTeam = s =>
+  switch (s.currentPage) {
+  | DashboardPage(selectedTeam, _) =>
+    s.teams
+    |> List.find(t => t |> Team.getId == (selectedTeam |> SelectedTeam.getId))
+  | _ =>
+    failwith(
+      "Turaku.currentTeam was called when on a page other than dashboard!",
+    )
+  };

@@ -30,10 +30,20 @@ let invitations = (appState: Turaku.state, appSend) =>
     <span />;
   };
 
-let selectTeam = (team, appSend, _event) => {
+let selectTeam = (appState: Turaku.state, appSend, team, _event) => {
   /* TODO: See how to select a team with old selectTeam function below. */
   Js.log2("Selecting this team: ", team);
-  appSend(Turaku.SelectTeam(team));
+  let decryptionKey = appState.session |> Session.getCryptographicKey;
+  team
+  |> Team.getEncryptedPassword
+  |> EncryptedData.decrypt(decryptionKey)
+  |> Js.Promise.then_(decryptedPassword => {
+       Js.log2("Decrypted team password is: ", decryptedPassword);
+       let teamPassword = decryptedPassword |> TeamPassword.fromString;
+       appSend(Turaku.SelectTeam(team, teamPassword));
+       Js.Promise.resolve();
+     })
+  |> ignore;
 };
 
 let teams = (appState: Turaku.state, appSend) =>
@@ -47,7 +57,7 @@ let teams = (appState: Turaku.state, appSend) =>
             |> List.map((team: Team.t) =>
                  <li key=(team |> Team.getId) className="mb-1">
                    <button
-                     onClick=(selectTeam(team, appSend))
+                     onClick=(selectTeam(appState, appSend, team))
                      className="btn btn-sm btn-outline-dark">
                      (str(team |> Team.getName))
                    </button>
@@ -95,13 +105,7 @@ let createTeam = ({Turaku.session}, appSend, state, event) => {
     ++ " and password (B64) "
     ++ (state.teamPassword |> TeamPassword.toString),
   );
-  let encryptionKey =
-    EncryptedData.EncryptionHashAsKey(
-      session
-      |> Session.getCredentials
-      |> Belt.Option.getExn
-      |> Session.getEncryptionHash,
-    );
+  let encryptionKey = session |> Session.getCryptographicKey;
   EncryptedData.encrypt(
     encryptionKey,
     state.teamPassword |> TeamPassword.toString,
@@ -130,7 +134,7 @@ let createTeam = ({Turaku.session}, appSend, state, event) => {
          )
        | Some(t) =>
          let team = Team.create(t##id, state.teamName, encryptedData);
-         appSend(Turaku.CreateTeam(team));
+         appSend(Turaku.CreateTeam(team, state.teamPassword));
        };
        Js.Promise.resolve();
      })

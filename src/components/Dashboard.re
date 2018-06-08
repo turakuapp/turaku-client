@@ -9,7 +9,7 @@ type action =
 
 let component = ReasonReact.reducerComponent("Dashboard");
 
-let make = (~appState, ~appSend, _children) => {
+let make = (~appState, ~appSend, ~selectedTeam, _children) => {
   ...component,
   initialState: () => {signingOut: false},
   reducer: (action, _state) =>
@@ -32,7 +32,7 @@ let make = (~appState, ~appSend, _children) => {
           <SignOutButton appSend appState />
         </div>
         <div className="col-10 dashboard__content">
-          <Entries appState appSend />
+          <Entries appState appSend selectedTeam />
           /* <Users appState appSend /> */
           <span />
         </div>
