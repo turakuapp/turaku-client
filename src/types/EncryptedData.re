@@ -48,7 +48,7 @@ let encrypt = (key, plaintext) => {
   |> CryptographicKey.create
   |> Js.Promise.then_(cryptoKey =>
        plaintext
-       |> UnsignedByteArray.encode
+       |> TextEncoder.encode
        |> subtleEncrypt(iv |> algorithm, cryptoKey)
      )
   |> Js.Promise.then_(ciphertext =>
@@ -56,17 +56,14 @@ let encrypt = (key, plaintext) => {
      );
 };
 
-let decrypt = (key, t) => {
-  Js.log2(key, t);
+let decrypt = (key, t) =>
   key
   |> CryptographicKey.create
-  |> Js.Promise.then_(cryptoKey => {
-       Js.log(cryptoKey);
-       t.ciphertext |> subtleDecrypt(t.iv |> algorithm, cryptoKey);
-     })
+  |> Js.Promise.then_(cryptoKey =>
+       t.ciphertext |> subtleDecrypt(t.iv |> algorithm, cryptoKey)
+     )
   |> Js.Promise.then_(byteArray =>
-       byteArray |> UnsignedByteArray.decode |> Js.Promise.resolve
+       byteArray |> TextDecoder.decode |> Js.Promise.resolve
      );
-};
 
 let create = (iv, ciphertext) => {iv, ciphertext};

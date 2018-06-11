@@ -18,7 +18,7 @@ let fromString = s : t => s |> UnsignedByteArray.fromBase64String;
  */
 let recreate = s : Js.Promise.t(t) =>
   s
-  |> UnsignedByteArray.encode
+  |> TextEncoder.encode
   |> UnsignedByteArray.digest("SHA-256")
   |> Js.Promise.then_(arrayBuffer =>
        arrayBuffer |> UnsignedByteArray.fromArrayBuffer |> Js.Promise.resolve
