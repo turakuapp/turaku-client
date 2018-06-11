@@ -19,6 +19,7 @@ type action =
       list(Invitation.t),
       EncryptionHash.t,
     )
+  | RefreshEntries(list(Entry.t))
   | Navigate(page)
   | SkipLoading
   | CreateTeam(Team.t, TeamPassword.t)
@@ -106,6 +107,8 @@ let reducer = (action, state) =>
       session: state.session |> Session.signOut,
       currentPage: SignInPage,
     })
+  | RefreshEntries(newList) =>
+    ReasonReact.Update({...state, entries: newList})
   };
 
 let selectedTeam = s =>

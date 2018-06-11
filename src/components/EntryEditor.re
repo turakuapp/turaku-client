@@ -7,7 +7,7 @@ let handleTitleChange = _event => ();
 let fields = (appState, appSend, entry: Entry.t) =>
   List.map(
     (field: Field.t) => <EntryField appState appSend field />,
-    entry.fields,
+    entry |> Entry.getFields,
   );
 
 /* Is an entry selected? */
@@ -17,7 +17,7 @@ let selectedEntry = (appState: Turaku.state) =>
   /* TODO: This should actually return one of unsavedEntries, or entries. */
   switch (appState.currentPage) {
   | DashboardPage(_, EntrySelected(id)) =>
-    appState.entries |> List.find((e: Entry.t) => e.id == id)
+    appState.entries |> List.find((e: Entry.t) => e |> Entry.getId == id)
   | _ => failwith("Entry.selectedEntry called when no entry was selected!")
   };
 
@@ -28,7 +28,7 @@ let selectedEntry = (appState, appSend) => {
       <div className="col offset-sm-2">
         <input
           _type="text"
-          value=entry.title
+          value=(entry |> Entry.getTitle)
           onChange=handleTitleChange
           className="my-2"
           placeholder="Entry Title"

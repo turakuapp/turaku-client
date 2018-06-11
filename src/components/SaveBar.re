@@ -7,17 +7,18 @@ let updateEntry = (appState, appSend, entry) => ();
 
 let createEntry = (appState, appSend, entry) => ();
 
-let saveChanges = (appState: Turaku.state, appSend, _event) => {
+let saveChanges = (appState: Turaku.state, appSend, event) => {
+  /* appState.unsavedEntries
+     |> List.iter((unsavedEntry: Entry.t) =>
+          if (unsavedEntry.persisted) {
+            updateEntry(appState, appSend, unsavedEntry);
+          } else {
+            createEntry(appState, appSend, unsavedEntry);
+          }
+        );
+     (); */
+  event |> DomUtils.preventMouseEventDefault;
   Js.log("Saving changes...");
-  appState.unsavedEntries
-  |> List.iter((unsavedEntry: Entry.t) =>
-       if (unsavedEntry.persisted) {
-         updateEntry(appState, appSend, unsavedEntry);
-       } else {
-         createEntry(appState, appSend, unsavedEntry);
-       }
-     );
-  ();
 };
 
 let make = (~appState: Turaku.state, ~appSend, _children) => {

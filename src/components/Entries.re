@@ -6,7 +6,10 @@ let component = ReasonReact.statelessComponent("Entries");
 
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
-let entryChoices = () => [|/* TODO: Actually write this, maybe? */|];
+let entryChoices = (appState: Turaku.state, appSend) =>
+  appState.entries
+  |> List.map(entry => <EntryChoice appState appSend entry />)
+  |> Array.of_list;
 
 module EntriesQuery = [%graphql
   {|
@@ -24,6 +27,33 @@ module EntriesQuery = [%graphql
   |}
 ];
 
+let decryptEntries = (decryptionKey, encryptedEntries) => {
+  let rec aux = (decryptedEntries, entries) =>
+    switch (entries) {
+    | [entry, ...remainingEntries] =>
+      let iv =
+        EncryptedData.InitializationVector.fromString(
+          entry##encryptedData##iv,
+        );
+      let ciphertext =
+        EncryptedData.CipherText.fromString(entry##encryptedData##ciphertext);
+      EncryptedData.create(iv, ciphertext)
+      |> EncryptedData.decrypt(decryptionKey)
+      |> Js.Promise.then_(plaintext => {
+           Js.log(plaintext);
+           remainingEntries
+           |> aux([
+                plaintext
+                |> Json.parseOrRaise
+                |> Entry.Codec.decode(entry##id),
+                ...decryptedEntries,
+              ]);
+         });
+    | [] => decryptedEntries |> Js.Promise.resolve
+    };
+  encryptedEntries |> Array.to_list |> aux([]);
+};
+
 let loadEntries = ({Turaku.session}, appSend, selectedTeam) =>
   EntriesQuery.make(~teamId=selectedTeam |> SelectedTeam.getId, ())
   |> Api.sendQuery(session)
@@ -32,33 +62,19 @@ let loadEntries = ({Turaku.session}, appSend, selectedTeam) =>
          "Loaded entries! Count: "
          ++ (response##team##entries |> Array.length |> string_of_int),
        );
-       response##team##entries
-       |> Array.map(entry => {
-            let iv =
-              EncryptedData.InitializationVector.fromString(
-                entry##encryptedData##iv,
-              );
-            let ciphertext =
-              EncryptedData.CipherText.fromString(
-                entry##encryptedData##ciphertext,
-              );
-            let decryptionKey =
-              selectedTeam |> SelectedTeam.getCryptographicKey;
-            EncryptedData.create(iv, ciphertext)
-            |> EncryptedData.decrypt(decryptionKey)
-            |> Js.Promise.then_(plaintext => {
-                 Js.log(plaintext);
-                 Js.Promise.resolve();
-               });
-          })
-       |> ignore;
+       let decryptionKey = selectedTeam |> SelectedTeam.getCryptographicKey;
+       response##team##entries |> decryptEntries(decryptionKey);
+     })
+  |> Js.Promise.then_(decryptedEntries => {
+       appSend(Turaku.RefreshEntries(decryptedEntries));
        Js.Promise.resolve();
-     });
+     })
+  |> ignore;
 
 let make = (~appState, ~appSend, ~selectedTeam, _children) => {
   ...component,
   didMount: _self => {
-    loadEntries(appState, appSend, selectedTeam) |> ignore;
+    loadEntries(appState, appSend, selectedTeam);
     ReasonReact.NoUpdate;
   },
   render: _self =>
@@ -71,7 +87,7 @@ let make = (~appState, ~appSend, ~selectedTeam, _children) => {
               (str("Add new"))
             </button>
           </div>
-          (entryChoices() |> ReasonReact.arrayToElement)
+          (entryChoices(appState, appSend) |> ReasonReact.arrayToElement)
         </div>
       </div>
       <div className="col-8"> <EntryEditor appState appSend /> </div>
