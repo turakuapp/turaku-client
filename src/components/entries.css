@@ -1,4 +1,7 @@
 .entries__nav {
-  border-right: 1px solid black;
   height: 100vh;
+}
+
+.entry-editor__container {
+  background-color: white;
 }

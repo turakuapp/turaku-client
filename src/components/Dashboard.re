@@ -9,7 +9,14 @@ type action =
 
 let component = ReasonReact.reducerComponent("Dashboard");
 
-let make = (~appState, ~appSend, ~selectedTeam, _children) => {
+let getMenu = (appState, appSend, selectedTeam, dashboardMenu) =>
+  switch (dashboardMenu) {
+  | Turaku.EntriesMenu(entrySelection) =>
+    <Entries appState appSend selectedTeam entrySelection />
+  | UsersMenu => "Users menu should show up here" |> str
+  };
+
+let make = (~appState, ~appSend, ~selectedTeam, ~dashboardMenu, _children) => {
   ...component,
   initialState: () => {signingOut: false},
   reducer: (action, _state) =>
@@ -32,7 +39,7 @@ let make = (~appState, ~appSend, ~selectedTeam, _children) => {
           <SignOutButton appSend appState />
         </div>
         <div className="col-10 dashboard__content">
-          <Entries appState appSend selectedTeam />
+          (dashboardMenu |> getMenu(appState, appSend, selectedTeam))
           /* <Users appState appSend /> */
           <span />
         </div>

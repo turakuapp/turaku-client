@@ -26,3 +26,5 @@ module Codec = {
       value: json |> field("value", string),
     };
 };
+
+let getKey = t => t.key;

@@ -6,51 +6,33 @@ let handleTitleChange = _event => ();
 
 let fields = (appState, appSend, entry: Entry.t) =>
   List.map(
-    (field: Field.t) => <EntryField appState appSend field />,
+    (field: Field.t) =>
+      <EntryField key=(field |> Field.getKey) appState appSend field />,
     entry |> Entry.getFields,
   );
 
-/* Is an entry selected? */
-let entrySelected = () => false;
-
-let selectedEntry = (appState: Turaku.state) =>
-  /* TODO: This should actually return one of unsavedEntries, or entries. */
-  switch (appState.currentPage) {
-  | DashboardPage(_, EntrySelected(id)) =>
-    appState.entries |> List.find((e: Entry.t) => e |> Entry.getId == id)
-  | _ => failwith("Entry.selectedEntry called when no entry was selected!")
-  };
-
-let selectedEntry = (appState, appSend) => {
-  let entry = selectedEntry(appState);
-  <div>
-    <div className="row">
-      <div className="col offset-sm-2">
-        <input
-          _type="text"
-          value=(entry |> Entry.getTitle)
-          onChange=handleTitleChange
-          className="my-2"
-          placeholder="Entry Title"
-        />
-        (
-          fields(appState, appSend, entry)
-          |> Array.of_list
-          |> ReasonReact.arrayToElement
-        )
-      </div>
-    </div>
-    <EntryTags appState appSend entry />
-  </div>;
-};
-
-let selectEntryMessage = () =>
-  <p> (str("Select an entry, or create a new one.")) </p>;
-
-let make = (~appState, ~appSend, _children) => {
+let make = (~appState, ~appSend, ~entry, _children) => {
   ...component,
   render: self =>
-    entrySelected() ? selectedEntry(appState, appSend) : selectEntryMessage(),
+    <div>
+      <div className="row">
+        <div className="col offset-sm-2">
+          <input
+            _type="text"
+            value=(entry |> Entry.getTitle)
+            onChange=handleTitleChange
+            className="my-2"
+            placeholder="Entry Title"
+          />
+          (
+            fields(appState, appSend, entry)
+            |> Array.of_list
+            |> ReasonReact.arrayToElement
+          )
+        </div>
+      </div>
+      <EntryTags appState appSend entry />
+    </div>,
 };
 /* export default class Entry extends React.Component {
      constructor(props) {

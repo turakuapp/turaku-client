@@ -19,6 +19,16 @@ let chooseEntry = (appState, appSend, entry, event) => {
        this.props.setAppState({ entryId: this.props.entryId });
      } */
   event |> DomUtils.preventMouseEventDefault;
+  let team =
+    switch (appState.Turaku.currentPage) {
+    | DashboardPage(selectedTeam, _) => selectedTeam
+    | _ => failwith("EntryChoice.chooseEntry called without a selected team!")
+    };
+  appSend(
+    Turaku.Navigate(
+      DashboardPage(team, Turaku.EntriesMenu(Turaku.EntrySelected(entry))),
+    ),
+  );
   Js.log("Clicked on event choice with ID: " ++ (entry |> Entry.getId));
 };
 

@@ -1,13 +1,15 @@
-type selectable =
+type entrySelection =
   | NothingSelected
-  | EntrySelected(Entry.id);
+  | EntrySelected(Entry.t);
 
-type selectedTeamId = Team.id;
+type dashboardMenu =
+  | EntriesMenu(entrySelection)
+  | UsersMenu;
 
 type page =
   | SignUpPage
   | SignInPage
-  | DashboardPage(SelectedTeam.t, selectable)
+  | DashboardPage(SelectedTeam.t, dashboardMenu)
   | TeamSelectionPage
   | LoadingPage;
 
@@ -79,8 +81,7 @@ let reducer = (action, state) =>
         justSignedUp: true,
       },
     })
-  | Navigate(destination) =>
-    ReasonReact.Update({...state, currentPage: destination})
+  | Navigate(page) => ReasonReact.Update({...state, currentPage: page})
   | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
   | SelectTeam(team, teamPassword) =>
     ReasonReact.Update({
@@ -88,7 +89,7 @@ let reducer = (action, state) =>
       currentPage:
         DashboardPage(
           team |> Team.getId |> SelectedTeam.create(teamPassword),
-          NothingSelected,
+          EntriesMenu(NothingSelected),
         ),
     })
   | CreateTeam(team, teamPassword) =>
@@ -98,7 +99,7 @@ let reducer = (action, state) =>
       currentPage:
         DashboardPage(
           team |> Team.getId |> SelectedTeam.create(teamPassword),
-          NothingSelected,
+          EntriesMenu(NothingSelected),
         ),
     })
   | SignOut =>

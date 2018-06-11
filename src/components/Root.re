@@ -8,8 +8,8 @@ let currentComponent = (state, send) =>
   switch (state.currentPage) {
   | SignUpPage => <SignUpMenu appState=state appSend=send />
   | SignInPage => <SignInMenu appState=state appSend=send />
-  | DashboardPage(selectedTeam, _) =>
-    <Dashboard appState=state appSend=send selectedTeam />
+  | DashboardPage(selectedTeam, dashboardMenu) =>
+    <Dashboard appState=state appSend=send selectedTeam dashboardMenu />
   | TeamSelectionPage => <TeamSelection appState=state appSend=send />
   | LoadingPage => <LoadingScreen appState=state appSend=send />
   };

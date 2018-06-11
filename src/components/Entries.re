@@ -8,7 +8,9 @@ let addEntry = _event => Js.log("Add an entry, maybe?");
 
 let entryChoices = (appState: Turaku.state, appSend) =>
   appState.entries
-  |> List.map(entry => <EntryChoice appState appSend entry />)
+  |> List.map(entry =>
+       <EntryChoice key=(entry |> Entry.getId) appState appSend entry />
+     )
   |> Array.of_list;
 
 module EntriesQuery = [%graphql
@@ -71,7 +73,13 @@ let loadEntries = ({Turaku.session}, appSend, selectedTeam) =>
      })
   |> ignore;
 
-let make = (~appState, ~appSend, ~selectedTeam, _children) => {
+let getSelection = (appState, appSend, selectedTeam, entryOption) =>
+  switch (entryOption) {
+  | Turaku.EntrySelected(entry) => <EntryEditor appState appSend entry />
+  | NothingSelected => <p> (str("Select an entry, or create a new one.")) </p>
+  };
+
+let make = (~appState, ~appSend, ~selectedTeam, ~entrySelection, _children) => {
   ...component,
   didMount: _self => {
     loadEntries(appState, appSend, selectedTeam);
@@ -90,7 +98,9 @@ let make = (~appState, ~appSend, ~selectedTeam, _children) => {
           (entryChoices(appState, appSend) |> ReasonReact.arrayToElement)
         </div>
       </div>
-      <div className="col-8"> <EntryEditor appState appSend /> </div>
+      <div className="col entry-editor__container">
+        (entrySelection |> getSelection(appState, appSend, selectedTeam))
+      </div>
     </div>,
 };
 /* export default class Entries extends React.Component {
@@ -101,37 +111,8 @@ let make = (~appState, ~appSend, ~selectedTeam, _children) => {
 
      componentDidMount() {
        // Load entries.
-       if (_.isEmpty(this.props.appState.entries)) {
-         const listService = new ListEntriesService(
-           this.props.appState.token,
-           this.props.appState.encryptionHash,
-           this.props.appState.team.id,
-           this.props.appState,
-           this.props.setAppState
-         );
-
-         listService.list().then(entries => {
-           for (const encryptedEntry of entries) {
-             this.decryptEntry(encryptedEntry);
-           }
-         });
+       !!! EXTRACTED !!!
        }
-     }
-
-     async decryptEntry(encryptedEntry) {
-       const crypto = new CryptoService(this.props.appState.team.password, true);
-       const decryptedEntry = await crypto.decrypt(encryptedEntry.encrypted_data);
-
-       // Tag IDs loaded from server are not encrypted. Attach them directly to decrypted entry.
-       decryptedEntry.tags = encryptedEntry.tags;
-
-       // Mark all loaded entries as persisted, so that changes
-       // to them are handled as updates instead of creates.
-       decryptedEntry.persisted = true;
-
-       const entriesClone = _.cloneDeep(this.props.appState.entries);
-       entriesClone[encryptedEntry.id] = decryptedEntry;
-       this.props.setAppState({ entries: entriesClone });
      }
 
      addEntry() {

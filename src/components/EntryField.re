@@ -4,7 +4,7 @@ let component = ReasonReact.statelessComponent("EntryField");
 
 let make = (~appState, ~appSend, ~field, _children) => {
   ...component,
-  render: _self => <div> (str("Field")) </div>,
+  render: _self => <div> (str("Field: " ++ (field |> Field.getKey))) </div>,
 };
 /* export default class Field extends React.Component {
      constructor(props) {

@@ -3,6 +3,10 @@
   background-color: lightgrey;
 }
 
+.dashboard__content {
+  background-color: #eeeeee;
+}
+
 .dashboard__entries {
   height: 100vh;
 }
