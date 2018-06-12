@@ -5,6 +5,11 @@ type state = {inProgress: bool};
 type action =
   | SignOut;
 
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+};
+
 let component = ReasonReact.reducerComponent("SignOutButton");
 
 module DeleteSessionQuery = [%graphql
@@ -17,7 +22,7 @@ module DeleteSessionQuery = [%graphql
   |}
 ];
 
-let make = (~appState: Turaku.state, ~appSend, _children) => {
+let make = (~bag, ~appSend, _children) => {
   ...component,
   initialState: () => {inProgress: false},
   reducer: (action, _state) =>
@@ -28,12 +33,12 @@ let make = (~appState: Turaku.state, ~appSend, _children) => {
         (
           _self =>
             DeleteSessionQuery.make()
-            |> Api.sendQuery(appState.session)
+            |> Api.sendAuthenticatedQuery(bag.signedInData.session)
             |> Js.Promise.then_(response => {
                  if (response##deleteSession##errors
                      |> Array.to_list
                      |> List.length == 0) {
-                   appSend(Turaku.SignOut);
+                   appSend(Turaku.SignOut(bag.signedInData.session));
                  } else {
                    Js.log2(
                      "Some error occured while trying to sign out. Check: ",

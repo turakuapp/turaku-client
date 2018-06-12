@@ -32,34 +32,27 @@ module RestoreSessionQuery = [%graphql
 ];
 
 /* TODO: This component should load necessary data, and accept password to regenerate the encryptionSalt. */
-let make = (~appState, ~appSend, _children) => {
+let make = (~appSend, _children) => {
   ...component,
   didMount: _self => {
     let session = Session.attemptRestoration();
     switch (session) {
-    | SignedOut =>
+    | None =>
       /* Session couldn't be restored, so skip loading. */
       appSend(Turaku.SkipLoading)
-    | SignedIn(credentials) =>
+    | Some(session) =>
       /* Session info was loaded, so retrieve sign user back in. */
       RestoreSessionQuery.make()
-      |> Api.sendQuery(session)
-      |> Js.Promise.then_(response => {
-           let teams =
-             response##session##user##teams
-             |> Array.map(team =>
-                  Team.create(
-                    team##id,
-                    team##name,
-                    EncryptedData.create(
-                      team##encryptedPassword##iv
-                      |> EncryptedData.InitializationVector.fromString,
-                      team##encryptedPassword##ciphertext
-                      |> EncryptedData.CipherText.fromString,
-                    ),
-                  )
-                )
-             |> Array.to_list;
+      |> Api.sendAuthenticatedQuery(session)
+      |> Js.Promise.then_(response =>
+           response##session##user##teams
+           |> Team.decryptTeams(
+                response,
+                session |> Session.getCryptographicKey,
+              )
+         )
+      |> Js.Promise.then_(responseAndTeams => {
+           let (response, teams) = responseAndTeams;
            let invitations =
              response##session##user##incomingInvitations
              |> Array.map(i =>
@@ -70,11 +63,7 @@ let make = (~appState, ~appSend, _children) => {
                   )
                 )
              |> Array.to_list;
-           let encryptionHash = credentials |> Session.getEncryptionHash;
-           let accessToken = credentials |> Session.getAccessToken;
-           appSend(
-             Turaku.SignIn(accessToken, teams, invitations, encryptionHash),
-           );
+           appSend(Turaku.SignIn(session, teams, invitations));
            Js.Promise.resolve();
          })
       |> ignore

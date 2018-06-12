@@ -1,10 +1,19 @@
 let str = ReasonReact.stringToElement;
 
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+  entryMenuData: Turaku.entryMenuData,
+  entry: Entry.t,
+  field: Field.t,
+};
+
 let component = ReasonReact.statelessComponent("EntryField");
 
-let make = (~appState, ~appSend, ~field, _children) => {
+let make = (~bag, ~appSend, _children) => {
   ...component,
-  render: _self => <div> (str("Field: " ++ (field |> Field.getKey))) </div>,
+  render: _self =>
+    <div> (str("Field: " ++ (bag.field |> Field.getKey))) </div>,
 };
 /* export default class Field extends React.Component {
      constructor(props) {

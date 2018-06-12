@@ -1,124 +1,130 @@
 let str = ReasonReact.stringToElement;
 
-let component = ReasonReact.statelessComponent("EntryTags");
-
-let make = (~appState, ~appSend, ~entry, _children) => {
-  ...component,
-  render: (_self) => <div><code>(str("EntryTags"))</code></div>
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+  entryMenuData: Turaku.entryMenuData,
+  entry: Entry.t,
 };
 
+let component = ReasonReact.statelessComponent("EntryTags");
+
+let make = (~bag: bag, ~appSend, _children) => {
+  ...component,
+  render: _self => <div> <code> (str("EntryTags")) </code> </div>,
+};
 /* export default class EntryTags extends React.Component {
-  constructor(props) {
-    super(props);
+     constructor(props) {
+       super(props);
 
-    this.handleAddTag = this.handleAddTag.bind(this);
-    this.handleDeleteTag = this.handleDeleteTag.bind(this);
-    this.handleDragTag = this.handleDragTag.bind(this);
-  }
+       this.handleAddTag = this.handleAddTag.bind(this);
+       this.handleDeleteTag = this.handleDeleteTag.bind(this);
+       this.handleDragTag = this.handleDragTag.bind(this);
+     }
 
-  tagsForDisplay() {
-    return _.map(this.props.entry.tags, tag => {
-      if (_.isString(tag.name)) {
-        return { text: tag.name };
-      } else {
-        return { id: tag.id, text: this.props.appState.tags[tag.id].name };
-      }
-    });
-  }
+     tagsForDisplay() {
+       return _.map(this.props.entry.tags, tag => {
+         if (_.isString(tag.name)) {
+           return { text: tag.name };
+         } else {
+           return { id: tag.id, text: this.props.appState.tags[tag.id].name };
+         }
+       });
+     }
 
-  suggestedTags() {
-    return _.map(this.props.appState.tags, tag => {
-      return tag.name;
-    });
-  }
+     suggestedTags() {
+       return _.map(this.props.appState.tags, tag => {
+         return tag.name;
+       });
+     }
 
-  async handleAddTag(tag) {
-    // Create hash from tag text.
-    const hashService = new HashService(
-      tag.toLowerCase(),
-      this.props.appState.team.password
-    );
+     async handleAddTag(tag) {
+       // Create hash from tag text.
+       const hashService = new HashService(
+         tag.toLowerCase(),
+         this.props.appState.team.password
+       );
 
-    const nameHash = await hashService.hexHash();
+       const nameHash = await hashService.hexHash();
 
-    // Check if client has tag in store.
-    const savedTagId = _.findKey(this.props.appState.tags, tag => {
-      return tag.nameHash === nameHash;
-    });
+       // Check if client has tag in store.
+       const savedTagId = _.findKey(this.props.appState.tags, tag => {
+         return tag.nameHash === nameHash;
+       });
 
-    const savedTag = this.props.appState.tags[savedTagId];
+       const savedTag = this.props.appState.tags[savedTagId];
 
-    let newTag = null;
+       let newTag = null;
 
-    if (_.isObject(savedTag)) {
-      newTag = { id: savedTagId };
-    } else {
-      // when client does not have tag in store, encrypt tag text...
-      const cryptoService = new CryptoService(
-        this.props.appState.team.password,
-        true
-      );
+       if (_.isObject(savedTag)) {
+         newTag = { id: savedTagId };
+       } else {
+         // when client does not have tag in store, encrypt tag text...
+         const cryptoService = new CryptoService(
+           this.props.appState.team.password,
+           true
+         );
 
-      const encryptedTag = await cryptoService.encrypt(tag);
-      newTag = { name: tag, encryptedName: encryptedTag, nameHash: nameHash };
-    }
+         const encryptedTag = await cryptoService.encrypt(tag);
+         newTag = { name: tag, encryptedName: encryptedTag, nameHash: nameHash };
+       }
 
-    // Now add the new tag to list of tags belonging to unsaved entry.
-    const tagsClone = _.cloneDeep(this.props.entry.tags);
-    tagsClone.push(newTag);
+       // Now add the new tag to list of tags belonging to unsaved entry.
+       const tagsClone = _.cloneDeep(this.props.entry.tags);
+       tagsClone.push(newTag);
 
-    this.saveChangeToTags(tagsClone);
-  }
+       this.saveChangeToTags(tagsClone);
+     }
 
-  handleDeleteTag(i) {
-    // Remove the tag at supplied index.
-    const tagsClone = _.cloneDeep(this.props.entry.tags);
-    tagsClone.splice(i, 1);
-    this.saveChangeToTags(tagsClone);
-  }
+     handleDeleteTag(i) {
+       // Remove the tag at supplied index.
+       const tagsClone = _.cloneDeep(this.props.entry.tags);
+       tagsClone.splice(i, 1);
+       this.saveChangeToTags(tagsClone);
+     }
 
-  handleDragTag(tag, currPos, newPos) {
-    const tagsClone = _.cloneDeep(this.props.entry.tags);
+     handleDragTag(tag, currPos, newPos) {
+       const tagsClone = _.cloneDeep(this.props.entry.tags);
 
-    // mutate array
-    tagsClone.splice(currPos, 1);
-    tagsClone.splice(newPos, 0, tag);
+       // mutate array
+       tagsClone.splice(currPos, 1);
+       tagsClone.splice(newPos, 0, tag);
 
-    // re-render
-    this.saveChangeToTags(tagsClone);
-  }
+       // re-render
+       this.saveChangeToTags(tagsClone);
+     }
 
-  saveChangeToTags(newTags) {
-    const entryId = this.props.appState.entryId;
-    const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
-    let unsavedEntry = unsavedEntries[entryId];
+     saveChangeToTags(newTags) {
+       const entryId = this.props.appState.entryId;
+       const unsavedEntries = _.cloneDeep(this.props.appState.unsavedEntries);
+       let unsavedEntry = unsavedEntries[entryId];
 
-    if (!_.isObject(unsavedEntry)) {
-      // The unsaved entry doesn't exist, copy it into the clone
-      // of unsaved entries list from list of saved entries.
-      unsavedEntry = _.cloneDeep(this.props.appState.entries[entryId]);
-      unsavedEntries[entryId] = unsavedEntry;
-    }
+       if (!_.isObject(unsavedEntry)) {
+         // The unsaved entry doesn't exist, copy it into the clone
+         // of unsaved entries list from list of saved entries.
+         unsavedEntry = _.cloneDeep(this.props.appState.entries[entryId]);
+         unsavedEntries[entryId] = unsavedEntry;
+       }
 
-    unsavedEntry.tags = newTags;
-    console.log("Setting updated unsavedEntries: ", unsavedEntries);
-    this.props.setAppState({ unsavedEntries: unsavedEntries });
-  }
+       unsavedEntry.tags = newTags;
+       console.log("Setting updated unsavedEntries: ", unsavedEntries);
+       this.props.setAppState({ unsavedEntries: unsavedEntries });
+     }
 
-  render() {
-    return (
-      <div className="row">
-        <div className="col-2">Tags</div>
-        <div className="col">
-          <ReactTags
-            tags={this.tagsForDisplay()}
-            suggestions={this.suggestedTags()}
-            handleDelete={this.handleDeleteTag}
-            handleAddition={this.handleAddTag}
-            handleDrag={this.handleDragTag}
-          />
-        </div>
-      </div>
-    );
-  }
-} */
+     render() {
+       return (
+         <div className="row">
+           <div className="col-2">Tags</div>
+           <div className="col">
+             <ReactTags
+               tags={this.tagsForDisplay()}
+               suggestions={this.suggestedTags()}
+               handleDelete={this.handleDeleteTag}
+               handleAddition={this.handleAddTag}
+               handleDrag={this.handleDragTag}
+             />
+           </div>
+         </div>
+       );
+     }
+   } */

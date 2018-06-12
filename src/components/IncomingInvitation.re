@@ -5,7 +5,12 @@ type state = {teamPassword: string};
 type action =
   | UpdateTeamPassword(string);
 
-let component = ReasonReact.reducerComponent("Invitation");
+type bag = {
+  signedInData: Turaku.signedInData,
+  invitation: Invitation.t,
+};
+
+let component = ReasonReact.reducerComponent("IncomingInvitation");
 
 let acceptInvitation = _event => ();
 
@@ -17,8 +22,7 @@ let updateTeamPassword = (send, _event) => {
   send(UpdateTeamPassword(teamPassword));
 };
 
-let make =
-    (~appState: Turaku.state, ~appSend, ~invitation: Invitation.t, _children) => {
+let make = (~bag, ~appSend, _children) => {
   ...component,
   initialState: () => {teamPassword: ""},
   reducer: (action, _state) =>
@@ -28,10 +32,12 @@ let make =
   render: ({state, send}) =>
     <div className="card mb-3">
       <div className="card-body">
-        <h4 className="card-title"> (str(invitation |> Invitation.name)) </h4>
+        <h4 className="card-title">
+          (str(bag.invitation |> Invitation.name))
+        </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           (str("from"))
-          <code> (str(invitation |> Invitation.email)) </code>
+          <code> (str(bag.invitation |> Invitation.email)) </code>
         </h6>
         <p className="card-text">
           <input

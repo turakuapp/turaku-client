@@ -2,34 +2,43 @@
 
 let str = ReasonReact.stringToElement;
 
-let component = ReasonReact.statelessComponent("EntryChoice");
-
-let containerClasses = (appState, entry) => {
-  let classes = "mr-3 mt-2 p-2 entry-choice";
-  /* if (entry == appState.focus) {
-       classes ++ " entry-choice--chosen";
-     } else {
-       classes;
-     } */
-  classes;
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+  entryMenuData: Turaku.entryMenuData,
+  entry: Entry.t,
 };
 
-let chooseEntry = (appState, appSend, entry, event) => {
-  /* if (this.props.entryId !== this.props.appState.entryId) {
-       this.props.setAppState({ entryId: this.props.entryId });
-     } */
+let component = ReasonReact.statelessComponent("EntryChoice");
+
+let isCurrentChoice = bag =>
+  switch (bag.entryMenuData.entryId) {
+  | Some(id) when id == (bag.entry |> Entry.getId) => true
+  | Some(_otherId) => false
+  | None => false
+  };
+
+let containerClasses = bag => {
+  let classes = "mr-3 mt-2 p-2 entry-choice";
+  if (bag |> isCurrentChoice) {
+    classes ++ " entry-choice--chosen";
+  } else {
+    classes;
+  };
+};
+
+let chooseEntry = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  let team =
-    switch (appState.Turaku.currentPage) {
-    | DashboardPage(selectedTeam, _) => selectedTeam
-    | _ => failwith("EntryChoice.chooseEntry called without a selected team!")
-    };
-  appSend(
-    Turaku.Navigate(
-      DashboardPage(team, Turaku.EntriesMenu(Turaku.EntrySelected(entry))),
-    ),
-  );
-  Js.log("Clicked on event choice with ID: " ++ (entry |> Entry.getId));
+  Js.log("Clicked on event choice with ID: " ++ (bag.entry |> Entry.getId));
+  let updatedPage =
+    Turaku.DashboardPage({
+      ...bag.dashboardPageData,
+      dashboardMenu:
+        Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.getId)}),
+    });
+  if (! isCurrentChoice(bag)) {
+    appSend(Turaku.Navigate(SignedIn(updatedPage, bag.signedInData)));
+  };
 };
 
 let title = (entry: Entry.t) => {
@@ -40,13 +49,12 @@ let title = (entry: Entry.t) => {
   };
 };
 
-let make = (~appState, ~appSend, ~entry, _children) => {
+let make = (~bag, ~appSend, _children) => {
   ...component,
   render: self =>
     <div
-      className=(containerClasses(appState, entry))
-      onClick=(chooseEntry(appState, appSend, entry))>
-      (entry |> title)
+      className=(containerClasses(bag)) onClick=(chooseEntry(bag, appSend))>
+      (bag.entry |> title)
     </div>,
 };
 /* export default class EntryChoice extends React.Component {

@@ -22,7 +22,7 @@ module CreateUserQuery = [%graphql
 ];
 
 let gotoSignIn = (appSend, _event) =>
-  appSend(Turaku.(Navigate(SignInPage)));
+  appSend(Turaku.(Navigate(SignedOut(SignInPage({justSignedUp: false})))));
 
 let handleSignUp = ({Turaku.session}, appSend, event) => {
   event |> DomUtils.preventEventDefault;
@@ -40,7 +40,7 @@ let handleSignUp = ({Turaku.session}, appSend, event) => {
          ~authenticationSalt,
          (),
        )
-       |> Api.sendQuery(session)
+       |> Api.sendAuthenticatedQuery(session)
      )
   |> Js.Promise.then_(response => {
        let errors = response##createUser##errors;

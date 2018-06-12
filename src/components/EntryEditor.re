@@ -1,38 +1,67 @@
 let str = ReasonReact.stringToElement;
 
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+  entryMenuData: Turaku.entryMenuData,
+  entryId: Entry.id,
+};
+
 let component = ReasonReact.statelessComponent("EntryEditor");
 
 let handleTitleChange = _event => ();
 
-let fields = (appState, appSend, entry: Entry.t) =>
+let fields = (bag, entry, appSend) =>
   List.map(
     (field: Field.t) =>
-      <EntryField key=(field |> Field.getKey) appState appSend field />,
+      <EntryField
+        key=(field |> Field.getKey)
+        bag={
+          signedInData: bag.signedInData,
+          dashboardPageData: bag.dashboardPageData,
+          entryMenuData: bag.entryMenuData,
+          entry,
+          field,
+        }
+        appSend
+      />,
     entry |> Entry.getFields,
   );
 
-let make = (~appState, ~appSend, ~entry, _children) => {
-  ...component,
-  render: self =>
-    <div>
-      <div className="row">
-        <div className="col offset-sm-2">
-          <input
-            _type="text"
-            value=(entry |> Entry.getTitle)
-            onChange=handleTitleChange
-            className="my-2"
-            placeholder="Entry Title"
-          />
-          (
-            fields(appState, appSend, entry)
-            |> Array.of_list
-            |> ReasonReact.arrayToElement
-          )
+let make = (~bag, ~appSend, _children) => {
+  let entry =
+    Turaku.currentEntry(bag.signedInData, bag.dashboardPageData, bag.entryId);
+  {
+    ...component,
+    render: self =>
+      <div>
+        <div className="row">
+          <div className="col offset-sm-2">
+            <input
+              _type="text"
+              value=(entry |> Entry.getTitle)
+              onChange=handleTitleChange
+              className="my-2"
+              placeholder="Entry Title"
+            />
+            (
+              fields(bag, entry, appSend)
+              |> Array.of_list
+              |> ReasonReact.arrayToElement
+            )
+          </div>
         </div>
-      </div>
-      <EntryTags appState appSend entry />
-    </div>,
+        <EntryTags
+          bag={
+            signedInData: bag.signedInData,
+            dashboardPageData: bag.dashboardPageData,
+            entryMenuData: bag.entryMenuData,
+            entry,
+          }
+          appSend
+        />
+      </div>,
+  };
 };
 /* export default class Entry extends React.Component {
      constructor(props) {

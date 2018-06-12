@@ -2,16 +2,33 @@
 
 let str = ReasonReact.stringToElement;
 
+type bag = {
+  signedInData: Turaku.signedInData,
+  dashboardPageData: Turaku.dashboardPageData,
+  entryMenuData: Turaku.entryMenuData,
+};
+
 let component = ReasonReact.statelessComponent("Entries");
 
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
-let entryChoices = (appState: Turaku.state, appSend) =>
-  appState.entries
+let entryChoices = (bag, appSend) => {
+  let team = Turaku.currentTeam(bag.signedInData, bag.dashboardPageData);
+  team
+  |> Team.getEntries
   |> List.map(entry =>
-       <EntryChoice key=(entry |> Entry.getId) appState appSend entry />
+       <EntryChoice
+         bag={
+           signedInData: bag.signedInData,
+           dashboardPageData: bag.dashboardPageData,
+           entryMenuData: bag.entryMenuData,
+           entry,
+         }
+         appSend
+       />
      )
   |> Array.of_list;
+};
 
 module EntriesQuery = [%graphql
   {|
@@ -56,33 +73,42 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
   encryptedEntries |> Array.to_list |> aux([]);
 };
 
-let loadEntries = ({Turaku.session}, appSend, selectedTeam) =>
-  EntriesQuery.make(~teamId=selectedTeam |> SelectedTeam.getId, ())
-  |> Api.sendQuery(session)
+let loadEntries = (bag, appSend) => {
+  let selectedTeam =
+    Turaku.currentTeam(bag.signedInData, bag.dashboardPageData);
+  EntriesQuery.make(~teamId=selectedTeam |> Team.getId, ())
+  |> Api.sendAuthenticatedQuery(bag.signedInData.session)
   |> Js.Promise.then_(response => {
        Js.log(
          "Loaded entries! Count: "
          ++ (response##team##entries |> Array.length |> string_of_int),
        );
-       let decryptionKey = selectedTeam |> SelectedTeam.getCryptographicKey;
+       let decryptionKey = selectedTeam |> Team.getCryptographicKey;
        response##team##entries |> decryptEntries(decryptionKey);
      })
   |> Js.Promise.then_(decryptedEntries => {
-       appSend(Turaku.RefreshEntries(decryptedEntries));
+       appSend(
+         Turaku.RefreshEntries(
+           selectedTeam |> Team.getId,
+           decryptedEntries,
+           bag.signedInData,
+         ),
+       );
        Js.Promise.resolve();
      })
   |> ignore;
+};
 
-let getSelection = (appState, appSend, selectedTeam, entryOption) =>
-  switch (entryOption) {
-  | Turaku.EntrySelected(entry) => <EntryEditor appState appSend entry />
-  | NothingSelected => <p> (str("Select an entry, or create a new one.")) </p>
+let getSelection = (bag, appSend, entryId) =>
+  switch (entryId) {
+  | Some(id) => <EntryEditor bag={...bag, entryId: id} appSend />
+  | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 
-let make = (~appState, ~appSend, ~selectedTeam, ~entrySelection, _children) => {
+let make = (~bag, ~appSend, _children) => {
   ...component,
   didMount: _self => {
-    loadEntries(appState, appSend, selectedTeam);
+    loadEntries(bag, appSend);
     ReasonReact.NoUpdate;
   },
   render: _self =>
@@ -95,11 +121,11 @@ let make = (~appState, ~appSend, ~selectedTeam, ~entrySelection, _children) => {
               (str("Add new"))
             </button>
           </div>
-          (entryChoices(appState, appSend) |> ReasonReact.arrayToElement)
+          (entryChoices(bag, appSend) |> ReasonReact.arrayToElement)
         </div>
       </div>
       <div className="col entry-editor__container">
-        (entrySelection |> getSelection(appState, appSend, selectedTeam))
+        (bag.entryMenuData.entryId |> getSelection(bag, appSend))
       </div>
     </div>,
 };

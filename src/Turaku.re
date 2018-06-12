@@ -1,124 +1,123 @@
-type entrySelection =
-  | NothingSelected
-  | EntrySelected(Entry.t);
+type signInPageData = {justSignedUp: bool};
+
+type entryMenuData = {entryId: option(Entry.id)};
 
 type dashboardMenu =
-  | EntriesMenu(entrySelection)
+  | EntriesMenu(entryMenuData)
   | UsersMenu;
 
-type page =
-  | SignUpPage
-  | SignInPage
-  | DashboardPage(SelectedTeam.t, dashboardMenu)
+type dashboardPageData = {
+  teamId: Team.id,
+  dashboardMenu,
+};
+
+type signedInPage =
   | TeamSelectionPage
-  | LoadingPage;
+  | DashboardPage(dashboardPageData);
+
+type signedOutPage =
+  | LoadingPage
+  | SignUpPage
+  | SignInPage(signInPageData);
+
+type signedInData = {
+  session: Session.t,
+  invitations: list(Invitation.t),
+  teams: list(Team.t),
+};
+
+type user =
+  | SignedOut(signedOutPage)
+  | SignedIn(signedInPage, signedInData);
 
 type action =
   | SignUp
-  | SignIn(
-      AccessToken.t,
-      list(Team.t),
-      list(Invitation.t),
-      EncryptionHash.t,
-    )
-  | RefreshEntries(list(Entry.t))
-  | Navigate(page)
+  | SignIn(Session.t, list(Team.t), list(Invitation.t))
+  | RefreshEntries(Team.id, list(Entry.t), signedInData)
+  | Navigate(user)
   | SkipLoading
-  | CreateTeam(Team.t, TeamPassword.t)
-  | SelectTeam(Team.t, TeamPassword.t)
-  | SignOut;
+  | CreateTeam(Team.t, signedInData)
+  | SelectTeam(Team.id, signedInData)
+  | SignOut(Session.t);
 
-type flags = {justSignedUp: bool};
+type state = {user};
 
-type teams = list(Team.t);
+let initialState = {user: SignedOut(LoadingPage)};
 
-type entries = list(Entry.t);
-
-type unsavedEntries = list(Entry.t);
-
-type state = {
-  session: Session.t,
-  currentPage: page,
-  flags,
-  invitations: list(Invitation.t),
-  teams,
-  entries,
-  unsavedEntries,
-};
-
-let initialState = {
-  session: Session.signedOut(),
-  currentPage: LoadingPage,
-  flags: {
-    justSignedUp: false,
-  },
-  invitations: [],
-  teams: [],
-  entries: [],
-  unsavedEntries: [],
-};
-
-/* TODO: COMPLICATED REFACTOR: The SignIn action accepts token and encryption hash, when it should be accepting the session, BUT only a signed in session. */
-/* https://stackoverflow.com/questions/24653301/accepting-only-one-variant-of-sum-type-as-ocaml-function-parameter */
 let reducer = (action, state) =>
   switch (action) {
-  | SignIn(token, teams, invitations, encryptionHash) =>
+  | SignIn(session, teams, invitations) =>
     ReasonReact.Update({
-      ...state,
-      currentPage: TeamSelectionPage,
-      session: Session.create(token, encryptionHash),
-      teams,
-      invitations,
-      flags: {
-        justSignedUp: false,
-      },
+      user: SignedIn(TeamSelectionPage, {session, invitations, teams}),
     })
   | SignUp =>
+    ReasonReact.Update({user: SignedOut(SignInPage({justSignedUp: true}))})
+  | Navigate(user) => ReasonReact.Update({user: user})
+  | SkipLoading =>
+    ReasonReact.Update({user: SignedOut(SignInPage({justSignedUp: false}))})
+  | SelectTeam(teamId, signedInData) =>
     ReasonReact.Update({
-      ...state,
-      currentPage: SignInPage,
-      flags: {
-        justSignedUp: true,
-      },
-    })
-  | Navigate(page) => ReasonReact.Update({...state, currentPage: page})
-  | SkipLoading => ReasonReact.Update({...state, currentPage: SignInPage})
-  | SelectTeam(team, teamPassword) =>
-    ReasonReact.Update({
-      ...state,
-      currentPage:
-        DashboardPage(
-          team |> Team.getId |> SelectedTeam.create(teamPassword),
-          EntriesMenu(NothingSelected),
+      user:
+        SignedIn(
+          DashboardPage({
+            teamId,
+            dashboardMenu: EntriesMenu({entryId: None}),
+          }),
+          signedInData,
         ),
     })
-  | CreateTeam(team, teamPassword) =>
+  | CreateTeam(team, signedInData) =>
+    let updatedSignedInData = {
+      ...signedInData,
+      teams: [team, ...signedInData.teams],
+    };
     ReasonReact.Update({
-      ...state,
-      teams: [team, ...state.teams],
-      currentPage:
-        DashboardPage(
-          team |> Team.getId |> SelectedTeam.create(teamPassword),
-          EntriesMenu(NothingSelected),
+      user:
+        SignedIn(
+          DashboardPage({
+            teamId: team |> Team.getId,
+            dashboardMenu: EntriesMenu({entryId: None}),
+          }),
+          updatedSignedInData,
         ),
-    })
-  | SignOut =>
+    });
+  | SignOut(session) =>
+    session |> Session.signOut;
     ReasonReact.Update({
-      ...state,
-      session: state.session |> Session.signOut,
-      currentPage: SignInPage,
-    })
-  | RefreshEntries(newList) =>
-    ReasonReact.Update({...state, entries: newList})
+      user: SignedOut(SignInPage({justSignedUp: false})),
+    });
+  | RefreshEntries(teamId, listOfEntries, signedInData) =>
+    let entryId =
+      switch (listOfEntries) {
+      | [entry, ..._] => Some(entry |> Entry.getId)
+      | [] => None
+      };
+    let updatedTeams =
+      signedInData.teams
+      |> List.map(team =>
+           if (team |> Team.getId == teamId) {
+             team |> Team.addEntries(listOfEntries);
+           } else {
+             team;
+           }
+         );
+    ReasonReact.Update({
+      user:
+        SignedIn(
+          DashboardPage({
+            teamId,
+            dashboardMenu: EntriesMenu({entryId: entryId}),
+          }),
+          {...signedInData, teams: updatedTeams},
+        ),
+    });
   };
 
-let selectedTeam = s =>
-  switch (s.currentPage) {
-  | DashboardPage(selectedTeam, _) =>
-    s.teams
-    |> List.find(t => t |> Team.getId == (selectedTeam |> SelectedTeam.getId))
-  | _ =>
-    failwith(
-      "Turaku.currentTeam was called when on a page other than dashboard!",
-    )
-  };
+let currentTeam = (signedInData, dashboardPageData) =>
+  signedInData.teams
+  |> List.find(team => team |> Team.getId == dashboardPageData.teamId);
+
+let currentEntry = (signedInData, dashboardPageData, entryId) =>
+  currentTeam(signedInData, dashboardPageData)
+  |> Team.getEntries
+  |> List.find(entry => entry |> Entry.getId == entryId);

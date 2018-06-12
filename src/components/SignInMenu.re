@@ -55,7 +55,7 @@ module SignInQuery = [%graphql
   |}
 ];
 
-let handleSubmit = ({Turaku.session}, appSend, event) => {
+let handleSubmit = (appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let email =
     DomUtils.getValueOfInputById("sign-in-form__email") |> Email.create;
@@ -68,50 +68,46 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
   );
   /* Fetch the authentication salt to hash the password before attempting to sign in. */
   GetAuthenticationSaltQuery.make(~email, ())
-  |> Api.sendQuery(session)
+  |> Api.sendPublicQuery
   |> Js.Promise.then_(response => {
        let salt = response##user##authenticationSalt |> Salt.fromString;
        AuthenticationHash.create(password, salt);
      })
   |> Js.Promise.then_(authenticationHash =>
        SignInQuery.make(~email, ~password=authenticationHash, ())
-       |> Api.sendQuery(session)
+       |> Api.sendPublicQuery
      )
   |> Js.Promise.then_(rawResponse => {
        let response = rawResponse##createSession;
        switch (response##session) {
-       | Some(session) =>
-         let encryptionSalt = session##user##encryptionSalt;
+       | Some(rawSession) =>
+         let encryptionSalt = rawSession##user##encryptionSalt;
          EncryptionHash.create(password, encryptionSalt)
          |> Js.Promise.then_(encryptionHash =>
-              Js.Promise.resolve((session, encryptionHash))
+              Js.Promise.resolve((rawSession, encryptionHash))
             );
        | None => Js.Promise.reject(AuthenticationFailure(response##errors))
        };
      })
-  |> Js.Promise.then_(sessionAndHash => {
-       let (session, encryptionHash) = sessionAndHash;
-       let accessToken = session##token |> AccessToken.create;
-       Session.create(accessToken, encryptionHash)
-       |> Session.saveInLocalStorage;
+  |> Js.Promise.then_(rawSessionAndHash => {
+       let (rawSession, encryptionHash) = rawSessionAndHash;
+       let accessToken = rawSession##token |> AccessToken.create;
+       let session = Session.create(accessToken, encryptionHash);
+       let key = session |> Session.getCryptographicKey;
+       Team.decryptTeams(
+         (rawSession, session),
+         key,
+         rawSession##user##teams,
+       );
+     })
+  |> Js.Promise.then_(sessionsAndTeams => {
+       let ((rawSession, session), teams) = sessionsAndTeams;
+       session |> Session.saveInLocalStorage;
        appSend(
          Turaku.SignIn(
-           accessToken,
-           session##user##teams
-           |> Array.map(team =>
-                Team.create(
-                  team##id,
-                  team##name,
-                  EncryptedData.create(
-                    team##encryptedPassword##iv
-                    |> EncryptedData.InitializationVector.fromString,
-                    team##encryptedPassword##ciphertext
-                    |> EncryptedData.CipherText.fromString,
-                  ),
-                )
-              )
-           |> Array.to_list,
-           session##user##incomingInvitations
+           session,
+           teams,
+           rawSession##user##incomingInvitations
            |> Array.map(i =>
                 Invitation.create(
                   i##id,
@@ -120,7 +116,6 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
                 )
               )
            |> Array.to_list,
-           encryptionHash,
          ),
        );
        Js.Promise.resolve();
@@ -128,8 +123,8 @@ let handleSubmit = ({Turaku.session}, appSend, event) => {
   |> ignore;
 };
 
-let signedUpAlert = (appState: Turaku.state) =>
-  if (appState.flags.justSignedUp) {
+let signedUpAlert = (data: Turaku.signInPageData) =>
+  if (data.justSignedUp) {
     <div className="alert alert-success" role="alert">
       (
         str(
@@ -142,16 +137,16 @@ let signedUpAlert = (appState: Turaku.state) =>
   };
 
 let gotoSignUp = (appSend, _event) =>
-  appSend(Turaku.(Navigate(SignUpPage)));
+  appSend(Turaku.(Navigate(Turaku.SignedOut(SignUpPage))));
 
-let make = (~appState, ~appSend, _children) => {
+let make = (~data, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          (signedUpAlert(appState))
-          <form onSubmit=(handleSubmit(appState, appSend))>
+          (signedUpAlert(data))
+          <form onSubmit=(handleSubmit(appSend))>
             <div className="form-group">
               <label htmlFor="sign-in-form__email">
                 (str("Email address"))

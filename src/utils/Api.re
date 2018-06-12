@@ -24,11 +24,10 @@ let fetchPost = (url, accessToken: option(AccessToken.t), body) => {
 };
 
 let sendQuery = (session, query) => {
-  let credentials = session |> Session.getCredentials;
   let accessToken =
-    switch (credentials) {
+    switch (session) {
     | None => None
-    | Some(c) => Some(c |> Session.getAccessToken)
+    | Some(s) => Some(s |> Session.getAccessToken)
     };
   Js.Dict.fromList([
     ("query", Js.Json.string(query##query)),
@@ -56,3 +55,8 @@ let sendQuery = (session, query) => {
        }
      );
 };
+
+let sendPublicQuery = query => sendQuery(None, query);
+
+let sendAuthenticatedQuery = (session, query) =>
+  sendQuery(Some(session), query);
