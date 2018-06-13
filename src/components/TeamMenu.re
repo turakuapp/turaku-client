@@ -17,25 +17,25 @@ let toggleInviteForm = (send, event) => {
   send(ToggleInviteForm);
 };
 
-let invitationToggle = (formVisible, send) =>
-  if (formVisible) {
+let invitationToggle = (state, send) =>
+  if (state.inviteFormVisible) {
     ReasonReact.nullElement;
   } else {
-    <button className="btn btn-primary" onClick=(toggleInviteForm(send))>
-      ("Invite a team member" |> str)
+    <button
+      className="btn btn-primary btn-sm" onClick=(toggleInviteForm(send))>
+      ("Invite" |> str)
     </button>;
   };
 
-let listOfUsers = bag => {
-  let users =
+let teamMembers = (bag, appSend) => {
+  let teamMembers =
     Turaku.currentTeam(bag.userData, bag.dashboardPageData)
     |> Team.teamMembers;
-  if (users |> List.length > 0) {
+  if (teamMembers |> List.length > 0) {
     <div>
-      <h2> ("Team Members" |> str) </h2>
       <ul>
         (
-          users
+          teamMembers
           |> List.map(teamMember =>
                <li key=(teamMember |> TeamMember.id)>
                  (teamMember |> TeamMember.name |> str)
@@ -55,9 +55,39 @@ let listOfUsers = bag => {
   };
 };
 
-let listOfInvitedUsers = bag => ReasonReact.nullElement;
+let invitedMembers = (bag, appSend) => ReasonReact.nullElement;
 
-let invitationForm = (bag, appSend) => ReasonReact.nullElement;
+let inviteUser = (bag, appSend, event) => {
+  Js.log("Invite a new user!");
+  event |> DomUtils.preventEventDefault;
+};
+
+let invitationForm = (bag, appSend, state, send) =>
+  if (state.inviteFormVisible) {
+    <form onSubmit=(inviteUser(bag, appSend))>
+      <div className="form-group">
+        <label htmlFor="users__invite-form-email">
+          ("Email Address" |> str)
+        </label>
+        <input
+          className="form-control"
+          id="users__invite-form-email"
+          placeholder="Enter your team member's email address"
+          _type="email"
+          required=(true |> Js.Boolean.to_js_boolean)
+        />
+      </div>
+      <button _type="submit" className="btn btn-primary">
+        ("Invite" |> str)
+      </button>
+      <button
+        className="btn btn-secondary ml-2" onClick=(toggleInviteForm(send))>
+        ("Cancel" |> str)
+      </button>
+    </form>;
+  } else {
+    ReasonReact.nullElement;
+  };
 
 module UsersQuery = [%graphql
   {|
@@ -112,12 +142,24 @@ let make = (~bag, ~appSend, _children) => {
       ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
     },
   render: ({state, send}) =>
-    <div>
-      (listOfUsers(bag))
-      (listOfInvitedUsers(bag))
-      (invitationToggle(state.inviteFormVisible, send))
-      (invitationForm(bag, appSend))
-    </div>,
+    <div className="row">
+
+        <div className="col-3">
+          <div className="team-menu__members">
+            <div className="pt-2">
+              <input _type="text" placeholder="Search" className="mr-2" />
+              (invitationToggle(state, send))
+            </div>
+            (invitationForm(bag, appSend, state, send))
+            (invitedMembers(bag, appSend))
+            (teamMembers(bag, appSend))
+          </div>
+        </div>
+        <div className="col entry-editor__container">
+          ("Permissions go here" |> str)
+        </div>
+      </div>,
+      /* (bag.entryMenuData.entryId |> getSelection(bag, appSend)) */
 };
 /* export default class Users extends React.Component {
      constructor(props) {
@@ -231,29 +273,7 @@ let make = (~bag, ~appSend, _children) => {
 
      inviteForm() {
        return (
-         <form onSubmit={this.inviteUser}>
-           <div className="form-group">
-             <label htmlFor="users__invite-form-email">Email Address</label>
-             <input
-               className="form-control"
-               id="users__invite-form-email"
-               placeholder="Enter your team member's email address"
-               type="email"
-               required={true}
-             />
-           </div>
-
-           <button type="submit" className="btn btn-primary">
-             Invite
-           </button>
-
-           <button
-             className="btn btn-secondary ml-2"
-             onClick={this.hideInviteForm}
-           >
-             Cancel
-           </button>
-         </form>
+         !!! EXTRACTED !!!
        );
      }
 

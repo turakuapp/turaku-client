@@ -71,7 +71,6 @@ let make = (~bag: bag, ~appSend, _children) => {
             className="dashboard__navlink">
             (str("Members"))
           </div>
-          <div className="dashboard__navlink"> (str("Permissions")) </div>
           <hr />
           <div
             className="dashboard__navlink"

@@ -31,10 +31,16 @@ let navigateToAllEntries = (bag, appSend, event) => {
 let make = (~bag, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div
-      onClick=(navigateToAllEntries(bag, appSend))
-      className="dashboard__navlink">
-      (str("All tags"))
+    <div className="pt-3">
+      <div
+        onClick=(navigateToAllEntries(bag, appSend))
+        className="dashboard__navlink">
+        (str("All tags"))
+      </div>
+      <div className="dashboard__navlink"> ("Tag 1" |> str) </div>
+      <div className="dashboard__navlink"> ("Tag 2" |> str) </div>
+      <div className="dashboard__navlink"> ("Tag 3" |> str) </div>
+      <div className="dashboard__navlink"> ("..." |> str) </div>
     </div>,
 };
 /* export default class Tags extends React.Component {
