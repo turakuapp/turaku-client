@@ -13,7 +13,7 @@ let component = ReasonReact.statelessComponent("EntryChoice");
 
 let isCurrentChoice = bag =>
   switch (bag.entryMenuData.entryId) {
-  | Some(id) when id == (bag.entry |> Entry.getId) => true
+  | Some(id) when id == (bag.entry |> Entry.id) => true
   | Some(_otherId) => false
   | None => false
   };
@@ -29,11 +29,11 @@ let containerClasses = bag => {
 
 let chooseEntry = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Js.log("Clicked on event choice with ID: " ++ (bag.entry |> Entry.getId));
+  Js.log("Clicked on event choice with ID: " ++ (bag.entry |> Entry.id));
   let page =
     Turaku.DashboardPage({
       ...bag.dashboardPageData,
-      menu: Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.getId)}),
+      menu: Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.id)}),
     });
   if (! isCurrentChoice(bag)) {
     appSend(Turaku.Navigate(SignedInUser({...bag.userData, page})));
@@ -41,7 +41,7 @@ let chooseEntry = (bag, appSend, event) => {
 };
 
 let title = (entry: Entry.t) => {
-  let trimmedTitle = entry |> Entry.getTitle |> String.trim;
+  let trimmedTitle = entry |> Entry.title |> String.trim;
   switch (trimmedTitle) {
   | "" => <em> (str("Nameless entry")) </em>
   | title => <span> (str(title)) </span>

@@ -18,6 +18,7 @@ let entryChoices = (bag, appSend) => {
   |> Team.entries
   |> List.map(entry =>
        <EntryChoice
+         key=(entry |> Entry.id)
          bag={
            userData: bag.userData,
            dashboardPageData: bag.dashboardPageData,

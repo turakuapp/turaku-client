@@ -7,10 +7,35 @@ type bag = {
   dashboardPageData: Turaku.dashboardPageData,
 };
 
-let make = (~bag: bag, ~appSend, _children) => {
+let navigateToAllEntries = (bag, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  let entryId = Turaku.someEntry(bag.userData, bag.dashboardPageData);
+  switch (bag.dashboardPageData.menu) {
+  | EntriesMenu(_) => ()
+  | TeamMenu =>
+    appSend(
+      Turaku.Navigate(
+        SignedInUser({
+          ...bag.userData,
+          page:
+            DashboardPage({
+              ...bag.dashboardPageData,
+              menu: EntriesMenu({entryId: entryId}),
+            }),
+        }),
+      ),
+    )
+  };
+};
+
+let make = (~bag, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="dashboard__navlink"> (str("All tags")) </div>,
+    <div
+      onClick=(navigateToAllEntries(bag, appSend))
+      className="dashboard__navlink">
+      (str("All tags"))
+    </div>,
 };
 /* export default class Tags extends React.Component {
      componentDidMount() {

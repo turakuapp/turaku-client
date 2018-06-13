@@ -2,10 +2,10 @@ type t;
 
 type id = string;
 
-let getId: t => id;
+let id: t => id;
 
-let getTitle: t => string;
+let title: t => string;
 
-let getFields: t => list(Field.t);
+let fields: t => list(Field.t);
 
 module Codec: {let decode: (id, Js.Json.t) => t;};

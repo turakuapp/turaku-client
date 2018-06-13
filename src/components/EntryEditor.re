@@ -25,7 +25,7 @@ let fields = (bag, entry, appSend) =>
         }
         appSend
       />,
-    entry |> Entry.getFields,
+    entry |> Entry.fields,
   );
 
 let make = (~bag, ~appSend, _children) => {
@@ -39,7 +39,7 @@ let make = (~bag, ~appSend, _children) => {
           <div className="col offset-sm-2">
             <input
               _type="text"
-              value=(entry |> Entry.getTitle)
+              value=(entry |> Entry.title)
               onChange=handleTitleChange
               className="my-2"
               placeholder="Entry Title"

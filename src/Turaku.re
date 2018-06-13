@@ -91,7 +91,7 @@ let reducer = (action, _state) =>
   | RefreshEntries(teamId, entries, userData) =>
     let entryId =
       switch (entries) {
-      | [entry, ..._] => Some(entry |> Entry.getId)
+      | [entry, ..._] => Some(entry |> Entry.id)
       | [] => None
       };
     let updatedTeams =
@@ -134,4 +134,12 @@ let currentTeam = (userData, dashboardPageData) =>
 let currentEntry = (userData, dashboardPageData, entryId) =>
   currentTeam(userData, dashboardPageData)
   |> Team.entries
-  |> List.find(entry => entry |> Entry.getId == entryId);
+  |> List.find(entry => entry |> Entry.id == entryId);
+
+let someEntry = (userData, dashboardPageData) => {
+  let entries = currentTeam(userData, dashboardPageData) |> Team.entries;
+  switch (entries) {
+  | [entry, ..._] => Some(entry |> Entry.id)
+  | [] => None
+  };
+};

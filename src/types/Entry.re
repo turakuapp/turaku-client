@@ -14,8 +14,8 @@ module Codec = {
     };
 };
 
-let getId = t => t.id;
+let id = t => t.id;
 
-let getTitle = t => t.title;
+let title = t => t.title;
 
-let getFields = t => t.fields;
+let fields = t => t.fields;
