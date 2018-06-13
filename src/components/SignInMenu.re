@@ -62,19 +62,23 @@ let handleSubmit = (appSend, event) => {
   let password = DomUtils.getValueOfInputById("sign-in-form__password");
   Js.log(
     "Attempting to sign in with email "
-    ++ email
+    ++ (email |> Email.toString)
     ++ " and password "
     ++ password,
   );
   /* Fetch the authentication salt to hash the password before attempting to sign in. */
-  GetAuthenticationSaltQuery.make(~email, ())
+  GetAuthenticationSaltQuery.make(~email=email |> Email.toString, ())
   |> Api.sendPublicQuery
   |> Js.Promise.then_(response => {
        let salt = response##user##authenticationSalt |> Salt.fromString;
        AuthenticationHash.create(password, salt);
      })
   |> Js.Promise.then_(authenticationHash =>
-       SignInQuery.make(~email, ~password=authenticationHash, ())
+       SignInQuery.make(
+         ~email=email |> Email.toString,
+         ~password=authenticationHash,
+         (),
+       )
        |> Api.sendPublicQuery
      )
   |> Js.Promise.then_(rawResponse => {
@@ -112,7 +116,7 @@ let handleSubmit = (appSend, event) => {
                 Invitation.create(
                   i##id,
                   ~teamName=i##team##name,
-                  ~userEmail=i##invitingUser##email,
+                  ~userEmail=i##invitingUser##email |> Email.create,
                 )
               )
            |> Array.to_list,

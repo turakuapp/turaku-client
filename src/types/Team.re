@@ -3,21 +3,32 @@ type t = {
   name: string,
   password: TeamPassword.t,
   entries: list(Entry.t),
+  teamMembers: list(TeamMember.t),
 }
 and id = string;
 
-let getName = t => t.name;
+let name = t => t.name;
 
-let getId = t => t.id;
+let id = t => t.id;
 
-let getEntries = t => t.entries;
+let entries = t => t.entries;
 
-let create = (id, name, password) => {id, name, password, entries: []};
+let teamMembers = t => t.teamMembers;
 
-let getCryptographicKey = t =>
+let create = (id, name, password) => {
+  id,
+  name,
+  password,
+  entries: [],
+  teamMembers: [],
+};
+
+let createCryptographicKey = t =>
   t.password |> CryptographicKey.keyFromTeamPassword;
 
 let addEntries = (entries, t) => {...t, entries};
+
+let addTeamMembers = (teamMembers, t) => {...t, teamMembers};
 
 let decryptTeams = (response, decryptionKey, encryptedTeams) => {
   let rec aux = (decryptedTeams, teams) =>

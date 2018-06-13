@@ -15,7 +15,7 @@ let addEntry = _event => Js.log("Add an entry, maybe?");
 let entryChoices = (bag, appSend) => {
   let team = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
   team
-  |> Team.getEntries
+  |> Team.entries
   |> List.map(entry =>
        <EntryChoice
          bag={
@@ -75,20 +75,20 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
 
 let loadEntries = (bag, appSend) => {
   let selectedTeam = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
-  EntriesQuery.make(~teamId=selectedTeam |> Team.getId, ())
+  EntriesQuery.make(~teamId=selectedTeam |> Team.id, ())
   |> Api.sendAuthenticatedQuery(bag.userData.session)
   |> Js.Promise.then_(response => {
        Js.log(
          "Loaded entries! Count: "
          ++ (response##team##entries |> Array.length |> string_of_int),
        );
-       let decryptionKey = selectedTeam |> Team.getCryptographicKey;
+       let decryptionKey = selectedTeam |> Team.createCryptographicKey;
        response##team##entries |> decryptEntries(decryptionKey);
      })
   |> Js.Promise.then_(decryptedEntries => {
        appSend(
          Turaku.RefreshEntries(
-           selectedTeam |> Team.getId,
+           selectedTeam |> Team.id,
            decryptedEntries,
            bag.userData,
          ),

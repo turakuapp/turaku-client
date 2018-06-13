@@ -4,7 +4,7 @@ type entryMenuData = {entryId: option(Entry.id)};
 
 type dashboardMenu =
   | EntriesMenu(entryMenuData)
-  | UsersMenu;
+  | TeamMenu;
 
 type dashboardPageData = {
   teamId: Team.id,
@@ -35,6 +35,7 @@ type action =
   | SignUp
   | SignIn(Session.t, list(Team.t), list(Invitation.t))
   | RefreshEntries(Team.id, list(Entry.t), userData)
+  | RefreshTeamMembers(Team.id, list(TeamMember.t), userData)
   | Navigate(user)
   | SkipLoading
   | CreateTeam(Team.t, userData)
@@ -76,7 +77,7 @@ let reducer = (action, _state) =>
           ...userData,
           page:
             DashboardPage({
-              teamId: team |> Team.getId,
+              teamId: team |> Team.id,
               menu: EntriesMenu({entryId: None}),
             }),
           teams: [team, ...userData.teams],
@@ -87,17 +88,17 @@ let reducer = (action, _state) =>
     ReasonReact.Update({
       user: SignedOutUser(SignInPage({justSignedUp: false})),
     });
-  | RefreshEntries(teamId, listOfEntries, userData) =>
+  | RefreshEntries(teamId, entries, userData) =>
     let entryId =
-      switch (listOfEntries) {
+      switch (entries) {
       | [entry, ..._] => Some(entry |> Entry.getId)
       | [] => None
       };
     let updatedTeams =
       userData.teams
       |> List.map(team =>
-           if (team |> Team.getId == teamId) {
-             team |> Team.addEntries(listOfEntries);
+           if (team |> Team.id == teamId) {
+             team |> Team.addEntries(entries);
            } else {
              team;
            }
@@ -111,13 +112,26 @@ let reducer = (action, _state) =>
             DashboardPage({teamId, menu: EntriesMenu({entryId: entryId})}),
         }),
     });
+  | RefreshTeamMembers(teamId, teamMembers, userData) =>
+    let updatedTeams =
+      userData.teams
+      |> List.map(team =>
+           if (team |> Team.id == teamId) {
+             team |> Team.addTeamMembers(teamMembers);
+           } else {
+             team;
+           }
+         );
+    ReasonReact.Update({
+      user: SignedInUser({...userData, teams: updatedTeams}),
+    });
   };
 
 let currentTeam = (userData, dashboardPageData) =>
   userData.teams
-  |> List.find(team => team |> Team.getId == dashboardPageData.teamId);
+  |> List.find(team => team |> Team.id == dashboardPageData.teamId);
 
 let currentEntry = (userData, dashboardPageData, entryId) =>
   currentTeam(userData, dashboardPageData)
-  |> Team.getEntries
+  |> Team.entries
   |> List.find(entry => entry |> Entry.getId == entryId);

@@ -52,11 +52,11 @@ let teams = (bag, appSend) =>
           (
             bag.userData.teams
             |> List.map((team: Team.t) =>
-                 <li key=(team |> Team.getId) className="mb-1">
+                 <li key=(team |> Team.id) className="mb-1">
                    <button
-                     onClick=(selectTeam(bag, appSend, team |> Team.getId))
+                     onClick=(selectTeam(bag, appSend, team |> Team.id))
                      className="btn btn-sm btn-outline-dark">
-                     (str(team |> Team.getName))
+                     (str(team |> Team.name))
                    </button>
                  </li>
                )

@@ -20,9 +20,11 @@ let getMenu = (bag, appSend) =>
       }
       appSend
     />
-  | UsersMenu =>
-    /* <Users appState appSend /> */
-    "Users menu should show up here" |> str
+  | TeamMenu =>
+    <TeamMenu
+      bag={userData: bag.userData, dashboardPageData: bag.dashboardPageData}
+      appSend
+    />
   };
 
 let navigateToTeams = (bag, appSend, event) => {
@@ -34,16 +36,20 @@ let navigateToTeams = (bag, appSend, event) => {
   );
 };
 
-let navigateToUsers = (bag, appSend, event) => {
+let navigateToTeamMembers = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  appSend(
-    Turaku.Navigate(
-      SignedInUser({
-        ...bag.userData,
-        page: DashboardPage({...bag.dashboardPageData, menu: UsersMenu}),
-      }),
-    ),
-  );
+  switch (bag.dashboardPageData.menu) {
+  | TeamMenu => ()
+  | EntriesMenu(_) =>
+    appSend(
+      Turaku.Navigate(
+        SignedInUser({
+          ...bag.userData,
+          page: DashboardPage({...bag.dashboardPageData, menu: TeamMenu}),
+        }),
+      ),
+    )
+  };
 };
 
 let make = (~bag: bag, ~appSend, _children) => {
@@ -61,14 +67,16 @@ let make = (~bag: bag, ~appSend, _children) => {
           />
           <hr />
           <div
+            onClick=(navigateToTeamMembers(bag, appSend))
+            className="dashboard__navlink">
+            (str("Members"))
+          </div>
+          <div className="dashboard__navlink"> (str("Permissions")) </div>
+          <hr />
+          <div
             className="dashboard__navlink"
             onClick=(navigateToTeams(bag, appSend))>
-            (str("Teams"))
-          </div>
-          <div
-            onClick=(navigateToUsers(bag, appSend))
-            className="dashboard__navlink">
-            (str("Users"))
+            (str("Switch Team"))
           </div>
           <hr />
           <SignOutButton

@@ -33,7 +33,7 @@ let make = (~bag, ~appSend, _children) => {
     Turaku.currentEntry(bag.userData, bag.dashboardPageData, bag.entryId);
   {
     ...component,
-    render: self =>
+    render: _self =>
       <div>
         <div className="row">
           <div className="col offset-sm-2">

@@ -37,7 +37,9 @@ let make = (~bag, ~appSend, _children) => {
         </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           (str("from"))
-          <code> (str(bag.invitation |> Invitation.email)) </code>
+          <code>
+            (bag.invitation |> Invitation.email |> Email.toString |> str)
+          </code>
         </h6>
         <p className="card-text">
           <input

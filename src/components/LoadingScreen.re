@@ -59,7 +59,7 @@ let make = (~appSend, _children) => {
                   Invitation.create(
                     i##id,
                     ~teamName=i##team##name,
-                    ~userEmail=i##invitingUser##email,
+                    ~userEmail=i##invitingUser##email |> Email.create,
                   )
                 )
              |> Array.to_list;

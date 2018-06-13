@@ -4,7 +4,7 @@ type t = {
   invitingUser,
 }
 and invitingTeam = {name: string}
-and invitingUser = {email: string}
+and invitingUser = {email: Email.t}
 and id = string;
 
 let email = invitation => invitation.invitingUser.email;
