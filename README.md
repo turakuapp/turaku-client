@@ -1,6 +1,14 @@
 # Turaku Client
 
-## Development
+## Development Status
+
+* ReactJS Prototype: **Completed in Dec 2017**
+* ReasonML + GraphQL conversion: **In Progress**
+* User permissions implementation
+* Private Alpha
+* Public Beta
+
+## Dev Setup
 
 ### Execution
 
