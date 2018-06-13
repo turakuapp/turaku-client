@@ -8,7 +8,7 @@ type dashboardMenu =
 
 type dashboardPageData = {
   teamId: Team.id,
-  dashboardMenu,
+  menu: dashboardMenu,
 };
 
 type signedInPage =
@@ -24,11 +24,12 @@ type userData = {
   session: Session.t,
   invitations: list(Invitation.t),
   teams: list(Team.t),
+  page: signedInPage,
 };
 
 type user =
   | SignedOutUser(signedOutPage)
-  | SignedInUser(signedInPage, userData);
+  | SignedInUser(userData);
 
 type action =
   | SignUp
@@ -44,11 +45,12 @@ type state = {user};
 
 let initialState = {user: SignedOutUser(LoadingPage)};
 
-let reducer = (action, state) =>
+let reducer = (action, _state) =>
   switch (action) {
   | SignIn(session, teams, invitations) =>
     ReasonReact.Update({
-      user: SignedInUser(TeamSelectionPage, {session, invitations, teams}),
+      user:
+        SignedInUser({page: TeamSelectionPage, session, invitations, teams}),
     })
   | SignUp =>
     ReasonReact.Update({
@@ -62,26 +64,24 @@ let reducer = (action, state) =>
   | SelectTeam(teamId, userData) =>
     ReasonReact.Update({
       user:
-        SignedInUser(
-          DashboardPage({
-            teamId,
-            dashboardMenu: EntriesMenu({entryId: None}),
-          }),
-          userData,
-        ),
+        SignedInUser({
+          ...userData,
+          page: DashboardPage({teamId, menu: EntriesMenu({entryId: None})}),
+        }),
     })
   | CreateTeam(team, userData) =>
-    let updatedUserData = {...userData, teams: [team, ...userData.teams]};
     ReasonReact.Update({
       user:
-        SignedInUser(
-          DashboardPage({
-            teamId: team |> Team.getId,
-            dashboardMenu: EntriesMenu({entryId: None}),
-          }),
-          updatedUserData,
-        ),
-    });
+        SignedInUser({
+          ...userData,
+          page:
+            DashboardPage({
+              teamId: team |> Team.getId,
+              menu: EntriesMenu({entryId: None}),
+            }),
+          teams: [team, ...userData.teams],
+        }),
+    })
   | SignOut(session) =>
     session |> Session.signOut;
     ReasonReact.Update({
@@ -104,13 +104,12 @@ let reducer = (action, state) =>
          );
     ReasonReact.Update({
       user:
-        SignedInUser(
-          DashboardPage({
-            teamId,
-            dashboardMenu: EntriesMenu({entryId: entryId}),
-          }),
-          {...userData, teams: updatedTeams},
-        ),
+        SignedInUser({
+          ...userData,
+          teams: updatedTeams,
+          page:
+            DashboardPage({teamId, menu: EntriesMenu({entryId: entryId})}),
+        }),
     });
   };
 

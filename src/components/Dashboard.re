@@ -10,7 +10,7 @@ type bag = {
 let component = ReasonReact.statelessComponent("Dashboard");
 
 let getMenu = (bag, appSend) =>
-  switch (bag.dashboardPageData.dashboardMenu) {
+  switch (bag.dashboardPageData.menu) {
   | Turaku.EntriesMenu(entryMenuData) =>
     <Entries
       bag={
@@ -20,12 +20,30 @@ let getMenu = (bag, appSend) =>
       }
       appSend
     />
-  | UsersMenu => "Users menu should show up here" |> str
+  | UsersMenu =>
+    /* <Users appState appSend /> */
+    "Users menu should show up here" |> str
   };
 
 let navigateToTeams = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  appSend(Turaku.Navigate(SignedInUser(TeamSelectionPage, bag.userData)));
+  appSend(
+    Turaku.Navigate(
+      SignedInUser({...bag.userData, page: TeamSelectionPage}),
+    ),
+  );
+};
+
+let navigateToUsers = (bag, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  appSend(
+    Turaku.Navigate(
+      SignedInUser({
+        ...bag.userData,
+        page: DashboardPage({...bag.dashboardPageData, menu: UsersMenu}),
+      }),
+    ),
+  );
 };
 
 let make = (~bag: bag, ~appSend, _children) => {
@@ -47,7 +65,11 @@ let make = (~bag: bag, ~appSend, _children) => {
             onClick=(navigateToTeams(bag, appSend))>
             (str("Teams"))
           </div>
-          <div className="dashboard__navlink"> (str("Users")) </div>
+          <div
+            onClick=(navigateToUsers(bag, appSend))
+            className="dashboard__navlink">
+            (str("Users"))
+          </div>
           <hr />
           <SignOutButton
             bag={
@@ -59,7 +81,6 @@ let make = (~bag: bag, ~appSend, _children) => {
         </div>
         <div className="col-10 dashboard__content">
           (getMenu(bag, appSend))
-          /* <Users appState appSend /> */
           <span />
         </div>
       </div>

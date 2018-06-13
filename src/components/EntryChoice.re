@@ -30,14 +30,13 @@ let containerClasses = bag => {
 let chooseEntry = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   Js.log("Clicked on event choice with ID: " ++ (bag.entry |> Entry.getId));
-  let updatedPage =
+  let page =
     Turaku.DashboardPage({
       ...bag.dashboardPageData,
-      dashboardMenu:
-        Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.getId)}),
+      menu: Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.getId)}),
     });
   if (! isCurrentChoice(bag)) {
-    appSend(Turaku.Navigate(SignedInUser(updatedPage, bag.userData)));
+    appSend(Turaku.Navigate(SignedInUser({...bag.userData, page})));
   };
 };
 

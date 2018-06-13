@@ -12,8 +12,8 @@ let currentComponent = (state, send) =>
     | SignInPage(data) => <SignInMenu data appSend=send />
     | SignUpPage => <SignUpMenu appSend=send />
     }
-  | SignedInUser(page, userData) =>
-    switch (page) {
+  | SignedInUser(userData) =>
+    switch (userData.page) {
     | TeamSelectionPage =>
       <TeamSelection bag={userData: userData} appSend=send />
     | DashboardPage(dashboardPageData) =>
