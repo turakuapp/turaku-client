@@ -10,3 +10,12 @@
 .dashboard__entries {
   height: 100vh;
 }
+
+.dashboard__navlink {
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.dashboard__navlink:hover {
+  background-color: #eee;
+}

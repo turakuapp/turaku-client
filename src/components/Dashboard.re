@@ -23,6 +23,11 @@ let getMenu = (bag, appSend) =>
   | UsersMenu => "Users menu should show up here" |> str
   };
 
+let navigateToTeams = (bag, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  appSend(Turaku.Navigate(SignedInUser(TeamSelectionPage, bag.userData)));
+};
+
 let make = (~bag: bag, ~appSend, _children) => {
   ...component,
   render: _self =>
@@ -37,8 +42,12 @@ let make = (~bag: bag, ~appSend, _children) => {
             appSend
           />
           <hr />
-          <div> <a href="#"> (str("Teams")) </a> </div>
-          <div> <a href="#"> (str("Users")) </a> </div>
+          <div
+            className="dashboard__navlink"
+            onClick=(navigateToTeams(bag, appSend))>
+            (str("Teams"))
+          </div>
+          <div className="dashboard__navlink"> (str("Users")) </div>
           <hr />
           <SignOutButton
             bag={

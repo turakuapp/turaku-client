@@ -9,7 +9,8 @@ type bag = {
 
 let make = (~bag: bag, ~appSend, _children) => {
   ...component,
-  render: _self => <div> (str("Tags")) </div>,
+  render: _self =>
+    <div className="dashboard__navlink"> (str("All tags")) </div>,
 };
 /* export default class Tags extends React.Component {
      componentDidMount() {
