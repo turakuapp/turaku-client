@@ -3,7 +3,7 @@
 let str = ReasonReact.stringToElement;
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
 };
@@ -13,13 +13,13 @@ let component = ReasonReact.statelessComponent("Entries");
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
 let entryChoices = (bag, appSend) => {
-  let team = Turaku.currentTeam(bag.signedInData, bag.dashboardPageData);
+  let team = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
   team
   |> Team.getEntries
   |> List.map(entry =>
        <EntryChoice
          bag={
-           signedInData: bag.signedInData,
+           userData: bag.userData,
            dashboardPageData: bag.dashboardPageData,
            entryMenuData: bag.entryMenuData,
            entry,
@@ -74,10 +74,9 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
 };
 
 let loadEntries = (bag, appSend) => {
-  let selectedTeam =
-    Turaku.currentTeam(bag.signedInData, bag.dashboardPageData);
+  let selectedTeam = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
   EntriesQuery.make(~teamId=selectedTeam |> Team.getId, ())
-  |> Api.sendAuthenticatedQuery(bag.signedInData.session)
+  |> Api.sendAuthenticatedQuery(bag.userData.session)
   |> Js.Promise.then_(response => {
        Js.log(
          "Loaded entries! Count: "
@@ -91,7 +90,7 @@ let loadEntries = (bag, appSend) => {
          Turaku.RefreshEntries(
            selectedTeam |> Team.getId,
            decryptedEntries,
-           bag.signedInData,
+           bag.userData,
          ),
        );
        Js.Promise.resolve();
@@ -101,7 +100,16 @@ let loadEntries = (bag, appSend) => {
 
 let getSelection = (bag, appSend, entryId) =>
   switch (entryId) {
-  | Some(id) => <EntryEditor bag={...bag, entryId: id} appSend />
+  | Some(id) =>
+    <EntryEditor
+      bag={
+        userData: bag.userData,
+        dashboardPageData: bag.dashboardPageData,
+        entryMenuData: bag.entryMenuData,
+        entryId: id,
+      }
+      appSend
+    />
   | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 

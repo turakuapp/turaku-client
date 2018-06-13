@@ -1,7 +1,7 @@
 let str = ReasonReact.stringToElement;
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
   entry: Entry.t,

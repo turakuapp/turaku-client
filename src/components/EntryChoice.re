@@ -3,7 +3,7 @@
 let str = ReasonReact.stringToElement;
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
   entry: Entry.t,
@@ -37,7 +37,7 @@ let chooseEntry = (bag, appSend, event) => {
         Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.getId)}),
     });
   if (! isCurrentChoice(bag)) {
-    appSend(Turaku.Navigate(SignedIn(updatedPage, bag.signedInData)));
+    appSend(Turaku.Navigate(SignedInUser(updatedPage, bag.userData)));
   };
 };
 
@@ -51,7 +51,7 @@ let title = (entry: Entry.t) => {
 
 let make = (~bag, ~appSend, _children) => {
   ...component,
-  render: self =>
+  render: _self =>
     <div
       className=(containerClasses(bag)) onClick=(chooseEntry(bag, appSend))>
       (bag.entry |> title)

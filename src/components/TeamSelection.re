@@ -12,20 +12,20 @@ type action =
 
 let str = ReasonReact.stringToElement;
 
-type bag = {signedInData: Turaku.signedInData};
+type bag = {userData: Turaku.userData};
 
 let component = ReasonReact.reducerComponent("TeamSelection");
 
 let invitations = (bag, appSend) =>
-  if (bag.signedInData.invitations |> List.length > 0) {
+  if (bag.userData.invitations |> List.length > 0) {
     <div>
       <h2> (str("Invitations")) </h2>
       <p> (str("You have been invited to join:")) </p>
       (
-        bag.signedInData.invitations
+        bag.userData.invitations
         |> List.map(invitation =>
              <IncomingInvitation
-               bag={signedInData: bag.signedInData, invitation}
+               bag={userData: bag.userData, invitation}
                appSend
              />
            )
@@ -40,17 +40,17 @@ let invitations = (bag, appSend) =>
 let selectTeam = (bag, appSend, team, _event) => {
   /* TODO: See how to select a team with old selectTeam function below. */
   Js.log2("Selecting Team with ID: ", team);
-  appSend(Turaku.SelectTeam(team, bag.signedInData));
+  appSend(Turaku.SelectTeam(team, bag.userData));
 };
 
 let teams = (bag, appSend) =>
-  if (bag.signedInData.teams |> List.length > 0) {
+  if (bag.userData.teams |> List.length > 0) {
     <div>
       <h2> (str("Your Teams")) </h2>
       <div>
         <ul className="mt-3 teams__ul">
           (
-            bag.signedInData.teams
+            bag.userData.teams
             |> List.map((team: Team.t) =>
                  <li key=(team |> Team.getId) className="mb-1">
                    <button
@@ -102,7 +102,7 @@ let createTeam = (bag, appSend, state, event) => {
     ++ " and password (B64) "
     ++ (state.teamPassword |> TeamPassword.toString),
   );
-  let encryptionKey = bag.signedInData.session |> Session.getCryptographicKey;
+  let encryptionKey = bag.userData.session |> Session.getCryptographicKey;
   EncryptedData.encrypt(
     encryptionKey,
     state.teamPassword |> TeamPassword.toString,
@@ -110,18 +110,19 @@ let createTeam = (bag, appSend, state, event) => {
   |> Js.Promise.then_(encryptedData =>
        CreateTeamQuery.make(
          ~name=state.teamName,
-         ~iv=encryptedData.iv |> EncryptedData.InitializationVector.toString,
+         ~iv=
+           encryptedData
+           |> EncryptedData.getIV
+           |> EncryptedData.InitializationVector.toString,
          ~ciphertext=
-           encryptedData.ciphertext |> EncryptedData.CipherText.toString,
+           encryptedData
+           |> EncryptedData.getCiphertext
+           |> EncryptedData.CipherText.toString,
          (),
        )
-       |> Api.sendAuthenticatedQuery(bag.signedInData.session)
-       |> Js.Promise.then_(response =>
-            Js.Promise.resolve((response, encryptedData))
-          )
+       |> Api.sendAuthenticatedQuery(bag.userData.session)
      )
-  |> Js.Promise.then_(responseAndEncryptedData => {
-       let (response, encryptedData) = responseAndEncryptedData;
+  |> Js.Promise.then_(response => {
        let team = response##createTeam##team;
        switch (team) {
        | None =>
@@ -130,8 +131,8 @@ let createTeam = (bag, appSend, state, event) => {
            response##createTeam##errors |> Js.Array.joinWith(", "),
          )
        | Some(t) =>
-         let team = Team.create(t##id, state.teamName, encryptedData);
-         appSend(Turaku.CreateTeam(team, bag.signedInData));
+         let team = Team.create(t##id, state.teamName, state.teamPassword);
+         appSend(Turaku.CreateTeam(team, bag.userData));
        };
        Js.Promise.resolve();
      })

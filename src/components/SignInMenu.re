@@ -137,7 +137,7 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
   };
 
 let gotoSignUp = (appSend, _event) =>
-  appSend(Turaku.(Navigate(Turaku.SignedOut(SignUpPage))));
+  appSend(Turaku.(Navigate(Turaku.SignedOutUser(SignUpPage))));
 
 let make = (~data, ~appSend, _children) => {
   ...component,

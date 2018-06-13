@@ -6,7 +6,7 @@ type action =
   | UpdateTeamPassword(string);
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   invitation: Invitation.t,
 };
 

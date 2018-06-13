@@ -6,17 +6,18 @@ let str = ReasonReact.stringToElement;
 
 let currentComponent = (state, send) =>
   switch (state.user) {
-  | SignedOut(page) =>
+  | SignedOutUser(page) =>
     switch (page) {
     | LoadingPage => <LoadingScreen appSend=send />
     | SignInPage(data) => <SignInMenu data appSend=send />
     | SignUpPage => <SignUpMenu appSend=send />
     }
-  | SignedIn(page, signedInData) =>
+  | SignedInUser(page, userData) =>
     switch (page) {
-    | TeamSelectionPage => <TeamSelection signedInData appSend=send />
-    | DashboardPage(dashboardData) =>
-      <Dashboard signedInData=data dashboardData />
+    | TeamSelectionPage =>
+      <TeamSelection bag={userData: userData} appSend=send />
+    | DashboardPage(dashboardPageData) =>
+      <Dashboard bag={userData, dashboardPageData} appSend=send />
     }
   };
 

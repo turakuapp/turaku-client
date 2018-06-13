@@ -67,3 +67,7 @@ let decrypt = (key, t) =>
      );
 
 let create = (iv, ciphertext) => {iv, ciphertext};
+
+let getIV = t => t.iv;
+
+let getCiphertext = t => t.ciphertext;

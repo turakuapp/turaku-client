@@ -1,7 +1,7 @@
 let str = ReasonReact.stringToElement;
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
   entryId: Entry.id,
@@ -17,7 +17,7 @@ let fields = (bag, entry, appSend) =>
       <EntryField
         key=(field |> Field.getKey)
         bag={
-          signedInData: bag.signedInData,
+          userData: bag.userData,
           dashboardPageData: bag.dashboardPageData,
           entryMenuData: bag.entryMenuData,
           entry,
@@ -30,7 +30,7 @@ let fields = (bag, entry, appSend) =>
 
 let make = (~bag, ~appSend, _children) => {
   let entry =
-    Turaku.currentEntry(bag.signedInData, bag.dashboardPageData, bag.entryId);
+    Turaku.currentEntry(bag.userData, bag.dashboardPageData, bag.entryId);
   {
     ...component,
     render: self =>
@@ -53,7 +53,7 @@ let make = (~bag, ~appSend, _children) => {
         </div>
         <EntryTags
           bag={
-            signedInData: bag.signedInData,
+            userData: bag.userData,
             dashboardPageData: bag.dashboardPageData,
             entryMenuData: bag.entryMenuData,
             entry,

@@ -1,45 +1,55 @@
 [%bs.raw {|require("./dashboard.css")|}];
 
-type state = {signingOut: bool};
-
 let str = ReasonReact.stringToElement;
 
-type action =
-  | SignOut;
+type bag = {
+  userData: Turaku.userData,
+  dashboardPageData: Turaku.dashboardPageData,
+};
 
-let component = ReasonReact.reducerComponent("Dashboard");
+let component = ReasonReact.statelessComponent("Dashboard");
 
-let getMenu = (appState, appSend, selectedTeam, dashboardMenu) =>
-  switch (dashboardMenu) {
-  | Turaku.EntriesMenu(entrySelection) =>
-    <Entries appState appSend selectedTeam entrySelection />
+let getMenu = (bag, appSend) =>
+  switch (bag.dashboardPageData.dashboardMenu) {
+  | Turaku.EntriesMenu(entryMenuData) =>
+    <Entries
+      bag={
+        userData: bag.userData,
+        dashboardPageData: bag.dashboardPageData,
+        entryMenuData,
+      }
+      appSend
+    />
   | UsersMenu => "Users menu should show up here" |> str
   };
 
-let make = (~appState, ~appSend, ~selectedTeam, ~dashboardMenu, _children) => {
+let make = (~bag: bag, ~appSend, _children) => {
   ...component,
-  initialState: () => {signingOut: false},
-  reducer: (action, _state) =>
-    switch (action) {
-    | SignOut =>
-      ReasonReact.UpdateWithSideEffects(
-        {signingOut: true},
-        (_self => appSend(Turaku.SignOut)),
-      )
-    },
-  render: ({state, send}) =>
+  render: _self =>
     <div className="container-fluid">
       <div className="row">
         <div className="col dashboard__navigation">
-          <Tags appState appSend />
+          <Tags
+            bag={
+              userData: bag.userData,
+              dashboardPageData: bag.dashboardPageData,
+            }
+            appSend
+          />
           <hr />
           <div> <a href="#"> (str("Teams")) </a> </div>
           <div> <a href="#"> (str("Users")) </a> </div>
           <hr />
-          <SignOutButton appSend appState />
+          <SignOutButton
+            bag={
+              userData: bag.userData,
+              dashboardPageData: bag.dashboardPageData,
+            }
+            appSend
+          />
         </div>
         <div className="col-10 dashboard__content">
-          (dashboardMenu |> getMenu(appState, appSend, selectedTeam))
+          (getMenu(bag, appSend))
           /* <Users appState appSend /> */
           <span />
         </div>

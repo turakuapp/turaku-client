@@ -6,7 +6,7 @@ type action =
   | SignOut;
 
 type bag = {
-  signedInData: Turaku.signedInData,
+  userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
 };
 
@@ -33,12 +33,12 @@ let make = (~bag, ~appSend, _children) => {
         (
           _self =>
             DeleteSessionQuery.make()
-            |> Api.sendAuthenticatedQuery(bag.signedInData.session)
+            |> Api.sendAuthenticatedQuery(bag.userData.session)
             |> Js.Promise.then_(response => {
                  if (response##deleteSession##errors
                      |> Array.to_list
                      |> List.length == 0) {
-                   appSend(Turaku.SignOut(bag.signedInData.session));
+                   appSend(Turaku.SignOut(bag.userData.session));
                  } else {
                    Js.log2(
                      "Some error occured while trying to sign out. Check: ",

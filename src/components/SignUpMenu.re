@@ -1,11 +1,11 @@
 let str = ReasonReact.stringToElement;
 
-type state = {signUpComplete: bool};
+type state = {inProgress: bool};
 
 type action =
-  | CompleteSignUp;
+  | AttemptSignUp;
 
-let signUp = ReasonReact.reducerComponent("SignUpMenu");
+let component = ReasonReact.reducerComponent("SignUpMenu");
 
 /* Create a GraphQL Query by using the graphql_ppx */
 module CreateUserQuery = [%graphql
@@ -22,10 +22,13 @@ module CreateUserQuery = [%graphql
 ];
 
 let gotoSignIn = (appSend, _event) =>
-  appSend(Turaku.(Navigate(SignedOut(SignInPage({justSignedUp: false})))));
+  appSend(
+    Turaku.(Navigate(SignedOutUser(SignInPage({justSignedUp: false})))),
+  );
 
-let handleSignUp = ({Turaku.session}, appSend, event) => {
+let handleSignUp = (appSend, send, event) => {
   event |> DomUtils.preventEventDefault;
+  send(AttemptSignUp);
   let name = DomUtils.getValueOfInputById("sign-up-form__name");
   let email = DomUtils.getValueOfInputById("sign-up-form__email");
   let password = DomUtils.getValueOfInputById("sign-up-form__password");
@@ -40,7 +43,7 @@ let handleSignUp = ({Turaku.session}, appSend, event) => {
          ~authenticationSalt,
          (),
        )
-       |> Api.sendAuthenticatedQuery(session)
+       |> Api.sendPublicQuery
      )
   |> Js.Promise.then_(response => {
        let errors = response##createUser##errors;
@@ -54,18 +57,18 @@ let handleSignUp = ({Turaku.session}, appSend, event) => {
   |> ignore;
 };
 
-let make = (~appState, ~appSend, _children) => {
-  ...signUp,
-  initialState: () => {signUpComplete: false},
+let make = (~appSend, _children) => {
+  ...component,
+  initialState: () => {inProgress: false},
   reducer: (action, _state) =>
     switch (action) {
-    | CompleteSignUp => ReasonReact.Update({signUpComplete: true})
+    | AttemptSignUp => ReasonReact.Update({inProgress: true})
     },
-  render: _self =>
+  render: ({state, send}) =>
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          <form onSubmit=(handleSignUp(appState, appSend))>
+          <form onSubmit=(handleSignUp(appSend, send))>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input
@@ -124,7 +127,10 @@ let make = (~appState, ~appSend, _children) => {
                 (str(" to learn more."))
               </small>
             </div>
-            <button _type="submit" className="mt-2 btn btn-primary">
+            <button
+              _type="submit"
+              disabled=(state.inProgress |> Js.Boolean.to_js_boolean)
+              className="mt-2 btn btn-primary">
               (str("Sign Up"))
             </button>
             <button
