@@ -116,10 +116,7 @@ let getSelection = (bag, appSend, entryId) =>
 
 let make = (~bag, ~appSend, _children) => {
   ...component,
-  didMount: _self => {
-    loadEntries(bag, appSend);
-    ReasonReact.NoUpdate;
-  },
+  didMount: _self => loadEntries(bag, appSend),
   render: _self =>
     <div className="row">
       <div className="col-3">

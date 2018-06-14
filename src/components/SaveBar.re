@@ -1,5 +1,5 @@
 /* import "./saveBar.css"; */
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("SaveBar");
 

@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type state = {inviteFormVisible: bool};
 
@@ -19,7 +19,7 @@ let toggleInviteForm = (send, event) => {
 
 let invitationToggle = (state, send) =>
   if (state.inviteFormVisible) {
-    ReasonReact.nullElement;
+    ReasonReact.null;
   } else {
     <button
       className="btn btn-primary btn-sm" onClick=(toggleInviteForm(send))>
@@ -27,7 +27,7 @@ let invitationToggle = (state, send) =>
     </button>;
   };
 
-let teamMembers = (bag, appSend) => {
+let teamMembers = (bag, _appSend) => {
   let teamMembers =
     Turaku.currentTeam(bag.userData, bag.dashboardPageData)
     |> Team.teamMembers;
@@ -46,7 +46,7 @@ let teamMembers = (bag, appSend) => {
                </li>
              )
           |> Array.of_list
-          |> ReasonReact.arrayToElement
+          |> ReasonReact.array
         )
       </ul>
     </div>;
@@ -55,7 +55,7 @@ let teamMembers = (bag, appSend) => {
   };
 };
 
-let invitedMembers = (bag, appSend) => ReasonReact.nullElement;
+let invitedMembers = (bag, appSend) => ReasonReact.null;
 
 let inviteUser = (bag, appSend, event) => {
   Js.log("Invite a new user!");
@@ -74,7 +74,7 @@ let invitationForm = (bag, appSend, state, send) =>
           id="users__invite-form-email"
           placeholder="Enter your team member's email address"
           _type="email"
-          required=(true |> Js.Boolean.to_js_boolean)
+          required=true
         />
       </div>
       <button _type="submit" className="btn btn-primary">
@@ -86,7 +86,7 @@ let invitationForm = (bag, appSend, state, send) =>
       </button>
     </form>;
   } else {
-    ReasonReact.nullElement;
+    ReasonReact.null;
   };
 
 module UsersQuery = [%graphql
@@ -131,10 +131,7 @@ let refreshUsers = (bag, appSend) => {
 
 let make = (~bag, ~appSend, _children) => {
   ...component,
-  didMount: _self => {
-    refreshUsers(bag, appSend);
-    ReasonReact.NoUpdate;
-  },
+  didMount: _self => refreshUsers(bag, appSend),
   initialState: () => {inviteFormVisible: false},
   reducer: (action, state) =>
     switch (action) {
@@ -143,23 +140,22 @@ let make = (~bag, ~appSend, _children) => {
     },
   render: ({state, send}) =>
     <div className="row">
-
-        <div className="col-3">
-          <div className="team-menu__members">
-            <div className="pt-2">
-              <input _type="text" placeholder="Search" className="mr-2" />
-              (invitationToggle(state, send))
-            </div>
-            (invitationForm(bag, appSend, state, send))
-            (invitedMembers(bag, appSend))
-            (teamMembers(bag, appSend))
+      <div className="col-3">
+        <div className="team-menu__members">
+          <div className="pt-2">
+            <input _type="text" placeholder="Search" className="mr-2" />
+            (invitationToggle(state, send))
           </div>
+          (invitationForm(bag, appSend, state, send))
+          (invitedMembers(bag, appSend))
+          (teamMembers(bag, appSend))
         </div>
-        <div className="col entry-editor__container">
-          ("Permissions go here" |> str)
-        </div>
-      </div>,
-      /* (bag.entryMenuData.entryId |> getSelection(bag, appSend)) */
+      </div>
+      <div className="col entry-editor__container">
+        ("Permissions go here" |> str)
+      </div>
+    </div>,
+  /* (bag.entryMenuData.entryId |> getSelection(bag, appSend)) */
 };
 /* export default class Users extends React.Component {
      constructor(props) {

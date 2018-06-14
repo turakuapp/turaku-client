@@ -10,7 +10,7 @@ type action =
   | UpdateTeamPassword(TeamPassword.t)
   | UpdateTeamName(string);
 
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type bag = {userData: Turaku.userData};
 
@@ -30,11 +30,11 @@ let invitations = (bag, appSend) =>
              />
            )
         |> Array.of_list
-        |> ReasonReact.arrayToElement
+        |> ReasonReact.array
       )
     </div>;
   } else {
-    ReasonReact.nullElement;
+    ReasonReact.null;
   };
 
 let selectTeam = (bag, appSend, team, _event) => {
@@ -61,7 +61,7 @@ let teams = (bag, appSend) =>
                  </li>
                )
             |> Array.of_list
-            |> ReasonReact.arrayToElement
+            |> ReasonReact.array
           )
         </ul>
         <hr />
@@ -159,7 +159,7 @@ let createTeamForm = (bag, appSend, state, send) =>
       <div className="form-group">
         <label htmlFor="teams__form-name"> (str("Name of your team")) </label>
         <input
-          required=(true |> Js.Boolean.to_js_boolean)
+          required=true
           className="form-control"
           id="teams__form-name"
           placeholder="Enter your team's name"
@@ -172,7 +172,7 @@ let createTeamForm = (bag, appSend, state, send) =>
       <div className="form-group">
         <label htmlFor="teams__form-password"> (str("Team Password")) </label>
         <input
-          required=(true |> Js.Boolean.to_js_boolean)
+          required=true
           className="form-control"
           id="teams__form-password"
           value=(state.teamPassword |> TeamPassword.toString)

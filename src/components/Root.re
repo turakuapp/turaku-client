@@ -2,7 +2,7 @@ open Turaku;
 
 let app = ReasonReact.reducerComponent("App");
 
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 let currentComponent = (state, send) =>
   switch (state.user) {

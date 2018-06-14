@@ -2,7 +2,7 @@ exception AuthenticationFailure(array(string));
 
 let component = ReasonReact.statelessComponent("SignInMenu");
 
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type createSessionResponse = {
   id: int,
@@ -137,7 +137,7 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
       )
     </div>;
   } else {
-    ReasonReact.nullElement;
+    ReasonReact.null;
   };
 
 let gotoSignUp = (appSend, _event) =>
@@ -156,7 +156,7 @@ let make = (~data, ~appSend, _children) => {
                 (str("Email address"))
               </label>
               <input
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
                 _type="email"
                 className="form-control"
                 id="sign-in-form__email"
@@ -168,7 +168,7 @@ let make = (~data, ~appSend, _children) => {
                 (str("Password"))
               </label>
               <input
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
                 _type="password"
                 className="form-control"
                 id="sign-in-form__password"

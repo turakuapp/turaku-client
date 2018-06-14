@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type state = {teamPassword: string};
 
@@ -43,7 +43,7 @@ let make = (~bag, ~appSend, _children) => {
         </h6>
         <p className="card-text">
           <input
-            required=(Js.Boolean.to_js_boolean(true))
+            required=true
             id="invitations__team-password"
             className="w-full"
             _type="text"

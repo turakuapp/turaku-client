@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type state = {inProgress: bool};
 
@@ -53,9 +53,7 @@ let make = (~bag, ~appSend, _children) => {
     },
   render: ({state, send}) =>
     if (state.inProgress) {
-      <button
-        className="btn btn-secondary btn-sm"
-        disabled=(true |> Js.Boolean.to_js_boolean)>
+      <button className="btn btn-secondary btn-sm" disabled=true>
         (str("Signing out..."))
       </button>;
     } else {

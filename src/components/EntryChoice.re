@@ -1,6 +1,6 @@
 [%bs.raw {|require("./entryChoice.css")|}];
 
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type bag = {
   userData: Turaku.userData,

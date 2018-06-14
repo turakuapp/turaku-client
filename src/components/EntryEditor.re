@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type bag = {
   userData: Turaku.userData,
@@ -45,9 +45,7 @@ let make = (~bag, ~appSend, _children) => {
               placeholder="Entry Title"
             />
             (
-              fields(bag, entry, appSend)
-              |> Array.of_list
-              |> ReasonReact.arrayToElement
+              fields(bag, entry, appSend) |> Array.of_list |> ReasonReact.array
             )
           </div>
         </div>

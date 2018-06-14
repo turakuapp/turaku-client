@@ -68,7 +68,6 @@ let make = (~appSend, _children) => {
          })
       |> ignore
     };
-    ReasonReact.NoUpdate;
   },
   render: _self => <div> ("Loading..." |> str) </div>,
 };

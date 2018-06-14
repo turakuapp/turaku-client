@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type state = {inProgress: bool};
 
@@ -75,7 +75,7 @@ let make = (~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__name"
                 placeholder="What should we call you?"
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
               />
             </div>
             <div className="form-group">
@@ -86,7 +86,7 @@ let make = (~appSend, _children) => {
                 _type="email"
                 className="form-control"
                 id="sign-up-form__email"
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
               />
               <small id="emailHelp" className="form-text text-muted">
                 (str("We'll never share your email with anyone else."))
@@ -101,7 +101,7 @@ let make = (~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__password"
                 placeholder="Password"
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
               />
             </div>
             <div className="form-group">
@@ -113,7 +113,7 @@ let make = (~appSend, _children) => {
                 className="form-control"
                 id="sign-up-form__password-confirmation"
                 placeholder="Again, to be sure"
-                required=(Js.Boolean.to_js_boolean(true))
+                required=true
               />
               <small id="emailHelp" className="form-text text-muted">
                 (
@@ -129,7 +129,7 @@ let make = (~appSend, _children) => {
             </div>
             <button
               _type="submit"
-              disabled=(state.inProgress |> Js.Boolean.to_js_boolean)
+              disabled=state.inProgress
               className="mt-2 btn btn-primary">
               (str("Sign Up"))
             </button>

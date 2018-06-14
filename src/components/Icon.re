@@ -1,4 +1,4 @@
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("Icon");
 
