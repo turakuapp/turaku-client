@@ -31,7 +31,7 @@ let invitationToggle = (state, send) =>
   };
 
 let containerClasses = bag => {
-  let classes = "mr-3 mt-2 p-2 entry-choice";
+  let classes = "mt-2 p-2 entry-choice";
   /* if (bag |> isCurrentChoice) {
        classes ++ " entry-choice--chosen";
      } else { */
