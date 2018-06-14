@@ -1,3 +1,6 @@
+[%bs.raw {|require("./teamMenu.css")|}];
+[%bs.raw {|require("./entryChoice.css")|}];
+
 let str = ReasonReact.string;
 
 type state = {inviteFormVisible: bool};
@@ -27,33 +30,38 @@ let invitationToggle = (state, send) =>
     </button>;
   };
 
-let teamMembers = (bag, _appSend) => {
-  let teamMembers =
-    Turaku.currentTeam(bag.userData, bag.dashboardPageData)
-    |> Team.teamMembers;
+let containerClasses = bag => {
+  let classes = "mr-3 mt-2 p-2 entry-choice";
+  /* if (bag |> isCurrentChoice) {
+       classes ++ " entry-choice--chosen";
+     } else { */
+  classes;
+  /* }; */
+};
+
+let teamMemberOptions = (bag, teamMembers, _appSend) =>
   if (teamMembers |> List.length > 0) {
     <div>
-      <ul>
-        (
-          teamMembers
-          |> List.map(teamMember =>
-               <li key=(teamMember |> TeamMember.id)>
-                 (teamMember |> TeamMember.name |> str)
-                 (" - " |> str)
-                 <code>
-                   (teamMember |> TeamMember.email |> Email.toString |> str)
-                 </code>
-               </li>
-             )
-          |> Array.of_list
-          |> ReasonReact.array
-        )
-      </ul>
+      (
+        teamMembers
+        |> List.map(teamMember =>
+             <div
+               className=(containerClasses(bag))
+               key=(teamMember |> TeamMember.id)>
+               (teamMember |> TeamMember.name |> str)
+               (" - " |> str)
+               <code>
+                 (teamMember |> TeamMember.email |> Email.toString |> str)
+               </code>
+             </div>
+           )
+        |> Array.of_list
+        |> ReasonReact.array
+      )
     </div>;
   } else {
     <div> ("Loading users..." |> str) </div>;
   };
-};
 
 let invitedMembers = (bag, appSend) => ReasonReact.null;
 
@@ -64,7 +72,9 @@ let inviteUser = (bag, appSend, event) => {
 
 let invitationForm = (bag, appSend, state, send) =>
   if (state.inviteFormVisible) {
-    <form onSubmit=(inviteUser(bag, appSend))>
+    <form
+      onSubmit=(inviteUser(bag, appSend))
+      className="p-2 team-menu__invite-form">
       <div className="form-group">
         <label htmlFor="users__invite-form-email">
           ("Email Address" |> str)
@@ -138,7 +148,10 @@ let make = (~bag, ~appSend, _children) => {
     | ToggleInviteForm =>
       ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
     },
-  render: ({state, send}) =>
+  render: ({state, send}) => {
+    let teamMembers =
+      Turaku.currentTeam(bag.userData, bag.dashboardPageData)
+      |> Team.teamMembers;
     <div className="row">
       <div className="col-3">
         <div className="team-menu__members">
@@ -148,13 +161,27 @@ let make = (~bag, ~appSend, _children) => {
           </div>
           (invitationForm(bag, appSend, state, send))
           (invitedMembers(bag, appSend))
-          (teamMembers(bag, appSend))
+          (teamMemberOptions(bag, teamMembers, appSend))
         </div>
       </div>
-      <div className="col entry-editor__container">
-        ("Permissions go here" |> str)
+      <div className="col team-menu__permissions-container">
+        (
+          switch (teamMembers) {
+          | [firstTeamMember, ..._] =>
+            <PermissionsEditor
+              bag={
+                userData: bag.userData,
+                dashboardPageData: bag.dashboardPageData,
+                teamMember: firstTeamMember,
+              }
+              appSend
+            />
+          | [] => <span> ("Loading team members..." |> str) </span>
+          }
+        )
       </div>
-    </div>,
+    </div>;
+  },
   /* (bag.entryMenuData.entryId |> getSelection(bag, appSend)) */
 };
 /* export default class Users extends React.Component {

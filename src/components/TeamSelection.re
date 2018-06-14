@@ -1,4 +1,5 @@
-/* import "./teams.css"; */
+[%bs.raw {|require("./teamSelection.css")|}];
+
 type state = {
   createFormVisible: bool,
   teamPassword: TeamPassword.t,
