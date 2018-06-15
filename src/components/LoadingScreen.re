@@ -56,10 +56,10 @@ let make = (~appSend, _children) => {
            let invitations =
              response##session##user##incomingInvitations
              |> Array.map(i =>
-                  Invitation.create(
+                  InvitationFromTeam.create(
                     i##id,
                     ~teamName=i##team##name,
-                    ~userEmail=i##invitingUser##email |> Email.create,
+                    ~invitingUserEmail=i##invitingUser##email |> Email.create,
                   )
                 )
              |> Array.to_list;

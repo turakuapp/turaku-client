@@ -22,7 +22,12 @@ let getMenu = (bag, appSend) =>
     />
   | TeamMenu =>
     <TeamMenu
-      bag={userData: bag.userData, dashboardPageData: bag.dashboardPageData}
+      bag={
+        userData: bag.userData,
+        dashboardPageData: bag.dashboardPageData,
+        teamId:
+          Turaku.currentTeam(bag.userData, bag.dashboardPageData) |> Team.id,
+      }
       appSend
     />
   };

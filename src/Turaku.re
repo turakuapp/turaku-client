@@ -22,7 +22,7 @@ type signedOutPage =
 
 type userData = {
   session: Session.t,
-  invitations: list(Invitation.t),
+  invitations: list(InvitationFromTeam.t),
   teams: list(Team.t),
   page: signedInPage,
 };
@@ -33,14 +33,15 @@ type user =
 
 type action =
   | SignUp
-  | SignIn(Session.t, list(Team.t), list(Invitation.t))
+  | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
   | RefreshEntries(Team.id, list(Entry.t), userData)
   | RefreshTeamMembers(Team.id, list(TeamMember.t), userData)
   | Navigate(user)
   | SkipLoading
   | CreateTeam(Team.t, userData)
   | SelectTeam(Team.id, userData)
-  | SignOut(Session.t);
+  | SignOut(Session.t)
+  | AddInvitationToUser(Team.id, InvitationToUser.t, userData);
 
 type state = {user};
 
@@ -118,6 +119,19 @@ let reducer = (action, _state) =>
       |> List.map(team =>
            if (team |> Team.id == teamId) {
              team |> Team.addTeamMembers(teamMembers);
+           } else {
+             team;
+           }
+         );
+    ReasonReact.Update({
+      user: SignedInUser({...userData, teams: updatedTeams}),
+    });
+  | AddInvitationToUser(teamId, invitation, userData) =>
+    let updatedTeams =
+      userData.teams
+      |> List.map(team =>
+           if (team |> Team.id == teamId) {
+             team |> Team.addInvitation(invitation);
            } else {
              team;
            }

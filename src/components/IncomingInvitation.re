@@ -7,7 +7,7 @@ type action =
 
 type bag = {
   userData: Turaku.userData,
-  invitation: Invitation.t,
+  invitation: InvitationFromTeam.t,
 };
 
 let component = ReasonReact.reducerComponent("IncomingInvitation");
@@ -33,12 +33,17 @@ let make = (~bag, ~appSend, _children) => {
     <div className="card mb-3">
       <div className="card-body">
         <h4 className="card-title">
-          (str(bag.invitation |> Invitation.name))
+          (str(bag.invitation |> InvitationFromTeam.name))
         </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           (str("from"))
           <code>
-            (bag.invitation |> Invitation.email |> Email.toString |> str)
+            (
+              bag.invitation
+              |> InvitationFromTeam.email
+              |> Email.toString
+              |> str
+            )
           </code>
         </h6>
         <p className="card-text">

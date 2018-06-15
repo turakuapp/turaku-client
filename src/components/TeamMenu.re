@@ -11,6 +11,7 @@ type action =
 type bag = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
+  teamId: Team.id,
 };
 
 let component = ReasonReact.reducerComponent("TeamMenu");
@@ -63,17 +64,86 @@ let teamMemberOptions = (bag, teamMembers, _appSend) =>
     <div> ("Loading users..." |> str) </div>;
   };
 
-let invitedMembers = (bag, appSend) => ReasonReact.null;
+let invitedMembers = (bag, currentTeam, appSend) =>
+  currentTeam
+  |> Team.invitations
+  |> List.map(invitation =>
+       <div
+         className=(containerClasses(bag))
+         key=(invitation |> InvitationToUser.id)>
+         (invitation |> InvitationToUser.email |> Email.toString |> str)
+         (" - " |> str)
+         <code>
+           (
+             switch (invitation |> InvitationToUser.name) {
+             | Some(name) => name |> str
+             | None => <em> ("Unregistered" |> str) </em>
+             }
+           )
+         </code>
+       </div>
+     )
+  |> Array.of_list
+  |> ReasonReact.array;
 
-let inviteUser = (bag, appSend, event) => {
+module CreateInvitation = [%graphql
+  {|
+  mutation($teamId: ID!, $email: String!) {
+    createInvitation(teamId: $teamId, email: $email) {
+      invitation {
+        id
+        invitedUser {
+          name
+        }
+      }
+      errors
+    }
+  }
+  |}
+];
+
+let inviteUser = (bag, appSend, send, event) => {
   Js.log("Invite a new user!");
   event |> DomUtils.preventEventDefault;
+  let email =
+    DomUtils.getValueOfInputById("users__invite-form-email") |> Email.create;
+
+  CreateInvitation.make(
+    ~teamId=bag.teamId,
+    ~email=email |> Email.toString,
+    (),
+  )
+  |> Api.sendAuthenticatedQuery(bag.userData.session)
+  |> Js.Promise.then_(response => {
+       switch (response##createInvitation##invitation) {
+       | Some(invitation) =>
+         let invitation =
+           InvitationToUser.create(
+             invitation##id,
+             email,
+             invitation##invitedUser##name,
+           );
+         appSend(
+           Turaku.AddInvitationToUser(bag.teamId, invitation, bag.userData),
+         );
+         send(ToggleInviteForm);
+       | None =>
+         Js.log2(
+           "Failed to send invitations. Errors array: ",
+           response##createInvitation##errors,
+         )
+       };
+
+       /* Do something with this invitation. */
+       Js.Promise.resolve();
+     })
+  |> ignore;
 };
 
 let invitationForm = (bag, appSend, state, send) =>
   if (state.inviteFormVisible) {
     <form
-      onSubmit=(inviteUser(bag, appSend))
+      onSubmit=(inviteUser(bag, appSend, send))
       className="p-2 team-menu__invite-form">
       <div className="form-group">
         <label htmlFor="users__invite-form-email">
@@ -82,13 +152,13 @@ let invitationForm = (bag, appSend, state, send) =>
         <input
           className="form-control"
           id="users__invite-form-email"
-          placeholder="Enter your team member's email address"
+          placeholder="Team member's email address"
           _type="email"
           required=true
         />
       </div>
       <button _type="submit" className="btn btn-primary">
-        ("Invite" |> str)
+        ("Send Invite" |> str)
       </button>
       <button
         className="btn btn-secondary ml-2" onClick=(toggleInviteForm(send))>
@@ -113,10 +183,8 @@ module UsersQuery = [%graphql
   |}
 ];
 
-let refreshUsers = (bag, appSend) => {
-  let teamId =
-    Turaku.currentTeam(bag.userData, bag.dashboardPageData) |> Team.id;
-  UsersQuery.make(~teamId, ())
+let refreshUsers = (bag, appSend) =>
+  UsersQuery.make(~teamId=bag.teamId, ())
   |> Api.sendAuthenticatedQuery(bag.userData.session)
   |> Js.Promise.then_(response => {
        let rawUsers = response##team##users;
@@ -133,11 +201,12 @@ let refreshUsers = (bag, appSend) => {
               )
             )
          |> Array.to_list;
-       appSend(Turaku.RefreshTeamMembers(teamId, teamMembers, bag.userData));
+       appSend(
+         Turaku.RefreshTeamMembers(bag.teamId, teamMembers, bag.userData),
+       );
        Js.Promise.resolve();
      })
   |> ignore;
-};
 
 let make = (~bag, ~appSend, _children) => {
   ...component,
@@ -149,9 +218,8 @@ let make = (~bag, ~appSend, _children) => {
       ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
     },
   render: ({state, send}) => {
-    let teamMembers =
-      Turaku.currentTeam(bag.userData, bag.dashboardPageData)
-      |> Team.teamMembers;
+    let currentTeam = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
+    let teamMembers = currentTeam |> Team.teamMembers;
     <div className="row">
       <div className="col-3">
         <div className="team-menu__members">
@@ -160,7 +228,7 @@ let make = (~bag, ~appSend, _children) => {
             (invitationToggle(state, send))
           </div>
           (invitationForm(bag, appSend, state, send))
-          (invitedMembers(bag, appSend))
+          (invitedMembers(bag, currentTeam, appSend))
           (teamMemberOptions(bag, teamMembers, appSend))
         </div>
       </div>

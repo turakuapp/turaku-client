@@ -10,11 +10,15 @@ let entries: t => list(Entry.t);
 
 let teamMembers: t => list(TeamMember.t);
 
+let invitations: t => list(InvitationToUser.t);
+
 let create: (id, string, TeamPassword.t) => t;
 
 let addEntries: (list(Entry.t), t) => t;
 
 let addTeamMembers: (list(TeamMember.t), t) => t;
+
+let addInvitation: (InvitationToUser.t, t) => t;
 
 let decryptTeams:
   (
