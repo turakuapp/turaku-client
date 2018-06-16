@@ -178,6 +178,13 @@ module UsersQuery = [%graphql
         name
         email
       }
+      invitations {
+        id
+        invitedUser {
+          email
+          name
+        }
+      }
     }
   }
   |}
@@ -187,22 +194,34 @@ let refreshUsers = (bag, appSend) =>
   UsersQuery.make(~teamId=bag.teamId, ())
   |> Api.sendAuthenticatedQuery(bag.userData.session)
   |> Js.Promise.then_(response => {
-       let rawUsers = response##team##users;
-       Js.log(
-         "Loaded users! Count: " ++ (rawUsers |> Array.length |> string_of_int),
-       );
        let teamMembers =
-         rawUsers
-         |> Array.map(rawUser =>
+         response##team##users
+         |> Array.map(jsUser =>
               TeamMember.create(
-                rawUser##id,
-                rawUser##name,
-                rawUser##email |> Email.create,
+                jsUser##id,
+                jsUser##name,
+                jsUser##email |> Email.create,
               )
             )
          |> Array.to_list;
+       let invitations =
+         response##team##invitations
+         |> Array.map(jsInvitation =>
+              InvitationToUser.create(
+                jsInvitation##id,
+                jsInvitation##invitedUser##email |> Email.create,
+                jsInvitation##invitedUser##name,
+              )
+            )
+         |> Array.to_list;
+
        appSend(
-         Turaku.RefreshTeamMembers(bag.teamId, teamMembers, bag.userData),
+         Turaku.RefreshTeamMembers(
+           bag.teamId,
+           teamMembers,
+           invitations,
+           bag.userData,
+         ),
        );
        Js.Promise.resolve();
      })

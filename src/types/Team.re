@@ -9,13 +9,9 @@ type t = {
 and id = string;
 
 let name = t => t.name;
-
 let id = t => t.id;
-
 let entries = t => t.entries;
-
 let teamMembers = t => t.teamMembers;
-
 let invitations = t => t.invitations;
 
 let create = (id, name, password) => {
@@ -30,9 +26,9 @@ let create = (id, name, password) => {
 let createCryptographicKey = t =>
   t.password |> CryptographicKey.keyFromTeamPassword;
 
-let addEntries = (entries, t) => {...t, entries};
-
-let addTeamMembers = (teamMembers, t) => {...t, teamMembers};
+let replaceEntries = (entries, t) => {...t, entries};
+let replaceTeamMembers = (teamMembers, t) => {...t, teamMembers};
+let replaceInvitations = (invitations, t) => {...t, invitations};
 
 let addInvitation = (invitation, t) => {
   ...t,

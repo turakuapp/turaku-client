@@ -35,7 +35,12 @@ type action =
   | SignUp
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
   | RefreshEntries(Team.id, list(Entry.t), userData)
-  | RefreshTeamMembers(Team.id, list(TeamMember.t), userData)
+  | RefreshTeamMembers(
+      Team.id,
+      list(TeamMember.t),
+      list(InvitationToUser.t),
+      userData,
+    )
   | Navigate(user)
   | SkipLoading
   | CreateTeam(Team.t, userData)
@@ -99,7 +104,7 @@ let reducer = (action, _state) =>
       userData.teams
       |> List.map(team =>
            if (team |> Team.id == teamId) {
-             team |> Team.addEntries(entries);
+             team |> Team.replaceEntries(entries);
            } else {
              team;
            }
@@ -113,12 +118,14 @@ let reducer = (action, _state) =>
             DashboardPage({teamId, menu: EntriesMenu({entryId: entryId})}),
         }),
     });
-  | RefreshTeamMembers(teamId, teamMembers, userData) =>
+  | RefreshTeamMembers(teamId, teamMembers, invitations, userData) =>
     let updatedTeams =
       userData.teams
       |> List.map(team =>
            if (team |> Team.id == teamId) {
-             team |> Team.addTeamMembers(teamMembers);
+             team
+             |> Team.replaceTeamMembers(teamMembers)
+             |> Team.replaceInvitations(invitations);
            } else {
              team;
            }
