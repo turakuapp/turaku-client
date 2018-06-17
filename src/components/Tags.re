@@ -12,7 +12,7 @@ let navigateToAllEntries = (bag, appSend, event) => {
   let entryId = Turaku.someEntry(bag.userData, bag.dashboardPageData);
   switch (bag.dashboardPageData.menu) {
   | EntriesMenu(_) => ()
-  | TeamMenu =>
+  | TeamMenu(_) =>
     appSend(
       Turaku.Navigate(
         SignedInUser({

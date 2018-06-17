@@ -2,9 +2,16 @@ type signInPageData = {justSignedUp: bool};
 
 type entryMenuData = {entryId: option(Entry.id)};
 
+type teamMenuSelection =
+  | TeamMenuLoading
+  | InvitationSelected(InvitationToUser.t)
+  | TeamMemberSelected(TeamMember.t);
+
+type teamMenuData = {selection: teamMenuSelection};
+
 type dashboardMenu =
   | EntriesMenu(entryMenuData)
-  | TeamMenu;
+  | TeamMenu(teamMenuData);
 
 type dashboardPageData = {
   teamId: Team.id,
@@ -40,6 +47,7 @@ type action =
       list(TeamMember.t),
       list(InvitationToUser.t),
       userData,
+      dashboardPageData,
     )
   | Navigate(user)
   | SkipLoading
@@ -118,7 +126,13 @@ let reducer = (action, _state) =>
             DashboardPage({teamId, menu: EntriesMenu({entryId: entryId})}),
         }),
     });
-  | RefreshTeamMembers(teamId, teamMembers, invitations, userData) =>
+  | RefreshTeamMembers(
+      teamId,
+      teamMembers,
+      invitations,
+      userData,
+      dashboardPageData,
+    ) =>
     let updatedTeams =
       userData.teams
       |> List.map(team =>
@@ -130,8 +144,26 @@ let reducer = (action, _state) =>
              team;
            }
          );
+    let teamMenuSelection =
+      switch (invitations) {
+      | [invitation, ..._] => InvitationSelected(invitation)
+      | [] =>
+        switch (teamMembers) {
+        | [teamMember, ..._] => TeamMemberSelected(teamMember)
+        | [] => TeamMenuLoading
+        }
+      };
     ReasonReact.Update({
-      user: SignedInUser({...userData, teams: updatedTeams}),
+      user:
+        SignedInUser({
+          ...userData,
+          teams: updatedTeams,
+          page:
+            DashboardPage({
+              ...dashboardPageData,
+              menu: TeamMenu({selection: teamMenuSelection}),
+            }),
+        }),
     });
   | AddInvitationToUser(teamId, invitation, userData) =>
     let updatedTeams =

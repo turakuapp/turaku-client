@@ -11,6 +11,7 @@ type action =
 type bag = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
+  teamMenuData: Turaku.teamMenuData,
   teamId: Team.id,
 };
 
@@ -40,13 +41,38 @@ let containerClasses = bag => {
   /* }; */
 };
 
-let teamMemberOptions = (bag, teamMembers, _appSend) =>
+let selectFromTeamMenu = (bag, selection, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  appSend(
+    Turaku.Navigate(
+      SignedInUser({
+        ...bag.userData,
+        page:
+          DashboardPage({
+            ...bag.dashboardPageData,
+            menu: TeamMenu({selection: selection}),
+          }),
+      }),
+    ),
+  );
+};
+
+let selectTeamMember = (bag, teamMember, appSend, event) =>
+  event
+  |> selectFromTeamMenu(bag, Turaku.TeamMemberSelected(teamMember), appSend);
+
+let selectInvitation = (bag, invitation, appSend, event) =>
+  event
+  |> selectFromTeamMenu(bag, Turaku.InvitationSelected(invitation), appSend);
+
+let teamMemberOptions = (bag, teamMembers, appSend) =>
   if (teamMembers |> List.length > 0) {
     <div>
       (
         teamMembers
         |> List.map(teamMember =>
              <div
+               onClick=(selectTeamMember(bag, teamMember, appSend))
                className=(containerClasses(bag))
                key=(teamMember |> TeamMember.id)>
                (teamMember |> TeamMember.name |> str)
@@ -69,6 +95,7 @@ let invitedMembers = (bag, currentTeam, appSend) =>
   |> Team.invitations
   |> List.map(invitation =>
        <div
+         onClick=(selectInvitation(bag, invitation, appSend))
          className=(containerClasses(bag))
          key=(invitation |> InvitationToUser.id)>
          (invitation |> InvitationToUser.email |> Email.toString |> str)
@@ -221,6 +248,7 @@ let refreshUsers = (bag, appSend) =>
            teamMembers,
            invitations,
            bag.userData,
+           bag.dashboardPageData,
          ),
        );
        Js.Promise.resolve();
@@ -251,19 +279,31 @@ let make = (~bag, ~appSend, _children) => {
           (teamMemberOptions(bag, teamMembers, appSend))
         </div>
       </div>
-      <div className="col team-menu__permissions-container">
+      <div className="col team-menu__editor-container">
         (
-          switch (teamMembers) {
-          | [firstTeamMember, ..._] =>
-            <PermissionsEditor
+          switch (bag.teamMenuData.selection) {
+          | Turaku.TeamMenuLoading =>
+            <span> ("Loading team data..." |> str) </span>
+          | TeamMemberSelected(teamMember) =>
+            <TeamMemberEditor
               bag={
                 userData: bag.userData,
                 dashboardPageData: bag.dashboardPageData,
-                teamMember: firstTeamMember,
+                teamMenuData: bag.teamMenuData,
+                teamMember,
               }
               appSend
             />
-          | [] => <span> ("Loading team members..." |> str) </span>
+          | InvitationSelected(invitation) =>
+            <InvitationEditor
+              bag={
+                userData: bag.userData,
+                dashboardPageData: bag.dashboardPageData,
+                teamMenuData: bag.teamMenuData,
+                invitation,
+              }
+              appSend
+            />
           }
         )
       </div>

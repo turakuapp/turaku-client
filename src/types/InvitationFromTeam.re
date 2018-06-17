@@ -6,7 +6,6 @@ type t = {
 and id = string;
 
 let email = invitation => invitation.invitingUserEmail;
-
 let name = invitation => invitation.teamName;
 
 let create = (id, ~teamName, ~invitingUserEmail) => {

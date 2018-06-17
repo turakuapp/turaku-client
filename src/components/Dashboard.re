@@ -20,11 +20,12 @@ let getMenu = (bag, appSend) =>
       }
       appSend
     />
-  | TeamMenu =>
+  | TeamMenu(teamMenuData) =>
     <TeamMenu
       bag={
         userData: bag.userData,
         dashboardPageData: bag.dashboardPageData,
+        teamMenuData,
         teamId:
           Turaku.currentTeam(bag.userData, bag.dashboardPageData) |> Team.id,
       }
@@ -44,13 +45,17 @@ let navigateToTeams = (bag, appSend, event) => {
 let navigateToTeamMembers = (bag, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   switch (bag.dashboardPageData.menu) {
-  | TeamMenu => ()
+  | TeamMenu(_) => ()
   | EntriesMenu(_) =>
     appSend(
       Turaku.Navigate(
         SignedInUser({
           ...bag.userData,
-          page: DashboardPage({...bag.dashboardPageData, menu: TeamMenu}),
+          page:
+            DashboardPage({
+              ...bag.dashboardPageData,
+              menu: TeamMenu({selection: Turaku.TeamMenuLoading}),
+            }),
         }),
       ),
     )
