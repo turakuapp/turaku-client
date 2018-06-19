@@ -5,7 +5,7 @@ type state = {teamPassword: string};
 type action =
   | UpdateTeamPassword(string);
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   invitation: InvitationFromTeam.t,
 };
@@ -22,7 +22,7 @@ let updateTeamPassword = (send, _event) => {
   send(UpdateTeamPassword(teamPassword));
 };
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   initialState: () => {teamPassword: ""},
   reducer: (action, _state) =>
@@ -33,13 +33,13 @@ let make = (~bag, ~appSend, _children) => {
     <div className="card mb-3">
       <div className="card-body">
         <h4 className="card-title">
-          (str(bag.invitation |> InvitationFromTeam.name))
+          (str(ctx.invitation |> InvitationFromTeam.name))
         </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           (str("from"))
           <code>
             (
-              bag.invitation
+              ctx.invitation
               |> InvitationFromTeam.email
               |> Email.toString
               |> str

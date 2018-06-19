@@ -1,6 +1,6 @@
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
@@ -10,10 +10,10 @@ type bag = {
 
 let component = ReasonReact.statelessComponent("EntryField");
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div> (str("Field: " ++ (bag.field |> Field.getKey))) </div>,
+    <div> (str("Field: " ++ (ctx.field |> Field.getKey))) </div>,
 };
 /* export default class Field extends React.Component {
      constructor(props) {

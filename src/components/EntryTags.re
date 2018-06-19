@@ -1,6 +1,6 @@
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
@@ -9,7 +9,7 @@ type bag = {
 
 let component = ReasonReact.statelessComponent("EntryTags");
 
-let make = (~bag: bag, ~appSend, _children) => {
+let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self => <div> <code> (str("EntryTags")) </code> </div>,
 };

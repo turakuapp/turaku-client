@@ -2,7 +2,7 @@
 
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
@@ -11,32 +11,32 @@ type bag = {
 
 let component = ReasonReact.statelessComponent("EntryChoice");
 
-let isCurrentChoice = bag =>
-  switch (bag.entryMenuData.entryId) {
-  | Some(id) when id == (bag.entry |> Entry.id) => true
+let isCurrentChoice = ctx =>
+  switch (ctx.entryMenuData.entryId) {
+  | Some(id) when id == (ctx.entry |> Entry.id) => true
   | Some(_otherId) => false
   | None => false
   };
 
-let containerClasses = bag => {
+let containerClasses = ctx => {
   let classes = "mr-3 mt-2 p-2 entry-choice";
-  if (bag |> isCurrentChoice) {
+  if (ctx |> isCurrentChoice) {
     classes ++ " entry-choice--chosen";
   } else {
     classes;
   };
 };
 
-let chooseEntry = (bag, appSend, event) => {
+let chooseEntry = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Js.log("Clicked on event choice with ID: " ++ (bag.entry |> Entry.id));
+  Js.log("Clicked on event choice with ID: " ++ (ctx.entry |> Entry.id));
   let page =
     Turaku.DashboardPage({
-      ...bag.dashboardPageData,
-      menu: Turaku.EntriesMenu({entryId: Some(bag.entry |> Entry.id)}),
+      ...ctx.dashboardPageData,
+      menu: Turaku.EntriesMenu({entryId: Some(ctx.entry |> Entry.id)}),
     });
-  if (! isCurrentChoice(bag)) {
-    appSend(Turaku.Navigate(SignedInUser({...bag.userData, page})));
+  if (! isCurrentChoice(ctx)) {
+    appSend(Turaku.Navigate(SignedInUser({...ctx.userData, page})));
   };
 };
 
@@ -48,12 +48,12 @@ let title = (entry: Entry.t) => {
   };
 };
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div
-      className=(containerClasses(bag)) onClick=(chooseEntry(bag, appSend))>
-      (bag.entry |> title)
+      className=(containerClasses(ctx)) onClick=(chooseEntry(ctx, appSend))>
+      (ctx.entry |> title)
     </div>,
 };
 /* export default class EntryChoice extends React.Component {

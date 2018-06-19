@@ -2,58 +2,58 @@
 
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
 };
 
 let component = ReasonReact.statelessComponent("Dashboard");
 
-let getMenu = (bag, appSend) =>
-  switch (bag.dashboardPageData.menu) {
+let getMenu = (ctx, appSend) =>
+  switch (ctx.dashboardPageData.menu) {
   | Turaku.EntriesMenu(entryMenuData) =>
     <Entries
-      bag={
-        userData: bag.userData,
-        dashboardPageData: bag.dashboardPageData,
+      ctx={
+        userData: ctx.userData,
+        dashboardPageData: ctx.dashboardPageData,
         entryMenuData,
       }
       appSend
     />
   | TeamMenu(teamMenuData) =>
     <TeamMenu
-      bag={
-        userData: bag.userData,
-        dashboardPageData: bag.dashboardPageData,
+      ctx={
+        userData: ctx.userData,
+        dashboardPageData: ctx.dashboardPageData,
         teamMenuData,
         teamId:
-          Turaku.currentTeam(bag.userData, bag.dashboardPageData) |> Team.id,
+          Turaku.currentTeam(ctx.userData, ctx.dashboardPageData) |> Team.id,
       }
       appSend
     />
   };
 
-let navigateToTeams = (bag, appSend, event) => {
+let navigateToTeams = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   appSend(
     Turaku.Navigate(
-      SignedInUser({...bag.userData, page: TeamSelectionPage}),
+      SignedInUser({...ctx.userData, page: TeamSelectionPage}),
     ),
   );
 };
 
-let navigateToTeamMembers = (bag, appSend, event) => {
+let navigateToTeamMembers = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  switch (bag.dashboardPageData.menu) {
+  switch (ctx.dashboardPageData.menu) {
   | TeamMenu(_) => ()
   | EntriesMenu(_) =>
     appSend(
       Turaku.Navigate(
         SignedInUser({
-          ...bag.userData,
+          ...ctx.userData,
           page:
             DashboardPage({
-              ...bag.dashboardPageData,
+              ...ctx.dashboardPageData,
               menu: TeamMenu({selection: Turaku.TeamMenuLoading}),
             }),
         }),
@@ -62,42 +62,42 @@ let navigateToTeamMembers = (bag, appSend, event) => {
   };
 };
 
-let make = (~bag: bag, ~appSend, _children) => {
+let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="container-fluid">
       <div className="row">
         <div className="col dashboard__navigation">
           <Tags
-            bag={
-              userData: bag.userData,
-              dashboardPageData: bag.dashboardPageData,
+            ctx={
+              userData: ctx.userData,
+              dashboardPageData: ctx.dashboardPageData,
             }
             appSend
           />
           <hr />
           <div
-            onClick=(navigateToTeamMembers(bag, appSend))
+            onClick=(navigateToTeamMembers(ctx, appSend))
             className="dashboard__navlink">
             (str("Members"))
           </div>
           <hr />
           <div
             className="dashboard__navlink"
-            onClick=(navigateToTeams(bag, appSend))>
+            onClick=(navigateToTeams(ctx, appSend))>
             (str("Switch Team"))
           </div>
           <hr />
           <SignOutButton
-            bag={
-              userData: bag.userData,
-              dashboardPageData: bag.dashboardPageData,
+            ctx={
+              userData: ctx.userData,
+              dashboardPageData: ctx.dashboardPageData,
             }
             appSend
           />
         </div>
         <div className="col-10 dashboard__content">
-          (getMenu(bag, appSend))
+          (getMenu(ctx, appSend))
           <span />
         </div>
       </div>

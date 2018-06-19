@@ -2,24 +2,24 @@ let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("Tags");
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
 };
 
-let navigateToAllEntries = (bag, appSend, event) => {
+let navigateToAllEntries = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  let entryId = Turaku.someEntry(bag.userData, bag.dashboardPageData);
-  switch (bag.dashboardPageData.menu) {
+  let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData);
+  switch (ctx.dashboardPageData.menu) {
   | EntriesMenu(_) => ()
   | TeamMenu(_) =>
     appSend(
       Turaku.Navigate(
         SignedInUser({
-          ...bag.userData,
+          ...ctx.userData,
           page:
             DashboardPage({
-              ...bag.dashboardPageData,
+              ...ctx.dashboardPageData,
               menu: EntriesMenu({entryId: entryId}),
             }),
         }),
@@ -28,12 +28,12 @@ let navigateToAllEntries = (bag, appSend, event) => {
   };
 };
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="pt-3">
       <div
-        onClick=(navigateToAllEntries(bag, appSend))
+        onClick=(navigateToAllEntries(ctx, appSend))
         className="dashboard__navlink">
         (str("All tags"))
       </div>

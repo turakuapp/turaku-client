@@ -5,7 +5,7 @@ type state = {inProgress: bool};
 type action =
   | SignOut;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
 };
@@ -22,7 +22,7 @@ module DeleteSessionQuery = [%graphql
   |}
 ];
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   initialState: () => {inProgress: false},
   reducer: (action, _state) =>
@@ -33,12 +33,12 @@ let make = (~bag, ~appSend, _children) => {
         (
           _self =>
             DeleteSessionQuery.make()
-            |> Api.sendAuthenticatedQuery(bag.userData.session)
+            |> Api.sendAuthenticatedQuery(ctx.userData.session)
             |> Js.Promise.then_(response => {
                  if (response##deleteSession##errors
                      |> Array.to_list
                      |> List.length == 0) {
-                   appSend(Turaku.SignOut(bag.userData.session));
+                   appSend(Turaku.SignOut(ctx.userData.session));
                  } else {
                    Js.log2(
                      "Some error occured while trying to sign out. Check: ",

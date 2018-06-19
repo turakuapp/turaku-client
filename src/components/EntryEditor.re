@@ -1,6 +1,6 @@
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
@@ -11,15 +11,15 @@ let component = ReasonReact.statelessComponent("EntryEditor");
 
 let handleTitleChange = _event => ();
 
-let fields = (bag, entry, appSend) =>
+let fields = (ctx, entry, appSend) =>
   List.map(
     (field: Field.t) =>
       <EntryField
         key=(field |> Field.getKey)
-        bag={
-          userData: bag.userData,
-          dashboardPageData: bag.dashboardPageData,
-          entryMenuData: bag.entryMenuData,
+        ctx={
+          userData: ctx.userData,
+          dashboardPageData: ctx.dashboardPageData,
+          entryMenuData: ctx.entryMenuData,
           entry,
           field,
         }
@@ -28,9 +28,9 @@ let fields = (bag, entry, appSend) =>
     entry |> Entry.fields,
   );
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   let entry =
-    Turaku.currentEntry(bag.userData, bag.dashboardPageData, bag.entryId);
+    Turaku.currentEntry(ctx.userData, ctx.dashboardPageData, ctx.entryId);
   {
     ...component,
     render: _self =>
@@ -45,15 +45,15 @@ let make = (~bag, ~appSend, _children) => {
               placeholder="Entry Title"
             />
             (
-              fields(bag, entry, appSend) |> Array.of_list |> ReasonReact.array
+              fields(ctx, entry, appSend) |> Array.of_list |> ReasonReact.array
             )
           </div>
         </div>
         <EntryTags
-          bag={
-            userData: bag.userData,
-            dashboardPageData: bag.dashboardPageData,
-            entryMenuData: bag.entryMenuData,
+          ctx={
+            userData: ctx.userData,
+            dashboardPageData: ctx.dashboardPageData,
+            entryMenuData: ctx.entryMenuData,
             entry,
           }
           appSend

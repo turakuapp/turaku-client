@@ -1,6 +1,6 @@
 let str = ReasonReact.string;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   teamMenuData: Turaku.teamMenuData,
@@ -19,25 +19,25 @@ module DeleteInvitationQuery = [%graphql
   |}
 ];
 
-let deleteInvitation = (bag, appSend, event) => {
+let deleteInvitation = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
-  let invitationId = bag.invitation |> InvitationToUser.id;
+  let invitationId = ctx.invitation |> InvitationToUser.id;
   Js.log("Deleting invitation with ID: " ++ invitationId);
 
   let teamId =
-    Turaku.currentTeam(bag.userData, bag.dashboardPageData) |> Team.id;
+    Turaku.currentTeam(ctx.userData, ctx.dashboardPageData) |> Team.id;
 
   DeleteInvitationQuery.make(~invitationId, ())
-  |> Api.sendAuthenticatedQuery(bag.userData.session)
+  |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
        switch (response##deleteInvitation##errors |> Array.to_list) {
        | [] =>
          appSend(
            Turaku.RemoveInvitationToUser(
              teamId,
-             bag.invitation,
-             bag.userData,
+             ctx.invitation,
+             ctx.userData,
            ),
          )
        | errors =>
@@ -51,12 +51,12 @@ let deleteInvitation = (bag, appSend, event) => {
   |> ignore;
 };
 
-let make = (~bag: bag, ~appSend, _children) => {
+let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="m-3">
       <button
-        className="btn btn-danger" onClick=(deleteInvitation(bag, appSend))>
+        className="btn btn-danger" onClick=(deleteInvitation(ctx, appSend))>
         ("Delete Invitation" |> str)
       </button>
     </div>,

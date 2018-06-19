@@ -1,5 +1,5 @@
 let str = ReasonReact.string;
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   teamMenuData: Turaku.teamMenuData,
@@ -8,13 +8,13 @@ type bag = {
 
 let component = ReasonReact.statelessComponent("TeamMemberEditor");
 
-let make = (~bag: bag, ~appSend, _children) => {
+let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <span>
       (
         "Editor for team member "
-        ++ (bag.teamMember |> TeamMember.email |> Email.toString)
+        ++ (ctx.teamMember |> TeamMember.email |> Email.toString)
         ++ " goes here."
         |> str
       )

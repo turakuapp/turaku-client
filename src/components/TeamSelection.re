@@ -13,20 +13,20 @@ type action =
 
 let str = ReasonReact.string;
 
-type bag = {userData: Turaku.userData};
+type ctx = {userData: Turaku.userData};
 
 let component = ReasonReact.reducerComponent("TeamSelection");
 
-let invitations = (bag, appSend) =>
-  if (bag.userData.invitations |> List.length > 0) {
+let invitations = (ctx, appSend) =>
+  if (ctx.userData.invitations |> List.length > 0) {
     <div>
       <h2> (str("Invitations")) </h2>
       <p> (str("You have been invited to join:")) </p>
       (
-        bag.userData.invitations
+        ctx.userData.invitations
         |> List.map(invitation =>
              <IncomingInvitation
-               bag={userData: bag.userData, invitation}
+               ctx={userData: ctx.userData, invitation}
                appSend
              />
            )
@@ -38,24 +38,24 @@ let invitations = (bag, appSend) =>
     ReasonReact.null;
   };
 
-let selectTeam = (bag, appSend, team, _event) => {
+let selectTeam = (ctx, appSend, team, _event) => {
   /* TODO: See how to select a team with old selectTeam function below. */
   Js.log2("Selecting Team with ID: ", team);
-  appSend(Turaku.SelectTeam(team, bag.userData));
+  appSend(Turaku.SelectTeam(team, ctx.userData));
 };
 
-let teams = (bag, appSend) =>
-  if (bag.userData.teams |> List.length > 0) {
+let teams = (ctx, appSend) =>
+  if (ctx.userData.teams |> List.length > 0) {
     <div>
       <h2> (str("Your Teams")) </h2>
       <div>
         <ul className="mt-3 teams__ul">
           (
-            bag.userData.teams
+            ctx.userData.teams
             |> List.map((team: Team.t) =>
                  <li key=(team |> Team.id) className="mb-1">
                    <button
-                     onClick=(selectTeam(bag, appSend, team |> Team.id))
+                     onClick=(selectTeam(ctx, appSend, team |> Team.id))
                      className="btn btn-sm btn-outline-dark">
                      (str(team |> Team.name))
                    </button>
@@ -95,7 +95,7 @@ module CreateTeamQuery = [%graphql
   |}
 ];
 
-let createTeam = (bag, appSend, state, event) => {
+let createTeam = (ctx, appSend, state, event) => {
   event |> DomUtils.preventEventDefault;
   Js.log(
     "Creating a team with name "
@@ -103,7 +103,7 @@ let createTeam = (bag, appSend, state, event) => {
     ++ " and password (B64) "
     ++ (state.teamPassword |> TeamPassword.toString),
   );
-  let encryptionKey = bag.userData.session |> Session.getCryptographicKey;
+  let encryptionKey = ctx.userData.session |> Session.getCryptographicKey;
   EncryptedData.encrypt(
     encryptionKey,
     state.teamPassword |> TeamPassword.toString,
@@ -121,7 +121,7 @@ let createTeam = (bag, appSend, state, event) => {
            |> EncryptedData.CipherText.toString,
          (),
        )
-       |> Api.sendAuthenticatedQuery(bag.userData.session)
+       |> Api.sendAuthenticatedQuery(ctx.userData.session)
      )
   |> Js.Promise.then_(response => {
        let team = response##createTeam##team;
@@ -133,7 +133,7 @@ let createTeam = (bag, appSend, state, event) => {
          )
        | Some(t) =>
          let team = Team.create(t##id, state.teamName, state.teamPassword);
-         appSend(Turaku.CreateTeam(team, bag.userData));
+         appSend(Turaku.CreateTeam(team, ctx.userData));
        };
        Js.Promise.resolve();
      })
@@ -154,9 +154,9 @@ let updateTeamName = (send, _event) => {
   send(UpdateTeamName(name));
 };
 
-let createTeamForm = (bag, appSend, state, send) =>
+let createTeamForm = (ctx, appSend, state, send) =>
   if (state.createFormVisible) {
-    <form onSubmit=(createTeam(bag, appSend, state))>
+    <form onSubmit=(createTeam(ctx, appSend, state))>
       <div className="form-group">
         <label htmlFor="teams__form-name"> (str("Name of your team")) </label>
         <input
@@ -214,7 +214,7 @@ let createTeamForm = (bag, appSend, state, send) =>
     <span />;
   };
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
   initialState: () => {
     createFormVisible: false,
@@ -237,10 +237,10 @@ let make = (~bag, ~appSend, _children) => {
     <div className="container">
       <div className="row justify-content-center sign-in__centered-container">
         <div className="col-md-6 align-self-center">
-          (invitations(bag, appSend))
-          (teams(bag, appSend))
+          (invitations(ctx, appSend))
+          (teams(ctx, appSend))
           (createTeamButton(state, send))
-          (createTeamForm(bag, appSend, state, send))
+          (createTeamForm(ctx, appSend, state, send))
         </div>
       </div>
     </div>,

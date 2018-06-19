@@ -2,7 +2,7 @@
 
 let str = ReasonReact.stringToElement;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
   dashboardPageData: Turaku.dashboardPageData,
   entryMenuData: Turaku.entryMenuData,
@@ -12,17 +12,17 @@ let component = ReasonReact.statelessComponent("Entries");
 
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
-let entryChoices = (bag, appSend) => {
-  let team = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
+let entryChoices = (ctx, appSend) => {
+  let team = Turaku.currentTeam(ctx.userData, ctx.dashboardPageData);
   team
   |> Team.entries
   |> List.map(entry =>
        <EntryChoice
          key=(entry |> Entry.id)
-         bag={
-           userData: bag.userData,
-           dashboardPageData: bag.dashboardPageData,
-           entryMenuData: bag.entryMenuData,
+         ctx={
+           userData: ctx.userData,
+           dashboardPageData: ctx.dashboardPageData,
+           entryMenuData: ctx.entryMenuData,
            entry,
          }
          appSend
@@ -74,10 +74,10 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
   encryptedEntries |> Array.to_list |> aux([]);
 };
 
-let loadEntries = (bag, appSend) => {
-  let selectedTeam = Turaku.currentTeam(bag.userData, bag.dashboardPageData);
+let loadEntries = (ctx, appSend) => {
+  let selectedTeam = Turaku.currentTeam(ctx.userData, ctx.dashboardPageData);
   EntriesQuery.make(~teamId=selectedTeam |> Team.id, ())
-  |> Api.sendAuthenticatedQuery(bag.userData.session)
+  |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
        Js.log(
          "Loaded entries! Count: "
@@ -91,7 +91,7 @@ let loadEntries = (bag, appSend) => {
          Turaku.RefreshEntries(
            selectedTeam |> Team.id,
            decryptedEntries,
-           bag.userData,
+           ctx.userData,
          ),
        );
        Js.Promise.resolve();
@@ -99,14 +99,14 @@ let loadEntries = (bag, appSend) => {
   |> ignore;
 };
 
-let getSelection = (bag, appSend, entryId) =>
+let getSelection = (ctx, appSend, entryId) =>
   switch (entryId) {
   | Some(id) =>
     <EntryEditor
-      bag={
-        userData: bag.userData,
-        dashboardPageData: bag.dashboardPageData,
-        entryMenuData: bag.entryMenuData,
+      ctx={
+        userData: ctx.userData,
+        dashboardPageData: ctx.dashboardPageData,
+        entryMenuData: ctx.entryMenuData,
         entryId: id,
       }
       appSend
@@ -114,9 +114,9 @@ let getSelection = (bag, appSend, entryId) =>
   | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 
-let make = (~bag, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
-  didMount: _self => loadEntries(bag, appSend),
+  didMount: _self => loadEntries(ctx, appSend),
   render: _self =>
     <div className="row">
       <div className="col-3">
@@ -127,11 +127,11 @@ let make = (~bag, ~appSend, _children) => {
               (str("Add new"))
             </button>
           </div>
-          (entryChoices(bag, appSend) |> ReasonReact.arrayToElement)
+          (entryChoices(ctx, appSend) |> ReasonReact.arrayToElement)
         </div>
       </div>
       <div className="col entry-editor__container">
-        (bag.entryMenuData.entryId |> getSelection(bag, appSend))
+        (ctx.entryMenuData.entryId |> getSelection(ctx, appSend))
       </div>
     </div>,
 };
