@@ -54,7 +54,8 @@ type action =
   | CreateTeam(Team.t, userData)
   | SelectTeam(Team.id, userData)
   | SignOut(Session.t)
-  | AddInvitationToUser(Team.id, InvitationToUser.t, userData);
+  | AddInvitationToUser(Team.id, InvitationToUser.t, userData)
+  | RemoveInvitationToUser(Team.id, InvitationToUser.t, userData);
 
 type state = {user};
 
@@ -171,6 +172,19 @@ let reducer = (action, _state) =>
       |> List.map(team =>
            if (team |> Team.id == teamId) {
              team |> Team.addInvitation(invitation);
+           } else {
+             team;
+           }
+         );
+    ReasonReact.Update({
+      user: SignedInUser({...userData, teams: updatedTeams}),
+    });
+  | RemoveInvitationToUser(teamId, invitation, userData) =>
+    let updatedTeams =
+      userData.teams
+      |> List.map(team =>
+           if (team |> Team.id == teamId) {
+             team |> Team.removeInvitation(invitation);
            } else {
              team;
            }

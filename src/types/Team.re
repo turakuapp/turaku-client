@@ -35,6 +35,11 @@ let addInvitation = (invitation, t) => {
   invitations: [invitation, ...t.invitations],
 };
 
+let removeInvitation = (invitation, t) => {
+  ...t,
+  invitations: t |> invitations |> List.filter(i => i != invitation),
+};
+
 let decryptTeams = (response, decryptionKey, encryptedTeams) => {
   let rec aux = (decryptedTeams, teams) =>
     switch (teams) {
