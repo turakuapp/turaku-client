@@ -2,11 +2,20 @@ type t = {
   id,
   name: string,
   password: TeamPassword.t,
-  entries: list(Entry.t),
-  teamMembers: list(TeamMember.t),
-  invitations: list(InvitationToUser.t),
+  entries: SelectableList.t(Entry.t),
+  teamMembers: SelectableList.t(TeamMember.t),
+  invitations: SelectableList.t(InvitationToUser.t),
 }
 and id = string;
+
+type ts = {
+  selected: t,
+  rest: list(t),
+};
+
+let selected = ts => ts.selected;
+
+let addItem = (i, ts) => {selected: i, rest: [ts.selected, ...ts.rest]};
 
 let name = t => t.name;
 let id = t => t.id;
@@ -18,26 +27,28 @@ let create = (id, name, password) => {
   id,
   name,
   password,
-  entries: [],
-  teamMembers: [],
-  invitations: [],
+  entries: SelectableList.empty(),
+  teamMembers: SelectableList.empty(),
+  invitations: SelectableList.empty(),
 };
 
 let createCryptographicKey = t =>
   t.password |> CryptographicKey.keyFromTeamPassword;
 
 let replaceEntries = (entries, t) => {...t, entries};
+
 let replaceTeamMembers = (teamMembers, t) => {...t, teamMembers};
+
 let replaceInvitations = (invitations, t) => {...t, invitations};
 
 let addInvitation = (invitation, t) => {
   ...t,
-  invitations: [invitation, ...t.invitations],
+  invitations: t.invitations |> SelectableList.add(invitation),
 };
 
 let removeInvitation = (invitation, t) => {
   ...t,
-  invitations: t |> invitations |> List.filter(i => i != invitation),
+  invitations: t |> invitations |> SelectableList.remove(invitation),
 };
 
 let decryptTeams = (response, decryptionKey, encryptedTeams) => {

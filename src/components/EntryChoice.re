@@ -4,19 +4,14 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  entryMenuData: Turaku.entryMenuData,
+  team: Team.t,
   entry: Entry.t,
 };
 
 let component = ReasonReact.statelessComponent("EntryChoice");
 
 let isCurrentChoice = ctx =>
-  switch (ctx.entryMenuData.entryId) {
-  | Some(id) when id == (ctx.entry |> Entry.id) => true
-  | Some(_otherId) => false
-  | None => false
-  };
+  ctx.team |> Team.entries |> SelectableList.selected == Some(ctx.entry);
 
 let containerClasses = ctx => {
   let classes = "mr-3 mt-2 p-2 entry-choice";

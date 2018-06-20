@@ -2,9 +2,8 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  teamMenuData: Turaku.teamMenuData,
   invitation: InvitationToUser.t,
+  team: Team.t,
 };
 
 let component = ReasonReact.statelessComponent("InvitationEditor");
@@ -25,9 +24,6 @@ let deleteInvitation = (ctx, appSend, event) => {
   let invitationId = ctx.invitation |> InvitationToUser.id;
   Js.log("Deleting invitation with ID: " ++ invitationId);
 
-  let teamId =
-    Turaku.currentTeam(ctx.userData, ctx.dashboardPageData) |> Team.id;
-
   DeleteInvitationQuery.make(~invitationId, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
@@ -35,7 +31,7 @@ let deleteInvitation = (ctx, appSend, event) => {
        | [] =>
          appSend(
            Turaku.RemoveInvitationToUser(
-             teamId,
+             ctx.team,
              ctx.invitation,
              ctx.userData,
            ),

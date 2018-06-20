@@ -10,8 +10,6 @@ type action =
 
 type bag = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  teamMenuData: Turaku.teamMenuData,
   teamId: Team.id,
 };
 

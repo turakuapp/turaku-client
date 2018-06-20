@@ -4,14 +4,6 @@ let component = ReasonReact.statelessComponent("SignInMenu");
 
 let str = ReasonReact.string;
 
-type createSessionResponse = {
-  id: int,
-  token: string,
-  user: User.t,
-  teams: list(Team.t),
-  invitations: list(Invitation.t),
-};
-
 module GetAuthenticationSaltQuery = [%graphql
   {|
   query($email: String!) {

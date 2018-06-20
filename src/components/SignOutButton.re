@@ -5,10 +5,7 @@ type state = {inProgress: bool};
 type action =
   | SignOut;
 
-type ctx = {
-  userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-};
+type ctx = {userData: Turaku.userData};
 
 let component = ReasonReact.reducerComponent("SignOutButton");
 

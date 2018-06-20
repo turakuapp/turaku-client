@@ -2,27 +2,17 @@ let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("Tags");
 
-type ctx = {
-  userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-};
+type ctx = {userData: Turaku.userData};
 
 let navigateToAllEntries = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData);
-  switch (ctx.dashboardPageData.menu) {
-  | EntriesMenu(_) => ()
+  /* let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData); */
+  switch (ctx.userData.dashboardMenu) {
+  | EntriesMenu => ()
   | TeamMenu(_) =>
     appSend(
       Turaku.Navigate(
-        SignedInUser({
-          ...ctx.userData,
-          page:
-            DashboardPage({
-              ...ctx.dashboardPageData,
-              menu: EntriesMenu({entryId: entryId}),
-            }),
-        }),
+        SignedInUser({...ctx.userData, dashboardMenu: EntriesMenu}),
       ),
     )
   };

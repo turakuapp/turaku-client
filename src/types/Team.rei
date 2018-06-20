@@ -6,13 +6,13 @@ let createCryptographicKey: t => CryptographicKey.source;
 
 let name: t => string;
 let id: t => id;
-let entries: t => list(Entry.t);
-let teamMembers: t => list(TeamMember.t);
-let invitations: t => list(InvitationToUser.t);
+let entries: t => SelectableList.t(Entry.t);
+let teamMembers: t => SelectableList.t(TeamMember.t);
+let invitations: t => SelectableList.t(InvitationToUser.t);
 
-let replaceEntries: (list(Entry.t), t) => t;
-let replaceTeamMembers: (list(TeamMember.t), t) => t;
-let replaceInvitations: (list(InvitationToUser.t), t) => t;
+let replaceEntries: (SelectableList.t(Entry.t), t) => t;
+let replaceTeamMembers: (SelectableList.t(TeamMember.t), t) => t;
+let replaceInvitations: (SelectableList.t(InvitationToUser.t), t) => t;
 
 let addInvitation: (InvitationToUser.t, t) => t;
 let removeInvitation: (InvitationToUser.t, t) => t;

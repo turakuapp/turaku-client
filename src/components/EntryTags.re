@@ -2,8 +2,6 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  entryMenuData: Turaku.entryMenuData,
   entry: Entry.t,
 };
 

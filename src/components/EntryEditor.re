@@ -2,64 +2,42 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  entryMenuData: Turaku.entryMenuData,
-  entryId: Entry.id,
+  entry: Entry.t,
 };
 
 let component = ReasonReact.statelessComponent("EntryEditor");
 
 let handleTitleChange = _event => ();
 
-let fields = (ctx, entry, appSend) =>
+let fields = (ctx, appSend) =>
   List.map(
     (field: Field.t) =>
       <EntryField
         key=(field |> Field.getKey)
-        ctx={
-          userData: ctx.userData,
-          dashboardPageData: ctx.dashboardPageData,
-          entryMenuData: ctx.entryMenuData,
-          entry,
-          field,
-        }
+        ctx={userData: ctx.userData, entry: ctx.entry, field}
         appSend
       />,
-    entry |> Entry.fields,
+    ctx.entry |> Entry.fields,
   );
 
 let make = (~ctx, ~appSend, _children) => {
-  let entry =
-    Turaku.currentEntry(ctx.userData, ctx.dashboardPageData, ctx.entryId);
-  {
-    ...component,
-    render: _self =>
-      <div>
-        <div className="row">
-          <div className="col offset-sm-2">
-            <input
-              _type="text"
-              value=(entry |> Entry.title)
-              onChange=handleTitleChange
-              className="my-2"
-              placeholder="Entry Title"
-            />
-            (
-              fields(ctx, entry, appSend) |> Array.of_list |> ReasonReact.array
-            )
-          </div>
+  ...component,
+  render: _self =>
+    <div>
+      <div className="row">
+        <div className="col offset-sm-2">
+          <input
+            _type="text"
+            value=(ctx.entry |> Entry.title)
+            onChange=handleTitleChange
+            className="my-2"
+            placeholder="Entry Title"
+          />
+          (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
         </div>
-        <EntryTags
-          ctx={
-            userData: ctx.userData,
-            dashboardPageData: ctx.dashboardPageData,
-            entryMenuData: ctx.entryMenuData,
-            entry,
-          }
-          appSend
-        />
-      </div>,
-  };
+      </div>
+      <EntryTags ctx={userData: ctx.userData, entry: ctx.entry} appSend />
+    </div>,
 };
 /* export default class Entry extends React.Component {
      constructor(props) {
