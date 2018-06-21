@@ -9,7 +9,12 @@ let all = t => t.all;
 
 let selected = t => t.selected;
 
-let select = (a, t) => {...t, selected: Some(a)};
+let select = (a, t) =>
+  if (t.all |> List.exists(b => b == a)) {
+    {...t, selected: Some(a)};
+  } else {
+    t;
+  };
 
 let deselect = t => {...t, selected: None};
 
@@ -20,9 +25,9 @@ let remove = (a, t) => {
   {selected, all: t.all |> List.filter(b => b != a)};
 };
 
-let create = a =>
-  switch (a) {
-  | [h, ..._] => {selected: Some(h), all: a}
+let create = xs =>
+  switch (xs) {
+  | [h, ..._] => {selected: Some(h), all: xs}
   | [] => empty()
   };
 
