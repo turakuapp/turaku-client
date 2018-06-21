@@ -268,7 +268,6 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="col team-menu__editor-container">
         (
           switch (ctx.teamMenuSelection) {
-          | Turaku.TeamMenuLoading => editorPlaceholder
           | TeamMemberSelected =>
             switch (ctx.team |> Team.teamMembers |> SelectableList.selected) {
             | Some(teamMember) =>

@@ -1,7 +1,6 @@
 type signInPageData = {justSignedUp: bool};
 
 type teamMenuSelection =
-  | TeamMenuLoading
   | InvitationSelected
   | TeamMemberSelected;
 
@@ -120,11 +119,7 @@ let reducer = (action, _state) =>
     let teamMenuSelection =
       switch (invitations) {
       | [_, ..._] => InvitationSelected
-      | [] =>
-        switch (teamMembers) {
-        | [_, ..._] => TeamMemberSelected
-        | [] => TeamMenuLoading
-        }
+      | [] => TeamMemberSelected
       };
     ReasonReact.Update({
       user:
@@ -141,6 +136,7 @@ let reducer = (action, _state) =>
         SignedInUser({
           ...userData,
           teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+          dashboardMenu: TeamMenu(InvitationSelected),
         }),
     });
   | RemoveInvitationToUser(team, invitation, userData) =>
@@ -199,7 +195,7 @@ let deselectTeam = userData => {
 
 let selectTeamMenu = userData =>
   Navigate(
-    SignedInUser({...userData, dashboardMenu: TeamMenu(TeamMenuLoading)}),
+    SignedInUser({...userData, dashboardMenu: TeamMenu(TeamMemberSelected)}),
   );
 /*
  let currentTeam = (userData, dashboardPageData) =>
