@@ -1,51 +1,33 @@
 type t('a) = {
   selected: option('a),
-  rest: list('a),
+  all: list('a),
 };
 
-let empty = () => {selected: None, rest: []};
+let empty = () => {selected: None, all: []};
 
-let all = t =>
-  switch (t.selected) {
-  | None => t.rest
-  | Some(a) => [a, ...t.rest]
-  };
+let all = t => t.all;
 
 let selected = t => t.selected;
 
-let select = (a, t) => {
-  selected: Some(a),
-  rest: t |> all |> List.filter(b => b != a),
+let select = (a, t) => {...t, selected: Some(a)};
+
+let deselect = t => {...t, selected: None};
+
+let add = (a, t) => {selected: Some(a), all: [a, ...t.all]};
+
+let remove = (a, t) => {
+  let selected = Some(a) == t.selected ? None : t.selected;
+  {selected, all: t.all |> List.filter(b => b != a)};
 };
-
-let deselect = t => {
-  selected: None,
-  rest:
-    switch (t.selected) {
-    | None => t.rest
-    | Some(a) => [a, ...t.rest]
-    },
-};
-
-let add = (a, t) => {selected: Some(a), rest: t |> all};
-
-let remove = (a, t) =>
-  if (Some(a) == t.selected) {
-    {...t, selected: None};
-  } else {
-    {...t, rest: t.rest |> List.filter(b => b != a)};
-  };
 
 let create = a =>
   switch (a) {
-  | [h, ...t] => {selected: Some(h), rest: t}
-  | [] => {selected: None, rest: []}
+  | [h, ..._] => {selected: Some(h), all: a}
+  | [] => empty()
   };
 
 /** Replaces the first argument with the second in given SelectableList. */
-let replace = (a, b, t) =>
-  if (Some(a) == t.selected) {
-    {...t, selected: Some(b)};
-  } else {
-    {...t, rest: t.rest |> List.map(x => x == a ? b : x)};
-  };
+let replace = (a, b, t) => {
+  let selected = Some(a) == t.selected ? Some(b) : t.selected;
+  {selected, all: t.all |> List.map(x => x == a ? b : x)};
+};
