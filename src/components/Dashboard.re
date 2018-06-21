@@ -4,61 +4,32 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
+  team: Team.t,
 };
 
 let component = ReasonReact.statelessComponent("Dashboard");
 
 let getMenu = (ctx, appSend) =>
-  switch (ctx.dashboardPageData.menu) {
-  | Turaku.EntriesMenu(entryMenuData) =>
-    <Entries
-      ctx={
-        userData: ctx.userData,
-        dashboardPageData: ctx.dashboardPageData,
-        entryMenuData,
-      }
-      appSend
-    />
-  | TeamMenu(teamMenuData) =>
+  switch (ctx.userData.dashboardMenu) {
+  | Turaku.EntriesMenu =>
+    <Entries ctx={userData: ctx.userData, team: ctx.team} appSend />
+  | TeamMenu(teamMenuSelection) =>
     <TeamMenu
-      ctx={
-        userData: ctx.userData,
-        dashboardPageData: ctx.dashboardPageData,
-        teamMenuData,
-        teamId:
-          Turaku.currentTeam(ctx.userData, ctx.dashboardPageData) |> Team.id,
-      }
+      ctx={userData: ctx.userData, team: ctx.team, teamMenuSelection}
       appSend
     />
   };
 
 let navigateToTeams = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  appSend(
-    Turaku.Navigate(
-      SignedInUser({...ctx.userData, page: TeamSelectionPage}),
-    ),
-  );
+  Turaku.deselectTeam(ctx.userData) |> appSend;
 };
 
-let navigateToTeamMembers = (ctx, appSend, event) => {
+let navigateToTeamMenu = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  switch (ctx.dashboardPageData.menu) {
+  switch (ctx.userData.dashboardMenu) {
   | TeamMenu(_) => ()
-  | EntriesMenu(_) =>
-    appSend(
-      Turaku.Navigate(
-        SignedInUser({
-          ...ctx.userData,
-          page:
-            DashboardPage({
-              ...ctx.dashboardPageData,
-              menu: TeamMenu({selection: Turaku.TeamMenuLoading}),
-            }),
-        }),
-      ),
-    )
+  | EntriesMenu(_) => Turaku.selectTeamMenu(ctx.userData) |> appSend
   };
 };
 
@@ -68,16 +39,10 @@ let make = (~ctx: ctx, ~appSend, _children) => {
     <div className="container-fluid">
       <div className="row">
         <div className="col dashboard__navigation">
-          <Tags
-            ctx={
-              userData: ctx.userData,
-              dashboardPageData: ctx.dashboardPageData,
-            }
-            appSend
-          />
+          <Tags ctx={userData: ctx.userData} appSend />
           <hr />
           <div
-            onClick=(navigateToTeamMembers(ctx, appSend))
+            onClick=(navigateToTeamMenu(ctx, appSend))
             className="dashboard__navlink">
             (str("Members"))
           </div>
@@ -88,13 +53,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
             (str("Switch Team"))
           </div>
           <hr />
-          <SignOutButton
-            ctx={
-              userData: ctx.userData,
-              dashboardPageData: ctx.dashboardPageData,
-            }
-            appSend
-          />
+          <SignOutButton ctx={userData: ctx.userData} appSend />
         </div>
         <div className="col-10 dashboard__content">
           (getMenu(ctx, appSend))

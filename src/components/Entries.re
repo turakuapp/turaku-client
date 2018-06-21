@@ -4,32 +4,25 @@ let str = ReasonReact.stringToElement;
 
 type ctx = {
   userData: Turaku.userData,
-  dashboardPageData: Turaku.dashboardPageData,
-  entryMenuData: Turaku.entryMenuData,
+  team: Team.t,
 };
 
 let component = ReasonReact.statelessComponent("Entries");
 
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
-let entryChoices = (ctx, appSend) => {
-  let team = Turaku.currentTeam(ctx.userData, ctx.dashboardPageData);
-  team
+let entryChoices = (ctx, appSend) =>
+  ctx.team
   |> Team.entries
+  |> SelectableList.all
   |> List.map(entry =>
        <EntryChoice
          key=(entry |> Entry.id)
-         ctx={
-           userData: ctx.userData,
-           dashboardPageData: ctx.dashboardPageData,
-           entryMenuData: ctx.entryMenuData,
-           entry,
-         }
+         ctx={userData: ctx.userData, team: ctx.team, entry}
          appSend
        />
      )
   |> Array.of_list;
-};
 
 module EntriesQuery = [%graphql
   {|
@@ -74,43 +67,29 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
   encryptedEntries |> Array.to_list |> aux([]);
 };
 
-let loadEntries = (ctx, appSend) => {
-  let selectedTeam = Turaku.currentTeam(ctx.userData, ctx.dashboardPageData);
-  EntriesQuery.make(~teamId=selectedTeam |> Team.id, ())
+let loadEntries = (ctx, appSend) =>
+  EntriesQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
        Js.log(
          "Loaded entries! Count: "
          ++ (response##team##entries |> Array.length |> string_of_int),
        );
-       let decryptionKey = selectedTeam |> Team.createCryptographicKey;
+       let decryptionKey = ctx.team |> Team.createCryptographicKey;
        response##team##entries |> decryptEntries(decryptionKey);
      })
   |> Js.Promise.then_(decryptedEntries => {
        appSend(
-         Turaku.RefreshEntries(
-           selectedTeam |> Team.id,
-           decryptedEntries,
-           ctx.userData,
-         ),
+         Turaku.RefreshEntries(ctx.team, decryptedEntries, ctx.userData),
        );
        Js.Promise.resolve();
      })
   |> ignore;
-};
 
-let getSelection = (ctx, appSend, entryId) =>
-  switch (entryId) {
-  | Some(id) =>
-    <EntryEditor
-      ctx={
-        userData: ctx.userData,
-        dashboardPageData: ctx.dashboardPageData,
-        entryMenuData: ctx.entryMenuData,
-        entryId: id,
-      }
-      appSend
-    />
+let getSelection = (ctx, appSend, entry) =>
+  switch (entry) {
+  | Some(entry) =>
+    <EntryEditor ctx={userData: ctx.userData, entry} appSend />
   | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 
@@ -127,11 +106,16 @@ let make = (~ctx, ~appSend, _children) => {
               (str("Add new"))
             </button>
           </div>
-          (entryChoices(ctx, appSend) |> ReasonReact.arrayToElement)
+          (entryChoices(ctx, appSend) |> ReasonReact.array)
         </div>
       </div>
       <div className="col entry-editor__container">
-        (ctx.entryMenuData.entryId |> getSelection(ctx, appSend))
+        (
+          ctx.team
+          |> Team.entries
+          |> SelectableList.selected
+          |> getSelection(ctx, appSend)
+        )
       </div>
     </div>,
 };

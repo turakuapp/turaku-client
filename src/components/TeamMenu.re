@@ -8,9 +8,10 @@ type state = {inviteFormVisible: bool};
 type action =
   | ToggleInviteForm;
 
-type bag = {
+type ctx = {
   userData: Turaku.userData,
-  teamId: Team.id,
+  teamMenuSelection: Turaku.teamMenuSelection,
+  team: Team.t,
 };
 
 let component = ReasonReact.reducerComponent("TeamMenu");
@@ -30,7 +31,7 @@ let invitationToggle = (state, send) =>
     </button>;
   };
 
-let containerClasses = bag => {
+let containerClasses = ctx => {
   let classes = "mt-2 p-2 entry-choice";
   /* if (ctx |> isCurrentChoice) {
        classes ++ " entry-choice--chosen";
@@ -39,32 +40,20 @@ let containerClasses = bag => {
   /* }; */
 };
 
-let selectFromTeamMenu = (ctx, selection, appSend, event) => {
+let selectTeamMember = (ctx, teamMember, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  appSend(
-    Turaku.Navigate(
-      SignedInUser({
-        ...ctx.userData,
-        page:
-          DashboardPage({
-            ...ctx.dashboardPageData,
-            menu: TeamMenu({selection: selection}),
-          }),
-      }),
-    ),
-  );
+  Turaku.selectTeamMember(teamMember, ctx.team, ctx.userData) |> appSend;
 };
 
-let selectTeamMember = (ctx, teamMember, appSend, event) =>
-  event
-  |> selectFromTeamMenu(ctx, Turaku.TeamMemberSelected(teamMember), appSend);
+let selectInvitation = (ctx, invitation, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  Turaku.selectInvitation(invitation, ctx.team, ctx.userData) |> appSend;
+};
 
-let selectInvitation = (ctx, invitation, appSend, event) =>
-  event
-  |> selectFromTeamMenu(ctx, Turaku.InvitationSelected(invitation), appSend);
-
-let teamMemberOptions = (ctx, teamMembers, appSend) =>
-  if (teamMembers |> List.length > 0) {
+let teamMemberOptions = (ctx, appSend) =>
+  switch (ctx.team |> Team.teamMembers |> SelectableList.all) {
+  | [] => <div> ("Loading users..." |> str) </div>
+  | teamMembers =>
     <div>
       (
         teamMembers
@@ -83,14 +72,13 @@ let teamMemberOptions = (ctx, teamMembers, appSend) =>
         |> Array.of_list
         |> ReasonReact.array
       )
-    </div>;
-  } else {
-    <div> ("Loading users..." |> str) </div>;
+    </div>
   };
 
-let invitedMembers = (ctx, currentTeam, appSend) =>
-  currentTeam
+let invitedMembers = (ctx, appSend) =>
+  ctx.team
   |> Team.invitations
+  |> SelectableList.all
   |> List.map(invitation =>
        <div
          onClick=(selectInvitation(ctx, invitation, appSend))
@@ -134,7 +122,7 @@ let inviteUser = (ctx, appSend, send, event) => {
     DomUtils.getValueOfInputById("users__invite-form-email") |> Email.create;
 
   CreateInvitation.make(
-    ~teamId=ctx.teamId,
+    ~teamId=ctx.team |> Team.id,
     ~email=email |> Email.toString,
     (),
   )
@@ -149,7 +137,7 @@ let inviteUser = (ctx, appSend, send, event) => {
              invitation##invitedUser##name,
            );
          appSend(
-           Turaku.AddInvitationToUser(ctx.teamId, invitation, ctx.userData),
+           Turaku.AddInvitationToUser(ctx.team, invitation, ctx.userData),
          );
          send(ToggleInviteForm);
        | None =>
@@ -216,7 +204,7 @@ module UsersQuery = [%graphql
 ];
 
 let refreshUsers = (ctx, appSend) =>
-  UsersQuery.make(~teamId=ctx.teamId, ())
+  UsersQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
        let teamMembers =
@@ -242,16 +230,18 @@ let refreshUsers = (ctx, appSend) =>
 
        appSend(
          Turaku.RefreshTeamMembers(
-           ctx.teamId,
+           ctx.team,
            teamMembers,
            invitations,
            ctx.userData,
-           ctx.dashboardPageData,
          ),
        );
        Js.Promise.resolve();
      })
   |> ignore;
+
+let editorPlaceholder =
+  <span> ("Select a team member, or invite someone." |> str) </span>;
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
@@ -262,9 +252,7 @@ let make = (~ctx, ~appSend, _children) => {
     | ToggleInviteForm =>
       ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
     },
-  render: ({state, send}) => {
-    let currentTeam = Turaku.currentTeam(ctx.userData, ctx.dashboardPageData);
-    let teamMembers = currentTeam |> Team.teamMembers;
+  render: ({state, send}) =>
     <div className="row">
       <div className="col-3">
         <div className="team-menu__members">
@@ -273,40 +261,37 @@ let make = (~ctx, ~appSend, _children) => {
             (invitationToggle(state, send))
           </div>
           (invitationForm(ctx, appSend, state, send))
-          (invitedMembers(ctx, currentTeam, appSend))
-          (teamMemberOptions(ctx, teamMembers, appSend))
+          (invitedMembers(ctx, appSend))
+          (teamMemberOptions(ctx, appSend))
         </div>
       </div>
       <div className="col team-menu__editor-container">
         (
-          switch (ctx.teamMenuData.selection) {
-          | Turaku.TeamMenuLoading =>
-            <span> ("Loading team data..." |> str) </span>
-          | TeamMemberSelected(teamMember) =>
-            <TeamMemberEditor
-              ctx={
-                userData: ctx.userData,
-                dashboardPageData: ctx.dashboardPageData,
-                teamMenuData: ctx.teamMenuData,
-                teamMember,
-              }
-              appSend
-            />
-          | InvitationSelected(invitation) =>
-            <InvitationEditor
-              ctx={
-                userData: ctx.userData,
-                dashboardPageData: ctx.dashboardPageData,
-                teamMenuData: ctx.teamMenuData,
-                invitation,
-              }
-              appSend
-            />
+          switch (ctx.teamMenuSelection) {
+          | Turaku.TeamMenuLoading => editorPlaceholder
+          | TeamMemberSelected =>
+            switch (ctx.team |> Team.teamMembers |> SelectableList.selected) {
+            | Some(teamMember) =>
+              <TeamMemberEditor
+                ctx={userData: ctx.userData, teamMember}
+                appSend
+              />
+            | None => editorPlaceholder
+            }
+
+          | InvitationSelected =>
+            switch (ctx.team |> Team.invitations |> SelectableList.selected) {
+            | Some(invitation) =>
+              <InvitationEditor
+                ctx={userData: ctx.userData, team: ctx.team, invitation}
+                appSend
+              />
+            | None => editorPlaceholder
+            }
           }
         )
       </div>
-    </div>;
-  },
+    </div>,
   /* (ctx.entryMenuData.entryId |> getSelection(ctx, appSend)) */
 };
 /* export default class Users extends React.Component {

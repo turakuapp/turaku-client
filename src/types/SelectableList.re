@@ -18,6 +18,15 @@ let select = (a, t) => {
   rest: t |> all |> List.filter(b => b != a),
 };
 
+let deselect = t => {
+  selected: None,
+  rest:
+    switch (t.selected) {
+    | None => t.rest
+    | Some(a) => [a, ...t.rest]
+    },
+};
+
 let add = (a, t) => {selected: Some(a), rest: t |> all};
 
 let remove = (a, t) =>

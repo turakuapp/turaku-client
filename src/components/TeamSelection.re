@@ -44,18 +44,20 @@ let selectTeam = (ctx, appSend, team, _event) => {
   appSend(Turaku.SelectTeam(team, ctx.userData));
 };
 
-let teams = (ctx, appSend) =>
-  if (ctx.userData.teams |> List.length > 0) {
+let teams = (ctx, appSend) => {
+  let allTeams = ctx.userData.teams |> SelectableList.all;
+
+  if (allTeams |> List.length > 0) {
     <div>
       <h2> (str("Your Teams")) </h2>
       <div>
         <ul className="mt-3 teams__ul">
           (
-            ctx.userData.teams
+            allTeams
             |> List.map((team: Team.t) =>
                  <li key=(team |> Team.id) className="mb-1">
                    <button
-                     onClick=(selectTeam(ctx, appSend, team |> Team.id))
+                     onClick=(selectTeam(ctx, appSend, team))
                      className="btn btn-sm btn-outline-dark">
                      (str(team |> Team.name))
                    </button>
@@ -71,6 +73,7 @@ let teams = (ctx, appSend) =>
   } else {
     <p> (str("You do not belong to any team, right now. Create one?")) </p>;
   };
+};
 
 let createTeamButton = (state, send) =>
   if (state.createFormVisible) {

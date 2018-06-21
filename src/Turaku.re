@@ -131,6 +131,7 @@ let reducer = (action, _state) =>
         SignedInUser({
           ...userData,
           teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+          dashboardMenu: TeamMenu(teamMenuSelection),
         }),
     });
   | AddInvitationToUser(team, invitation, userData) =>
@@ -152,6 +153,54 @@ let reducer = (action, _state) =>
         }),
     });
   };
+
+let selectEntry = (entry, team, userData) => {
+  let updatedEntries = team |> Team.entries |> SelectableList.select(entry);
+  let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+  let updatedTeams =
+    userData.teams |> SelectableList.replace(team, updatedTeam);
+  Navigate(SignedInUser({...userData, teams: updatedTeams}));
+};
+
+let selectTeamMember = (teamMember, team, userData) => {
+  let updatedTeamMembers =
+    team |> Team.teamMembers |> SelectableList.select(teamMember);
+  let updatedTeam = team |> Team.replaceTeamMembers(updatedTeamMembers);
+  let updatedTeams =
+    userData.teams |> SelectableList.replace(team, updatedTeam);
+  Navigate(
+    SignedInUser({
+      ...userData,
+      teams: updatedTeams,
+      dashboardMenu: TeamMenu(TeamMemberSelected),
+    }),
+  );
+};
+
+let selectInvitation = (invitation, team, userData) => {
+  let updatedInvitations =
+    team |> Team.invitations |> SelectableList.select(invitation);
+  let updatedTeam = team |> Team.replaceInvitations(updatedInvitations);
+  let updatedTeams =
+    userData.teams |> SelectableList.replace(team, updatedTeam);
+  Navigate(
+    SignedInUser({
+      ...userData,
+      teams: updatedTeams,
+      dashboardMenu: TeamMenu(InvitationSelected),
+    }),
+  );
+};
+
+let deselectTeam = userData => {
+  let updatedTeams = userData.teams |> SelectableList.deselect;
+  Navigate(SignedInUser({...userData, teams: updatedTeams}));
+};
+
+let selectTeamMenu = userData =>
+  Navigate(
+    SignedInUser({...userData, dashboardMenu: TeamMenu(TeamMenuLoading)}),
+  );
 /*
  let currentTeam = (userData, dashboardPageData) =>
    userData.teams

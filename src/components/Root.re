@@ -13,11 +13,9 @@ let currentComponent = (state, send) =>
     | SignUpPage => <SignUpMenu appSend=send />
     }
   | SignedInUser(userData) =>
-    switch (userData.page) {
-    | TeamSelectionPage =>
-      <TeamSelection ctx={userData: userData} appSend=send />
-    | DashboardPage(dashboardPageData) =>
-      <Dashboard ctx={userData, dashboardPageData} appSend=send />
+    switch (userData.teams |> SelectableList.selected) {
+    | None => <TeamSelection ctx={userData: userData} appSend=send />
+    | Some(team) => <Dashboard ctx={userData, team} appSend=send />
     }
   };
 

@@ -25,13 +25,11 @@ let containerClasses = ctx => {
 let chooseEntry = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   Js.log("Clicked on event choice with ID: " ++ (ctx.entry |> Entry.id));
-  let page =
-    Turaku.DashboardPage({
-      ...ctx.dashboardPageData,
-      menu: Turaku.EntriesMenu({entryId: Some(ctx.entry |> Entry.id)}),
-    });
   if (! isCurrentChoice(ctx)) {
-    appSend(Turaku.Navigate(SignedInUser({...ctx.userData, page})));
+    /* appSend(Turaku.Navigate(SignedInUser({...ctx.userData, page}))); */
+    appSend(
+      Turaku.selectEntry(ctx.entry, ctx.team, ctx.userData),
+    );
   };
 };
 
