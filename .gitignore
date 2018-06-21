@@ -27,3 +27,6 @@ graphql_schema.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# BSB lockfile
+.bsb.lock
