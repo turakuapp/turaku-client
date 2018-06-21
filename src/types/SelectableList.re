@@ -27,7 +27,7 @@ let remove = (a, t) => {
 
 let create = xs =>
   switch (xs) {
-  | [h, ..._] => {selected: Some(h), all: xs}
+  | [h, ..._] => {selected: None, all: xs}
   | [] => empty()
   };
 
