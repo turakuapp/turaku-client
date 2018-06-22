@@ -116,13 +116,9 @@ let createTeam = (ctx, appSend, state, event) => {
        CreateTeamQuery.make(
          ~name=state.teamName,
          ~iv=
-           encryptedData
-           |> EncryptedData.iv
-           |> EncryptedData.InitializationVector.toString,
+           encryptedData |> EncryptedData.iv |> InitializationVector.toString,
          ~ciphertext=
-           encryptedData
-           |> EncryptedData.ciphertext
-           |> EncryptedData.CipherText.toString,
+           encryptedData |> EncryptedData.ciphertext |> CipherText.toString,
          (),
        )
        |> Api.sendAuthenticatedQuery(ctx.userData.session)

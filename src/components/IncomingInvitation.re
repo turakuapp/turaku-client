@@ -40,13 +40,9 @@ let acceptInvitation = (ctx, appSend, event) => {
   EncryptedData.encrypt(encryptionKey, stringPassword)
   |> Js.Promise.then_(encryptedData => {
        let iv =
-         encryptedData
-         |> EncryptedData.iv
-         |> EncryptedData.InitializationVector.toString;
+         encryptedData |> EncryptedData.iv |> InitializationVector.toString;
        let ciphertext =
-         encryptedData
-         |> EncryptedData.ciphertext
-         |> EncryptedData.CipherText.toString;
+         encryptedData |> EncryptedData.ciphertext |> CipherText.toString;
 
        AcceptInvitationQuery.make(
          ~id=ctx.invitation |> InvitationFromTeam.id,

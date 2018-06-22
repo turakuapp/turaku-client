@@ -56,14 +56,9 @@ let decryptTeams = (response, decryptionKey, encryptedTeams) => {
   let rec aux = (decryptedTeams, teams) =>
     switch (teams) {
     | [team, ...remainingTeams] =>
-      let iv =
-        EncryptedData.InitializationVector.fromString(
-          team##encryptedPassword##iv,
-        );
+      let iv = InitializationVector.fromString(team##encryptedPassword##iv);
       let ciphertext =
-        EncryptedData.CipherText.fromString(
-          team##encryptedPassword##ciphertext,
-        );
+        CipherText.fromString(team##encryptedPassword##ciphertext);
       EncryptedData.create(iv, ciphertext)
       |> EncryptedData.decrypt(decryptionKey)
       |> Js.Promise.then_(plaintext => {

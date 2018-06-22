@@ -1,22 +1,3 @@
-module InitializationVector = {
-  type t = UnsignedByteArray.t;
-  let create = () : t => {
-    let iv = UnsignedByteArray.createWithLength(16);
-    iv |> UnsignedByteArray.getRandomValues;
-    iv;
-  };
-  let toString = (t: t) => t |> UnsignedByteArray.toBase64String;
-  let fromString = s : t => s |> UnsignedByteArray.fromBase64String;
-};
-
-module CipherText = {
-  type t = ArrayBuffer.t;
-  let create = (t: ArrayBuffer.t) : t => t;
-  let toString = (t: t) =>
-    t |> UnsignedByteArray.fromArrayBuffer |> UnsignedByteArray.toBase64String;
-  let fromString = s : t => s |> UnsignedByteArray.fromBase64String;
-};
-
 type t = {
   iv: InitializationVector.t,
   ciphertext: CipherText.t,
@@ -31,7 +12,7 @@ type encryptionAlgorithm = {
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
 external subtleEncrypt :
   (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
-  Js.Promise.t(CipherText.t) =
+  Js.Promise.t(ArrayBuffer.t) =
   "encrypt";
 
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
@@ -60,7 +41,9 @@ let decrypt = (key, t) =>
   key
   |> CryptographicKey.create
   |> Js.Promise.then_(cryptoKey =>
-       t.ciphertext |> subtleDecrypt(t.iv |> algorithm, cryptoKey)
+       t.ciphertext
+       |> CipherText.toArrayBuffer
+       |> subtleDecrypt(t.iv |> algorithm, cryptoKey)
      )
   |> Js.Promise.then_(byteArray =>
        byteArray |> TextDecoder.decode |> Js.Promise.resolve

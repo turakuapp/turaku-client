@@ -44,12 +44,9 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
   let rec aux = (decryptedEntries, entries) =>
     switch (entries) {
     | [entry, ...remainingEntries] =>
-      let iv =
-        EncryptedData.InitializationVector.fromString(
-          entry##encryptedData##iv,
-        );
+      let iv = InitializationVector.fromString(entry##encryptedData##iv);
       let ciphertext =
-        EncryptedData.CipherText.fromString(entry##encryptedData##ciphertext);
+        CipherText.fromString(entry##encryptedData##ciphertext);
       EncryptedData.create(iv, ciphertext)
       |> EncryptedData.decrypt(decryptionKey)
       |> Js.Promise.then_(plaintext => {
