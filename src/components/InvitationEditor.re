@@ -1,3 +1,5 @@
+[%bs.raw {|require("./invitationEditor.css")|}];
+
 let str = ReasonReact.string;
 
 type ctx = {
@@ -42,8 +44,18 @@ let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="m-3">
+      <div>
+        ("This new user will need the team password to join your team:" |> str)
+      </div>
+      <div className="my-3">
+        <span className="p-2 invitation-editor__team-password">
+          (ctx.team |> Team.password |> TeamPassword.toString |> str)
+        </span>
+      </div>
+      <div> ("...or, you can delete this invitation." |> str) </div>
       <button
-        className="btn btn-danger" onClick=(deleteInvitation(ctx, appSend))>
+        className="mt-3 btn btn-danger"
+        onClick=(deleteInvitation(ctx, appSend))>
         ("Delete Invitation" |> str)
       </button>
     </div>,

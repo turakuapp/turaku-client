@@ -4,8 +4,9 @@ type id = string;
 let create: (id, string, TeamPassword.t) => t;
 let createCryptographicKey: t => CryptographicKey.source;
 
-let name: t => string;
 let id: t => id;
+let name: t => string;
+let password: t => TeamPassword.t;
 let entries: t => SelectableList.t(Entry.t);
 let teamMembers: t => SelectableList.t(TeamMember.t);
 let invitations: t => SelectableList.t(InvitationToUser.t);

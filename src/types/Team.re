@@ -19,6 +19,7 @@ let addItem = (i, ts) => {selected: i, rest: [ts.selected, ...ts.rest]};
 
 let name = t => t.name;
 let id = t => t.id;
+let password = t => t.password;
 let entries = t => t.entries;
 let teamMembers = t => t.teamMembers;
 let invitations = t => t.invitations;
