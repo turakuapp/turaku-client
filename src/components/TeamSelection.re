@@ -117,11 +117,11 @@ let createTeam = (ctx, appSend, state, event) => {
          ~name=state.teamName,
          ~iv=
            encryptedData
-           |> EncryptedData.getIV
+           |> EncryptedData.iv
            |> EncryptedData.InitializationVector.toString,
          ~ciphertext=
            encryptedData
-           |> EncryptedData.getCiphertext
+           |> EncryptedData.ciphertext
            |> EncryptedData.CipherText.toString,
          (),
        )
@@ -137,7 +137,7 @@ let createTeam = (ctx, appSend, state, event) => {
          )
        | Some(t) =>
          let team = Team.create(t##id, state.teamName, state.teamPassword);
-         appSend(Turaku.CreateTeam(team, ctx.userData));
+         appSend(Turaku.AddTeam(team, ctx.userData));
        };
        Js.Promise.resolve();
      })

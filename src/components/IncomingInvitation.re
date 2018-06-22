@@ -12,7 +12,67 @@ type ctx = {
 
 let component = ReasonReact.reducerComponent("IncomingInvitation");
 
-let acceptInvitation = _event => ();
+module AcceptInvitationQuery = [%graphql
+  {|
+  mutation($id: ID!, $iv: String!, $ciphertext: String!) {
+    acceptInvitation(id: $id, encryptedPassword: {iv: $iv, ciphertext: $ciphertext}) {
+      invitation {
+        team {
+          id
+        }
+      }
+      errors
+    }
+  }
+  |}
+];
+
+let acceptInvitation = (ctx, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+
+  let invitationId = ctx.invitation |> InvitationFromTeam.id;
+  Js.log("Accepting Invitation#" ++ invitationId);
+
+  let stringPassword =
+    DomUtils.getValueOfInputById("invitations__team-password");
+
+  let encryptionKey = ctx.userData.session |> Session.getCryptographicKey;
+  EncryptedData.encrypt(encryptionKey, stringPassword)
+  |> Js.Promise.then_(encryptedData => {
+       let iv =
+         encryptedData
+         |> EncryptedData.iv
+         |> EncryptedData.InitializationVector.toString;
+       let ciphertext =
+         encryptedData
+         |> EncryptedData.ciphertext
+         |> EncryptedData.CipherText.toString;
+
+       AcceptInvitationQuery.make(
+         ~id=ctx.invitation |> InvitationFromTeam.id,
+         ~iv,
+         ~ciphertext,
+         (),
+       )
+       |> Api.sendAuthenticatedQuery(ctx.userData.session);
+     })
+  |> Js.Promise.then_(response => {
+       let invitation = response##acceptInvitation##invitation;
+       switch (invitation) {
+       | Some(i) =>
+         let team =
+           Team.create(
+             i##team##id,
+             ctx.invitation |> InvitationFromTeam.name,
+             stringPassword |> TeamPassword.fromString,
+           );
+         appSend(Turaku.AddTeam(team, ctx.userData));
+       | None => Js.log2("Errors: ", response##acceptInvitation##errors)
+       };
+       Js.Promise.resolve();
+     })
+  |> ignore;
+};
 
 let rejectInvitation = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
@@ -69,7 +129,7 @@ let make = (~ctx, ~appSend, _children) => {
           <input
             required=true
             id="invitations__team-password"
-            className="w-full"
+            className="w-100"
             _type="text"
             value=state.teamPassword
             onChange=(updateTeamPassword(send))
@@ -77,8 +137,8 @@ let make = (~ctx, ~appSend, _children) => {
           />
         </p>
         <button
-          onClick=acceptInvitation
-          className="card-link btn btn-sm btn-success ml-2">
+          onClick=(acceptInvitation(ctx, appSend))
+          className="card-link btn btn-sm btn-success">
           (str("Accept"))
         </button>
         <button

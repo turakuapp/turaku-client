@@ -36,7 +36,7 @@ type action =
     )
   | Navigate(user)
   | SkipLoading
-  | CreateTeam(Team.t, userData)
+  | AddTeam(Team.t, userData)
   | SelectTeam(Team.t, userData)
   | SelectEntry(Team.t, Entry.t, userData)
   | SignOut(Session.t)
@@ -87,7 +87,7 @@ let reducer = (action, _state) =>
           teams: userData.teams |> SelectableList.replace(team, updatedTeam),
         }),
     });
-  | CreateTeam(team, userData) =>
+  | AddTeam(team, userData) =>
     ReasonReact.Update({
       user:
         SignedInUser({
