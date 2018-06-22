@@ -26,6 +26,7 @@ let invitations = (ctx, appSend) =>
         ctx.userData.invitations
         |> List.map(invitation =>
              <IncomingInvitation
+               key=(invitation |> InvitationFromTeam.id)
                ctx={userData: ctx.userData, invitation}
                appSend
              />

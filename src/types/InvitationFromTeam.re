@@ -3,10 +3,11 @@ type t = {
   teamName: string,
   invitingUserEmail: Email.t,
 }
-and id = string;
+and id = Invitation.id;
 
-let email = invitation => invitation.invitingUserEmail;
-let name = invitation => invitation.teamName;
+let id = t => t.id;
+let email = t => t.invitingUserEmail;
+let name = t => t.teamName;
 
 let create = (id, ~teamName, ~invitingUserEmail) => {
   id,

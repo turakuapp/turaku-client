@@ -1,6 +1,7 @@
 type t;
-type id = string;
+type id = Invitation.id;
 
+let id: t => id;
 let email: t => Email.t;
 let name: t => string;
 

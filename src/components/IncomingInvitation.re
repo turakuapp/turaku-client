@@ -14,7 +14,26 @@ let component = ReasonReact.reducerComponent("IncomingInvitation");
 
 let acceptInvitation = _event => ();
 
-let rejectInvitation = _event => ();
+let rejectInvitation = (ctx, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+
+  let invitationId = ctx.invitation |> InvitationFromTeam.id;
+  Js.log("Rejecting Invitation#" ++ invitationId);
+
+  invitationId
+  |> Invitation.delete(ctx.userData.session)
+  |> Js.Promise.then_(response => {
+       switch (response##deleteInvitation##errors |> Array.to_list) {
+       | [] =>
+         appSend(
+           Turaku.RemoveInvitationFromTeam(ctx.invitation, ctx.userData),
+         )
+       | errors => Js.log2("Errors: ", errors)
+       };
+       Js.Promise.resolve();
+     })
+  |> ignore;
+};
 
 let updateTeamPassword = (send, _event) => {
   let teamPassword =
@@ -63,7 +82,7 @@ let make = (~ctx, ~appSend, _children) => {
           (str("Accept"))
         </button>
         <button
-          onClick=rejectInvitation
+          onClick=(rejectInvitation(ctx, appSend))
           className="card-link btn btn-sm btn-danger ml-2">
           (str("Reject"))
         </button>

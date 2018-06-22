@@ -8,24 +8,15 @@ type ctx = {
 
 let component = ReasonReact.statelessComponent("InvitationEditor");
 
-module DeleteInvitationQuery = [%graphql
-  {|
-  mutation($invitationId: ID!) {
-    deleteInvitation(id: $invitationId) {
-      errors
-    }
-  }
-  |}
-];
-
 let deleteInvitation = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
   let invitationId = ctx.invitation |> InvitationToUser.id;
   Js.log("Deleting invitation with ID: " ++ invitationId);
 
-  DeleteInvitationQuery.make(~invitationId, ())
-  |> Api.sendAuthenticatedQuery(ctx.userData.session)
+  ctx.invitation
+  |> InvitationToUser.id
+  |> Invitation.delete(ctx.userData.session)
   |> Js.Promise.then_(response => {
        switch (response##deleteInvitation##errors |> Array.to_list) {
        | [] =>

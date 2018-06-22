@@ -41,7 +41,8 @@ type action =
   | SelectEntry(Team.t, Entry.t, userData)
   | SignOut(Session.t)
   | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
-  | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData);
+  | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
+  | RemoveInvitationFromTeam(InvitationFromTeam.t, userData);
 
 type state = {user};
 
@@ -148,6 +149,15 @@ let reducer = (action, _state) =>
           teams: userData.teams |> SelectableList.replace(team, updatedTeam),
         }),
     });
+  | RemoveInvitationFromTeam(invitation, userData) =>
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          invitations:
+            userData.invitations |> List.filter(i => i != invitation),
+        }),
+    })
   };
 
 let selectEntry = (entry, team, userData) => {

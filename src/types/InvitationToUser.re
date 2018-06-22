@@ -3,7 +3,7 @@ type t = {
   email: Email.t,
   name: option(string),
 }
-and id = string;
+and id = Invitation.id;
 
 let id = t => t.id;
 
