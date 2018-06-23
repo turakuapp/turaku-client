@@ -9,7 +9,11 @@ let component = ReasonReact.statelessComponent("EntryTags");
 
 let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
-  render: _self => <div> <code> (str("EntryTags")) </code> </div>,
+  render: _self =>
+    <div className="row">
+      <div className="col-sm-2 font-weight-bold"> ("Tags" |> str) </div>
+      <div className="col"> ("Tags go here" |> str) </div>
+    </div>,
 };
 /* export default class EntryTags extends React.Component {
      constructor(props) {

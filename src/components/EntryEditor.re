@@ -13,7 +13,7 @@ let fields = (ctx, appSend) =>
   List.map(
     (field: Field.t) =>
       <EntryField
-        key=(field |> Field.getKey)
+        key=(field |> Field.key)
         ctx={userData: ctx.userData, entry: ctx.entry, field}
         appSend
       />,
@@ -33,9 +33,9 @@ let make = (~ctx, ~appSend, _children) => {
             className="my-2"
             placeholder="Entry Title"
           />
-          (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
         </div>
       </div>
+      (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
       <EntryTags ctx={userData: ctx.userData, entry: ctx.entry} appSend />
     </div>,
 };

@@ -11,7 +11,12 @@ let component = ReasonReact.statelessComponent("EntryField");
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div> (str("Field: " ++ (ctx.field |> Field.getKey))) </div>,
+    <div className="row">
+      <div className="col-sm-2 font-weight-bold">
+        (ctx.field |> Field.key |> str)
+      </div>
+      <div className="col"> (ctx.field |> Field.value |> str) </div>
+    </div>,
 };
 /* export default class Field extends React.Component {
      constructor(props) {

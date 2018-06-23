@@ -3,7 +3,6 @@ type kind =
   | TextField;
 
 type key = string;
-
 type value = string;
 
 type t = {
@@ -27,4 +26,5 @@ module Codec = {
     };
 };
 
-let getKey = t => t.key;
+let key = t => t.key;
+let value = t => t.value;

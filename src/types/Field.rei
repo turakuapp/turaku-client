@@ -2,4 +2,5 @@ type t;
 
 module Codec: {let decode: Js.Json.t => t;};
 
-let getKey: t => string;
+let key: t => string;
+let value: t => string;
