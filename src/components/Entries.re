@@ -7,14 +7,23 @@ type ctx = {
   team: Team.t,
 };
 
-let component = ReasonReact.statelessComponent("Entries");
+type action =
+  | UpdateSearch(string);
+
+type state = {search: string};
+
+let component = ReasonReact.reducerComponent("Entries");
 
 let addEntry = _event => Js.log("Add an entry, maybe?");
 
-let entryChoices = (ctx, appSend) =>
+let entryChoices = (ctx, state, appSend) =>
   ctx.team
   |> Team.entries
   |> SelectableList.all
+  |> List.filter(entry => {
+       let searchExp = state.search |> Js.Re.fromString;
+       entry |> Entry.title |> Js.String.search(searchExp) > (-1);
+     })
   |> List.map(entry =>
        <EntryChoice
          key=(entry |> Entry.id)
@@ -90,20 +99,36 @@ let getSelection = (ctx, appSend, entry) =>
   | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 
+let updateSearch = (send, _event) => {
+  let searchString = DomUtils.getValueOfInputById("sign-in-menu__search");
+  send(UpdateSearch(searchString));
+};
+
 let make = (~ctx, ~appSend, _children) => {
   ...component,
+  initialState: () => {search: ""},
+  reducer: (action, _state) =>
+    switch (action) {
+    | UpdateSearch(search) => ReasonReact.Update({search: search})
+    },
   didMount: _self => loadEntries(ctx, appSend),
-  render: _self =>
+  render: ({state, send}) =>
     <div className="row">
       <div className="col-3">
         <div className="entries__nav">
           <div className="pt-2">
-            <input _type="text" placeholder="Search" className="mr-2" />
+            <input
+              id="sign-in-menu__search"
+              _type="text"
+              onChange=(updateSearch(send))
+              placeholder="Search"
+              className="mr-2"
+            />
             <button className="btn btn-primary btn-sm" onClick=addEntry>
               (str("Add new"))
             </button>
           </div>
-          (entryChoices(ctx, appSend) |> ReasonReact.array)
+          (entryChoices(ctx, state, appSend) |> ReasonReact.array)
         </div>
       </div>
       <div className="col entry-editor__container">
