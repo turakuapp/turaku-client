@@ -1,36 +1,36 @@
-/* import "./saveBar.css"; */
+[%bs.raw {|require("./saveBar.css")|}];
 let str = ReasonReact.string;
+
+type ctx = {
+  userData: Turaku.userData,
+  team: Team.t,
+};
 
 let component = ReasonReact.statelessComponent("SaveBar");
 
-let updateEntry = (appState, appSend, entry) => ();
-
-let createEntry = (appState, appSend, entry) => ();
-
-let saveChanges = (appState: Turaku.state, appSend, event) => {
-  /* appState.unsavedEntries
-     |> List.iter((unsavedEntry: Entry.t) =>
-          if (unsavedEntry.persisted) {
-            updateEntry(appState, appSend, unsavedEntry);
-          } else {
-            createEntry(appState, appSend, unsavedEntry);
-          }
-        );
-     (); */
+let saveChanges = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Js.log("Saving changes...");
+  Js.log("TODO: Save changes");
 };
 
-let make = (~appState: Turaku.state, ~appSend, _children) => {
+let make = (~ctx, ~appSend, _children) => {
   ...component,
-  render: self =>
-    <div className="fixed-bottom text-center p-2 save-bar">
-      <button
-        className="btn btn-outline-light btn-sm"
-        onClick=(saveChanges(appState, appSend))>
-        (str("Save all changes"))
-      </button>
-    </div>,
+  render: _self =>
+    if (ctx.team
+        |> Team.entries
+        |> SelectableList.all
+        |> List.filter(Entry.unpersisted)
+        |> List.length > 0) {
+      <div className="fixed-bottom text-center p-2 save-bar">
+        <button
+          className="btn btn-outline-light btn-sm"
+          onClick=(saveChanges(ctx, appSend))>
+          (str("Save all changes"))
+        </button>
+      </div>;
+    } else {
+      ReasonReact.null;
+    },
 };
 /* export default class SaveBar extends React.Component {
      constructor(props) {

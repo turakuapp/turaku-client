@@ -60,10 +60,8 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           <span />
         </div>
       </div>
+      <SaveBar ctx={userData: ctx.userData, team: ctx.team} appSend />
     </div>,
-  /* {this.haveUnsavedEntries() && ( */
-  /* <SaveBar appState=appState appSend=appSend /> */
-  /* )} */
 };
 /* export default class Dashboard extends React.Component {
      constructor(props) {
