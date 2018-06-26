@@ -16,7 +16,7 @@ let handleTitleChange = (ctx, appSend, _event) => {
 
 let fields = (ctx, appSend) => {
   let index = ref(-1);
-  Array.map(
+  List.map(
     (field: Field.t) => {
       index := index^ + 1;
       <EntryField
@@ -51,7 +51,7 @@ let make = (~ctx, ~appSend, _children) => {
           />
         </div>
       </div>
-      (fields(ctx, appSend) |> ReasonReact.array)
+      (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
       <EntryTags ctx={userData: ctx.userData, entry: ctx.entry} appSend />
     </div>,
 };

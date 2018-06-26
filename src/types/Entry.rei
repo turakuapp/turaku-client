@@ -4,7 +4,7 @@ type id = string;
 
 let id: t => id;
 let title: t => string;
-let fields: t => array(Field.t);
+let fields: t => list(Field.t);
 
 let unpersisted: t => bool;
 

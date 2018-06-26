@@ -15,7 +15,7 @@ let fieldValue = ctx => ctx.field |> Field.value;
 let id = ctx => "entry-field__input-" ++ (ctx.index |> string_of_int);
 
 let editField = (ctx, appSend, _event) => {
-  Js.log("Editing field.");
+  Js.log("Editing field with index: " ++ string_of_int(ctx.index));
   let v = id(ctx) |> DomUtils.getValueOfInputById;
   appSend(
     Turaku.EditEntryField(

@@ -1,14 +1,12 @@
-type entry = {
-  title: string,
-  fields: array(Field.t),
-};
-
-type id = string;
-
 type t =
   | Saved(entry, id)
   | Edited(entry, id, entry)
-  | Unsaved(entry, id);
+  | Unsaved(entry, id)
+and entry = {
+  title: string,
+  fields: list(Field.t),
+}
+and id = string;
 
 module Codec = {
   let decode = (id, json) =>
@@ -16,7 +14,7 @@ module Codec = {
       Saved(
         {
           title: json |> field("title", string),
-          fields: json |> field("fields", array(Field.Codec.decode)),
+          fields: json |> field("fields", list(Field.Codec.decode)),
         },
         id,
       )
@@ -45,7 +43,12 @@ let createEntry = (title, fields) => {title, fields};
 let editEntry = (newEntry, t) =>
   switch (t) {
   | Saved(entry, id) => Edited(entry, id, newEntry)
-  | Edited(original, id, _) => Edited(original, id, newEntry)
+  | Edited(original, id, _) =>
+    if (original == newEntry) {
+      Saved(newEntry, id);
+    } else {
+      Edited(original, id, newEntry);
+    }
   | Unsaved(_, id) => Unsaved(newEntry, id)
   };
 
@@ -55,8 +58,14 @@ let editTitle = (title, t) => {
 };
 
 let replaceField = (field, index, fields) => {
-  fields[index] = field;
-  fields;
+  let rec aux = (c, idx, xs) =>
+    switch (xs) {
+    | [h, ...t] when idx == index => (c |> List.rev) @ [field, ...t]
+    | [h, ...t] => aux([h, ...c], idx + 1, t)
+    | [] => c |> List.rev
+    };
+
+  aux([], 0, fields);
 };
 
 let editField = (field, index, t) => {
