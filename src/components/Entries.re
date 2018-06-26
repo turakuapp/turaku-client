@@ -14,7 +14,10 @@ type state = {search: string};
 
 let component = ReasonReact.reducerComponent("Entries");
 
-let addEntry = _event => Js.log("Add an entry, maybe?");
+let addEntry = (ctx, appSend, _event) => {
+  Js.log("Add a new entry");
+  appSend(Turaku.AddNewEntry(ctx.team, ctx.userData));
+};
 
 let entryChoices = (ctx, state, appSend) =>
   ctx.team
@@ -127,7 +130,9 @@ let make = (~ctx, ~appSend, _children) => {
               placeholder="Search"
               className="mr-2"
             />
-            <button className="btn btn-primary btn-sm" onClick=addEntry>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick=(addEntry(ctx, appSend))>
               (str("Add new"))
             </button>
           </div>

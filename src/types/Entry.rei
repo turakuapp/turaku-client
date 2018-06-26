@@ -2,10 +2,13 @@ type t;
 
 type id = string;
 
+let newUnsaved: int => t;
+
 let id: t => id;
 let title: t => string;
 let fields: t => list(Field.t);
 
+let unsaved: t => bool;
 let unpersisted: t => bool;
 
 let editTitle: (string, t) => t;

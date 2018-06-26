@@ -80,3 +80,19 @@ let unpersisted = t =>
   | Unsaved(_)
   | Edited(_) => true
   };
+
+let newUnsaved = idx =>
+  Unsaved(
+    {
+      title: "New Entry #" ++ string_of_int(idx),
+      fields: Field.forNewEntry(),
+    },
+    "unsaved-" ++ string_of_int(idx),
+  );
+
+let unsaved = t =>
+  switch (t) {
+  | Unsaved(_) => true
+  | Saved(_)
+  | Edited(_) => false
+  };

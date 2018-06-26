@@ -30,3 +30,9 @@ let key = t => t.key;
 let value = t => t.value;
 
 let editValue = (v, t) => {...t, value: v};
+
+let forNewEntry = () => [
+  {kind: TextField, key: "URL", value: ""},
+  {kind: PasswordField, key: "Password", value: ""},
+  {kind: TextField, key: "Notes", value: ""},
+];

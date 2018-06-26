@@ -43,6 +43,7 @@ type action =
   | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
+  | AddNewEntry(Team.t, userData)
   | EditEntryTitle(Team.t, Entry.t, string, userData)
   | EditEntryField(Team.t, Entry.t, Field.t, int, userData);
 
@@ -176,6 +177,24 @@ let reducer = (action, _state) =>
     let updatedEntry = entry |> Entry.editField(field, index);
     let updatedEntries =
       team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
+    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+        }),
+    });
+  | AddNewEntry(team, userData) =>
+    let newEntry =
+      team
+      |> Team.entries
+      |> SelectableList.all
+      |> List.filter(Entry.unsaved)
+      |> List.length
+      |> Entry.newUnsaved;
+
+    let updatedEntries = team |> Team.entries |> SelectableList.add(newEntry);
     let updatedTeam = team |> Team.replaceEntries(updatedEntries);
     ReasonReact.Update({
       user:

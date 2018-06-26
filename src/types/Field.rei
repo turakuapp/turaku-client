@@ -6,3 +6,5 @@ let key: t => string;
 let value: t => string;
 
 let editValue: (string, t) => t;
+
+let forNewEntry: unit => list(t);
