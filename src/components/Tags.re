@@ -9,12 +9,7 @@ let navigateToAllEntries = (ctx, appSend, event) => {
   /* let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData); */
   switch (ctx.userData.dashboardMenu) {
   | EntriesMenu => ()
-  | TeamMenu(_) =>
-    appSend(
-      Turaku.Navigate(
-        SignedInUser({...ctx.userData, dashboardMenu: EntriesMenu}),
-      ),
-    )
+  | TeamMenu(_) => Turaku.SelectTag(None, ctx.userData) |> appSend
   };
 };
 

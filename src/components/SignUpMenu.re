@@ -21,10 +21,7 @@ module CreateUserQuery = [%graphql
 |}
 ];
 
-let gotoSignIn = (appSend, _event) =>
-  appSend(
-    Turaku.(Navigate(SignedOutUser(SignInPage({justSignedUp: false})))),
-  );
+let gotoSignIn = (appSend, _event) => Turaku.SelectSignIn |> appSend;
 
 let handleSignUp = (appSend, send, event) => {
   event |> DomUtils.preventEventDefault;

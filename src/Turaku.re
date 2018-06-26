@@ -25,6 +25,8 @@ type user =
   | SignedInUser(userData);
 
 type action =
+  | SelectSignIn
+  | SelectSignUp
   | SignUp
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
   | RefreshEntries(Team.t, list(Entry.t), userData)
@@ -34,13 +36,17 @@ type action =
       list(InvitationToUser.t),
       userData,
     )
-  | Navigate(user)
   | SkipLoading
   | AddTeam(Team.t, userData)
   | SelectTeam(Team.t, userData)
+  | DeselectTeam(userData)
   | SelectEntry(Team.t, Entry.t, userData)
+  | SelectTeamMenu(userData)
+  | SelectTag(option(Tag.t), userData)
   | SignOut(Session.t)
   | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
+  | SelectInvitation(Team.t, InvitationToUser.t, userData)
+  | SelectTeamMember(Team.t, TeamMember.t, userData)
   | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
   | AddNewEntry(Team.t, userData)
@@ -53,6 +59,11 @@ let initialState = {user: SignedOutUser(LoadingPage)};
 
 let reducer = (action, _state) =>
   switch (action) {
+  | SelectSignIn =>
+    ReasonReact.Update({
+      user: SignedOutUser(SignInPage({justSignedUp: false})),
+    })
+  | SelectSignUp => ReasonReact.Update({user: SignedOutUser(SignUpPage)})
   | SignIn(session, teams, invitations) =>
     ReasonReact.Update({
       user:
@@ -67,7 +78,6 @@ let reducer = (action, _state) =>
     ReasonReact.Update({
       user: SignedOutUser(SignInPage({justSignedUp: true})),
     })
-  | Navigate(user) => ReasonReact.Update({user: user})
   | SkipLoading =>
     ReasonReact.Update({
       user: SignedOutUser(SignInPage({justSignedUp: false})),
@@ -83,12 +93,10 @@ let reducer = (action, _state) =>
   | SelectEntry(team, entry, userData) =>
     let updatedEntries = team |> Team.entries |> SelectableList.select(entry);
     let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+    let updatedTeams =
+      userData.teams |> SelectableList.replace(team, updatedTeam);
     ReasonReact.Update({
-      user:
-        SignedInUser({
-          ...userData,
-          teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-        }),
+      user: SignedInUser({...userData, teams: updatedTeams}),
     });
   | AddTeam(team, userData) =>
     ReasonReact.Update({
@@ -203,69 +211,55 @@ let reducer = (action, _state) =>
           teams: userData.teams |> SelectableList.replace(team, updatedTeam),
         }),
     });
+  | SelectTeamMenu(userData) =>
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          dashboardMenu: TeamMenu(TeamMemberSelected),
+        }),
+    })
+  | DeselectTeam(userData) =>
+    let updatedTeams = userData.teams |> SelectableList.deselect;
+    ReasonReact.Update({
+      user: SignedInUser({...userData, teams: updatedTeams}),
+    });
+  | SelectInvitation(team, invitation, userData) =>
+    let updatedInvitations =
+      team |> Team.invitations |> SelectableList.select(invitation);
+    let updatedTeam = team |> Team.replaceInvitations(updatedInvitations);
+    let updatedTeams =
+      userData.teams |> SelectableList.replace(team, updatedTeam);
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          teams: updatedTeams,
+          dashboardMenu: TeamMenu(InvitationSelected),
+        }),
+    });
+  | SelectTeamMember(team, teamMember, userData) =>
+    let updatedTeamMembers =
+      team |> Team.teamMembers |> SelectableList.select(teamMember);
+    let updatedTeam = team |> Team.replaceTeamMembers(updatedTeamMembers);
+    let updatedTeams =
+      userData.teams |> SelectableList.replace(team, updatedTeam);
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          teams: updatedTeams,
+          dashboardMenu: TeamMenu(TeamMemberSelected),
+        }),
+    });
+  | SelectTag(tag, userData) =>
+    switch (tag) {
+    | None =>
+      ReasonReact.Update({
+        user: SignedInUser({...userData, dashboardMenu: EntriesMenu}),
+      })
+    | Some(tag) =>
+      Js.log("Show entries with this tag, probably?");
+      failwith("Tag selection hasn't been implemented yet.");
+    }
   };
-
-let selectEntry = (entry, team, userData) => {
-  let updatedEntries = team |> Team.entries |> SelectableList.select(entry);
-  let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-  let updatedTeams =
-    userData.teams |> SelectableList.replace(team, updatedTeam);
-  Navigate(SignedInUser({...userData, teams: updatedTeams}));
-};
-
-let selectTeamMember = (teamMember, team, userData) => {
-  let updatedTeamMembers =
-    team |> Team.teamMembers |> SelectableList.select(teamMember);
-  let updatedTeam = team |> Team.replaceTeamMembers(updatedTeamMembers);
-  let updatedTeams =
-    userData.teams |> SelectableList.replace(team, updatedTeam);
-  Navigate(
-    SignedInUser({
-      ...userData,
-      teams: updatedTeams,
-      dashboardMenu: TeamMenu(TeamMemberSelected),
-    }),
-  );
-};
-
-let selectInvitation = (invitation, team, userData) => {
-  let updatedInvitations =
-    team |> Team.invitations |> SelectableList.select(invitation);
-  let updatedTeam = team |> Team.replaceInvitations(updatedInvitations);
-  let updatedTeams =
-    userData.teams |> SelectableList.replace(team, updatedTeam);
-  Navigate(
-    SignedInUser({
-      ...userData,
-      teams: updatedTeams,
-      dashboardMenu: TeamMenu(InvitationSelected),
-    }),
-  );
-};
-
-let deselectTeam = userData => {
-  let updatedTeams = userData.teams |> SelectableList.deselect;
-  Navigate(SignedInUser({...userData, teams: updatedTeams}));
-};
-
-let selectTeamMenu = userData =>
-  Navigate(
-    SignedInUser({...userData, dashboardMenu: TeamMenu(TeamMemberSelected)}),
-  );
-/*
- let currentTeam = (userData, dashboardPageData) =>
-   userData.teams
-   |> List.find(team => team |> Team.id == dashboardPageData.teamId);
-
- let currentEntry = (userData, dashboardPageData, entryId) =>
-   currentTeam(userData, dashboardPageData)
-   |> Team.entries
-   |> List.find(entry => entry |> Entry.id == entryId);
-
- let someEntry = (userData, dashboardPageData) => {
-   let entries = currentTeam(userData, dashboardPageData) |> Team.entries;
-   switch (entries) {
-   | [entry, ..._] => Some(entry |> Entry.id)
-   | [] => None
-   };
- }; */

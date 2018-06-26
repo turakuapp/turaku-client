@@ -132,8 +132,7 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
     ReasonReact.null;
   };
 
-let gotoSignUp = (appSend, _event) =>
-  appSend(Turaku.(Navigate(Turaku.SignedOutUser(SignUpPage))));
+let gotoSignUp = (appSend, _event) => Turaku.SelectSignUp |> appSend;
 
 let make = (~data, ~appSend, _children) => {
   ...component,

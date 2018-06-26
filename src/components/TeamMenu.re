@@ -42,12 +42,12 @@ let containerClasses = ctx => {
 
 let selectTeamMember = (ctx, teamMember, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Turaku.selectTeamMember(teamMember, ctx.team, ctx.userData) |> appSend;
+  Turaku.SelectTeamMember(ctx.team, teamMember, ctx.userData) |> appSend;
 };
 
 let selectInvitation = (ctx, invitation, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Turaku.selectInvitation(invitation, ctx.team, ctx.userData) |> appSend;
+  Turaku.SelectInvitation(ctx.team, invitation, ctx.userData) |> appSend;
 };
 
 let teamMemberOptions = (ctx, appSend) =>
