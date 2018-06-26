@@ -5,7 +5,7 @@ let app = ReasonReact.reducerComponent("App");
 let str = ReasonReact.string;
 
 let currentComponent = (state, send) =>
-  switch (state.user) {
+  switch (state) {
   | SignedOutUser(page) =>
     switch (page) {
     | LoadingPage => <LoadingScreen appSend=send />
