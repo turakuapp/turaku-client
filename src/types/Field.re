@@ -28,3 +28,5 @@ module Codec = {
 
 let key = t => t.key;
 let value = t => t.value;
+
+let editValue = (v, t) => {...t, value: v};

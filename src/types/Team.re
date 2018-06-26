@@ -3,6 +3,7 @@ type t = {
   name: string,
   password: TeamPassword.t,
   entries: SelectableList.t(Entry.t),
+  unsavedEntries: SelectableList.t(UnsavedEntry.t),
   teamMembers: SelectableList.t(TeamMember.t),
   invitations: SelectableList.t(InvitationToUser.t),
 }
@@ -29,6 +30,7 @@ let create = (id, name, password) => {
   name,
   password,
   entries: SelectableList.empty(),
+  unsavedEntries: SelectableList.empty(),
   teamMembers: SelectableList.empty(),
   invitations: SelectableList.empty(),
 };

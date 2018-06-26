@@ -2,11 +2,31 @@ let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
+  team: Team.t,
   entry: Entry.t,
   field: Field.t,
+  index: int,
 };
 
 let component = ReasonReact.statelessComponent("EntryField");
+
+let fieldValue = ctx => ctx.field |> Field.value;
+
+let id = ctx => "entry-field__input-" ++ (ctx.index |> string_of_int);
+
+let editField = (ctx, appSend, _event) => {
+  Js.log("Editing field.");
+  let v = id(ctx) |> DomUtils.getValueOfInputById;
+  appSend(
+    Turaku.EditEntryField(
+      ctx.team,
+      ctx.entry,
+      ctx.field |> Field.editValue(v),
+      ctx.index,
+      ctx.userData,
+    ),
+  );
+};
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
@@ -15,7 +35,14 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="col-sm-2 font-weight-bold">
         (ctx.field |> Field.key |> str)
       </div>
-      <div className="col"> (ctx.field |> Field.value |> str) </div>
+      <div className="col">
+        <input
+          value=(fieldValue(ctx))
+          type_="text"
+          onChange=(editField(ctx, appSend))
+          id=(id(ctx))
+        />
+      </div>
     </div>,
 };
 /* export default class Field extends React.Component {

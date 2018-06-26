@@ -1,6 +1,6 @@
 [%bs.raw {|require("./entries.css")|}];
 
-let str = ReasonReact.stringToElement;
+let str = ReasonReact.string;
 
 type ctx = {
   userData: Turaku.userData,
@@ -95,7 +95,10 @@ let loadEntries = (ctx, appSend) =>
 let getSelection = (ctx, appSend, entry) =>
   switch (entry) {
   | Some(entry) =>
-    <EntryEditor ctx={userData: ctx.userData, entry} appSend />
+    <EntryEditor
+      ctx={userData: ctx.userData, team: ctx.team, entry}
+      appSend
+    />
   | None => <p> (str("Select an entry, or create a new one.")) </p>
   };
 

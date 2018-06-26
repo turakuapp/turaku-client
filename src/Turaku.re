@@ -42,7 +42,9 @@ type action =
   | SignOut(Session.t)
   | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
-  | RemoveInvitationFromTeam(InvitationFromTeam.t, userData);
+  | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
+  | EditEntryTitle(Team.t, Entry.t, string, userData)
+  | EditEntryField(Team.t, Entry.t, Field.t, int, userData);
 
 type state = {user};
 
@@ -158,6 +160,30 @@ let reducer = (action, _state) =>
             userData.invitations |> List.filter(i => i != invitation),
         }),
     })
+  | EditEntryTitle(team, entry, title, userData) =>
+    let updatedEntry = entry |> Entry.editTitle(title);
+    let updatedEntries =
+      team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
+    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+        }),
+    });
+  | EditEntryField(team, entry, field, index, userData) =>
+    let updatedEntry = entry |> Entry.editField(field, index);
+    let updatedEntries =
+      team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
+    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+    ReasonReact.Update({
+      user:
+        SignedInUser({
+          ...userData,
+          teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+        }),
+    });
   };
 
 let selectEntry = (entry, team, userData) => {

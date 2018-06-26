@@ -33,7 +33,7 @@ let chooseEntry = (ctx, appSend, event) => {
   };
 };
 
-let title = (entry: Entry.t) => {
+let title = entry => {
   let trimmedTitle = entry |> Entry.title |> String.trim;
   switch (trimmedTitle) {
   | "" => <em> (str("Nameless entry")) </em>
@@ -41,11 +41,19 @@ let title = (entry: Entry.t) => {
   };
 };
 
+let changesMarker = ctx =>
+  if (ctx.entry |> Entry.unpersisted) {
+    "(*) " |> str;
+  } else {
+    ReasonReact.null;
+  };
+
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div
       className=(containerClasses(ctx)) onClick=(chooseEntry(ctx, appSend))>
+      (changesMarker(ctx))
       (ctx.entry |> title)
     </div>,
 };
