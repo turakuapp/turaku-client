@@ -38,6 +38,7 @@ type action =
     )
   | SkipLoading
   | AddTeam(Team.t, userData)
+  | AcceptInvitation(Team.t, InvitationFromTeam.t, userData)
   | SelectTeam(Team.t, userData)
   | DeselectTeam(userData)
   | SelectEntry(Team.t, Entry.t, userData)
@@ -91,6 +92,15 @@ let reducer = (action, _state) =>
       SignedInUser({
         ...userData,
         teams: userData.teams |> SelectableList.add(team),
+      }),
+    )
+  | AcceptInvitation(team, invitationFromTeam, userData) =>
+    ReasonReact.Update(
+      SignedInUser({
+        ...userData,
+        teams: userData.teams |> SelectableList.add(team),
+        invitations:
+          userData.invitations |> List.filter(i => i != invitationFromTeam),
       }),
     )
   | SignOut(session) =>

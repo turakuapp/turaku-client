@@ -62,7 +62,9 @@ let acceptInvitation = (ctx, appSend, event) => {
              ctx.invitation |> InvitationFromTeam.name,
              stringPassword |> TeamPassword.fromString,
            );
-         appSend(Turaku.AddTeam(team, ctx.userData));
+         appSend(
+           Turaku.AcceptInvitation(team, ctx.invitation, ctx.userData),
+         );
        | None => Js.log2("Errors: ", response##acceptInvitation##errors)
        };
        Js.Promise.resolve();
