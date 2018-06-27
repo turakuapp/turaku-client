@@ -8,7 +8,13 @@ type ctx = {
   index: int,
 };
 
-let component = ReasonReact.statelessComponent("EntryField");
+type state = {reveal: bool};
+
+type action =
+  | ForceReveal
+  | UnforceReveal;
+
+let component = ReasonReact.reducerComponent("EntryField");
 
 let fieldValue = ctx => ctx.field |> Field.value;
 
@@ -28,9 +34,23 @@ let editField = (ctx, appSend, _event) => {
   );
 };
 
+let fieldType = (ctx, state) =>
+  switch (state.reveal, ctx.field |> Field.shouldBeHidden) {
+  | (true, true)
+  | (false, false)
+  | (true, false) => "text"
+  | (false, true) => "password"
+  };
+
 let make = (~ctx, ~appSend, _children) => {
   ...component,
-  render: _self =>
+  initialState: () => {reveal: false},
+  reducer: (action, _state) =>
+    switch (action) {
+    | ForceReveal => ReasonReact.Update({reveal: true})
+    | UnforceReveal => ReasonReact.Update({reveal: false})
+    },
+  render: ({state, send}) =>
     <div className="row">
       <div className="col-sm-2 font-weight-bold">
         (ctx.field |> Field.key |> str)
@@ -38,9 +58,11 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="col">
         <input
           value=(fieldValue(ctx))
-          type_="text"
+          type_=(fieldType(ctx, state))
           onChange=(editField(ctx, appSend))
           id=(id(ctx))
+          onFocus=(_e => send(ForceReveal))
+          onBlur=(_e => send(UnforceReveal))
         />
       </div>
     </div>,

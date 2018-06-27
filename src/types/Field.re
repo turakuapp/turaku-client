@@ -29,6 +29,12 @@ module Codec = {
 let key = t => t.key;
 let value = t => t.value;
 
+let shouldBeHidden = t =>
+  switch (t.kind) {
+  | PasswordField => true
+  | TextField => false
+  };
+
 let editValue = (v, t) => {...t, value: v};
 
 let forNewEntry = () => [
