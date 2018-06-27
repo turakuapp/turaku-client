@@ -1,3 +1,5 @@
+exception CreateFailure(string);
+
 [%bs.raw {|require("./saveBar.css")|}];
 let str = ReasonReact.string;
 
@@ -8,19 +10,113 @@ type ctx = {
 
 let component = ReasonReact.statelessComponent("SaveBar");
 
+let unpersistedEntries = ctx =>
+  ctx.team
+  |> Team.entries
+  |> SelectableList.all
+  |> List.filter(Entry.unpersisted);
+
+module CreateEntryQuery = [%graphql
+  {|
+  mutation($teamId: ID!, $iv: String!, $ciphertext: String!, $tagIds: [ID!]!) {
+    createEntry(teamId: $teamId, encryptedData: {iv: $iv, ciphertext: $ciphertext}, tagIds: $tagIds) {
+      entry {
+        id
+      }
+      errors
+    }
+  }
+  |}
+];
+
+module UpdateEntryQuery = [%graphql
+  {|
+  mutation($id: ID!, $iv: String!, $ciphertext: String!, $tagIds: [ID!]!) {
+    updateEntry(id: $id, encryptedData: {iv: $iv, ciphertext: $ciphertext}, tagIds: $tagIds) {
+      entry {
+        id
+      }
+      errors
+    }
+  }
+  |}
+];
+
 let saveChanges = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Js.log("TODO: Save changes");
+  unpersistedEntries(ctx)
+  |> List.iter(entry => {
+       Js.log("Saving entry: " ++ (entry |> Entry.id));
+       let key = ctx.team |> Team.createCryptographicKey;
+       entry
+       |> Entry.Codec.encode
+       |> Js.Json.stringify
+       |> EncryptedData.encrypt(key)
+       |> Js.Promise.then_(encryptedData =>
+            if (entry |> Entry.unsaved) {
+              CreateEntryQuery.make(
+                ~teamId=ctx.team |> Team.id,
+                ~iv=
+                  encryptedData
+                  |> EncryptedData.iv
+                  |> InitializationVector.toString,
+                ~ciphertext=
+                  encryptedData
+                  |> EncryptedData.ciphertext
+                  |> CipherText.toString,
+                ~tagIds=[||],
+                (),
+              )
+              |> Api.sendAuthenticatedQuery(ctx.userData.session)
+              |> Js.Promise.then_(response => {
+                   let updatedEntry = response##createEntry##entry;
+                   switch (updatedEntry) {
+                   | Some(e) =>
+                     entry |> Entry.save(e##id) |> Js.Promise.resolve
+                   | None => CreateFailure("") |> Js.Promise.reject
+                   };
+                 });
+            } else {
+              UpdateEntryQuery.make(
+                ~id=entry |> Entry.id,
+                ~iv=
+                  encryptedData
+                  |> EncryptedData.iv
+                  |> InitializationVector.toString,
+                ~ciphertext=
+                  encryptedData
+                  |> EncryptedData.ciphertext
+                  |> CipherText.toString,
+                ~tagIds=[||],
+                (),
+              )
+              |> Api.sendAuthenticatedQuery(ctx.userData.session)
+              |> Js.Promise.then_(_response =>
+                   entry
+                   |> Entry.save(entry |> Entry.id)
+                   |> Js.Promise.resolve
+                 );
+            }
+          )
+       |> Js.Promise.then_(updatedEntry => {
+            appSend(
+              Turaku.ReplaceEntry(
+                ctx.team,
+                entry,
+                updatedEntry,
+                ctx.userData,
+              ),
+            );
+            Js.Promise.resolve();
+          })
+       |> ignore;
+     });
 };
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    if (ctx.team
-        |> Team.entries
-        |> SelectableList.all
-        |> List.filter(Entry.unpersisted)
-        |> List.length > 0) {
+    if (unpersistedEntries(ctx) |> List.length > 0) {
       <div className="fixed-bottom text-center p-2 save-bar">
         <button
           className="btn btn-outline-light btn-sm"

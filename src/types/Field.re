@@ -24,6 +24,19 @@ module Codec = {
       key: json |> field("key", string),
       value: json |> field("value", string),
     };
+  let kindToString = kind =>
+    switch (kind) {
+    | PasswordField => "password"
+    | TextField => "text"
+    };
+  let encode = f =>
+    Json.Encode.(
+      object_([
+        ("kind", string(f.kind |> kindToString)),
+        ("key", string(f.key)),
+        ("value", string(f.value)),
+      ])
+    );
 };
 
 let key = t => t.key;

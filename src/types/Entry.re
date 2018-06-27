@@ -8,6 +8,13 @@ and entry = {
 }
 and id = string;
 
+let entry = t =>
+  switch (t) {
+  | Saved(entry, _)
+  | Unsaved(entry, _)
+  | Edited(_, _, entry) => entry
+  };
+
 module Codec = {
   let decode = (id, json) =>
     Json.Decode.(
@@ -19,14 +26,15 @@ module Codec = {
         id,
       )
     );
-};
 
-let entry = t =>
-  switch (t) {
-  | Saved(entry, _)
-  | Unsaved(entry, _) => entry
-  | Edited(_, _, entry) => entry
-  };
+  let encode = t =>
+    Json.Encode.(
+      object_([
+        ("title", string(entry(t).title)),
+        ("fields", list(Field.Codec.encode, entry(t).fields)),
+      ])
+    );
+};
 
 let id = t =>
   switch (t) {
@@ -95,4 +103,11 @@ let unsaved = t =>
   | Unsaved(_) => true
   | Saved(_)
   | Edited(_) => false
+  };
+
+let save = (id, t) =>
+  switch (t) {
+  | Saved(entry, _) => Saved(entry, id)
+  | Edited(_original, _, edited) => Saved(edited, id)
+  | Unsaved(entry, _) => Saved(entry, id)
   };
