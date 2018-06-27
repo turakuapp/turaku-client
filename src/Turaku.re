@@ -182,11 +182,14 @@ let reducer = (action, _state) =>
     );
   | AddNewEntry(team, userData) =>
     let newEntry =
-      team
-      |> Team.entries
-      |> SelectableList.all
-      |> List.filter(Entry.unsaved)
-      |> List.length
+      (
+        team
+        |> Team.entries
+        |> SelectableList.all
+        |> List.filter(Entry.unsaved)
+        |> List.length
+      )
+      + 1
       |> Entry.newUnsaved;
 
     let updatedEntries = team |> Team.entries |> SelectableList.add(newEntry);
