@@ -52,6 +52,10 @@ let make = (~ctx, ~appSend, _children) => {
       className=(containerClasses(ctx)) onClick=(chooseEntry(ctx, appSend))>
       (changesMarker(ctx))
       (ctx.entry |> title)
+      <SaveNowButton
+        ctx={userData: ctx.userData, team: ctx.team, entry: ctx.entry}
+        appSend
+      />
     </div>,
 };
 /* export default class EntryChoice extends React.Component {

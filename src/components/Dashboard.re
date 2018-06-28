@@ -60,7 +60,6 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           <span />
         </div>
       </div>
-      <SaveBar ctx={userData: ctx.userData, team: ctx.team} appSend />
     </div>,
 };
 /* export default class Dashboard extends React.Component {
