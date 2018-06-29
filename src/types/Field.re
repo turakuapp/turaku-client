@@ -51,7 +51,7 @@ let shouldBeHidden = t =>
 let editValue = (v, t) => {...t, value: v};
 
 let forNewEntry = () => [
-  {kind: TextField, key: "URL", value: ""},
+  {kind: TextField, key: "Username", value: ""},
   {kind: PasswordField, key: "Password", value: ""},
-  {kind: TextField, key: "Notes", value: ""},
+  {kind: TextField, key: "URL", value: ""},
 ];
