@@ -24,7 +24,7 @@ let entryChoices = (ctx, state, appSend) =>
   |> Team.entries
   |> SelectableList.all
   |> List.filter(entry => {
-       let searchExp = state.search |> Js.Re.fromString;
+       let searchExp = state.search |> Js.Re.fromStringWithFlags(~flags="i");
        entry |> Entry.title |> Js.String.search(searchExp) > (-1);
      })
   |> List.map(entry =>
