@@ -1,7 +1,17 @@
 .entries__nav {
   height: 100vh;
+  padding-top: 3rem;
 }
 
-.entry-editor__container {
+.entries__editor-container {
   background-color: white;
+}
+
+.entries__scroll {
+  overflow: scroll;
+  height: 100%;
+}
+
+.entries__search {
+  float: left;
 }

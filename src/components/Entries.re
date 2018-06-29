@@ -121,25 +121,27 @@ let make = (~ctx, ~appSend, _children) => {
   render: ({state, send}) =>
     <div className="row">
       <div className="col-3">
+        <div className="entries__search mt-2">
+          <input
+            id="sign-in-menu__search"
+            _type="text"
+            onChange=(updateSearch(send))
+            placeholder="Search"
+            className="mr-2"
+          />
+          <button
+            className="btn btn-primary btn-sm"
+            onClick=(addEntry(ctx, appSend))>
+            (str("Add new"))
+          </button>
+        </div>
         <div className="entries__nav">
-          <div className="pt-2">
-            <input
-              id="sign-in-menu__search"
-              _type="text"
-              onChange=(updateSearch(send))
-              placeholder="Search"
-              className="mr-2"
-            />
-            <button
-              className="btn btn-primary btn-sm"
-              onClick=(addEntry(ctx, appSend))>
-              (str("Add new"))
-            </button>
+          <div className="entries__scroll">
+            (entryChoices(ctx, state, appSend) |> ReasonReact.array)
           </div>
-          (entryChoices(ctx, state, appSend) |> ReasonReact.array)
         </div>
       </div>
-      <div className="col entry-editor__container">
+      <div className="col entries__editor-container">
         (
           ctx.team
           |> Team.entries

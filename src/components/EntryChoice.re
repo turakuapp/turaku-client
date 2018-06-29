@@ -14,7 +14,7 @@ let isCurrentChoice = ctx =>
   ctx.team |> Team.entries |> SelectableList.selected == Some(ctx.entry);
 
 let containerClasses = ctx => {
-  let classes = "mr-3 mt-2 p-2 entry-choice";
+  let classes = "mb-2 p-2 entry-choice";
   if (ctx |> isCurrentChoice) {
     classes ++ " entry-choice--chosen";
   } else {
