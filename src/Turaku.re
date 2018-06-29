@@ -63,14 +63,15 @@ let reducer = (action, _state) =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
   | SelectSignUp => ReasonReact.Update(SignedOutUser(SignUpPage))
   | SignIn(session, teams, invitations) =>
+    let teamList = teams |> (teams |> List.length > 1 ? SelectableList.create : SelectableList.createAndSelect);
     ReasonReact.Update(
       SignedInUser({
         dashboardMenu: EntriesMenu,
         session,
         invitations,
-        teams: teams |> SelectableList.create,
+        teams: teamList,
       }),
-    )
+    );
   | SignUp =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: true})))
   | SkipLoading =>

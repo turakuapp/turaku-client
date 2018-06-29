@@ -2,6 +2,7 @@ type t('a);
 
 let empty: unit => t('a);
 let create: list('a) => t('a);
+let createAndSelect: list('a) => t('a);
 
 let add: ('a, t('a)) => t('a);
 let remove: ('a, t('a)) => t('a);
