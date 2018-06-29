@@ -53,11 +53,11 @@ type action =
   | AddNewEntry(Team.t, userData)
   | EditEntryTitle(Team.t, Entry.t, string, userData)
   | EditEntryField(Team.t, Entry.t, Field.t, int, userData)
-  | ReplaceEntry(Team.t, Entry.t, Entry.t, userData);
+  | ReplaceEntry(Team.t, Entry.t, Entry.t);
 
 let initialState = SignedOutUser(LoadingPage);
 
-let reducer = (action, _state) =>
+let reducer = (action, state) =>
   switch (action) {
   | SelectSignIn =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
@@ -243,14 +243,19 @@ let reducer = (action, _state) =>
       Js.log("Show entries with this tag, probably?");
       failwith("Tag selection hasn't been implemented yet.");
     }
-  | ReplaceEntry(team, oldEntry, newEntry, userData) =>
+  | ReplaceEntry(team, oldEntry, newEntry) =>
     let updatedEntries =
       team |> Team.entries |> SelectableList.replace(oldEntry, newEntry);
     let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
+
+    switch (state) {
+    | SignedInUser(userData) =>
+      ReasonReact.Update(
+        SignedInUser({
+          ...userData,
+          teams: userData.teams |> SelectableList.replace(team, updatedTeam),
+        }),
+      )
+    | SignedOutUser(_) => ReasonReact.NoUpdate
+    };
   };

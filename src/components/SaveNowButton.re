@@ -82,9 +82,7 @@ let saveChanges = (ctx, appSend) => {
        }
      )
   |> Js.Promise.then_(updatedEntry => {
-       appSend(
-         Turaku.ReplaceEntry(ctx.team, ctx.entry, updatedEntry, ctx.userData),
-       );
+       appSend(Turaku.ReplaceEntry(ctx.team, ctx.entry, updatedEntry));
        Js.Promise.resolve();
      })
   |> ignore;
@@ -92,7 +90,14 @@ let saveChanges = (ctx, appSend) => {
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
-  didUpdate: oldAndNew => {
+  willUnmount: _self =>
+    if (ctx.entry |> Entry.unpersisted) {
+      Js.log(
+        "Auto-saving (on unmount) entry with ID: " ++ (ctx.entry |> Entry.id),
+      );
+      saveChanges(ctx, appSend);
+    },
+  didUpdate: _oldAndNew => {
     let selectedEntry = ctx.team |> Team.entries |> SelectableList.selected;
     if (ctx.entry |> Entry.unpersisted && Some(ctx.entry) != selectedEntry) {
       Js.log("Auto-saving entry with ID: " ++ (ctx.entry |> Entry.id));
