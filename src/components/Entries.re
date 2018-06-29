@@ -23,10 +23,15 @@ let entryChoices = (ctx, state, appSend) =>
   ctx.team
   |> Team.entries
   |> SelectableList.all
-  |> List.filter(entry => {
-       let searchExp = state.search |> Js.Re.fromStringWithFlags(~flags="i");
-       entry |> Entry.title |> Js.String.search(searchExp) > (-1);
-     })
+  |> List.filter(entry =>
+       if (entry |> Entry.unpersisted) {
+         true;
+       } else {
+         let searchExp =
+           state.search |> Js.Re.fromStringWithFlags(~flags="i");
+         entry |> Entry.title |> Js.String.search(searchExp) > (-1);
+       }
+     )
   |> List.map(entry =>
        <EntryChoice
          key=(entry |> Entry.id)
