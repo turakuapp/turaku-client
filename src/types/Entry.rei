@@ -2,7 +2,7 @@ type t;
 
 type id = string;
 
-let newUnsaved: int => t;
+let newUnsaved: unit => t;
 
 let id: t => id;
 let title: t => string;

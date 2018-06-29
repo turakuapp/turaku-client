@@ -63,7 +63,12 @@ let reducer = (action, _state) =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
   | SelectSignUp => ReasonReact.Update(SignedOutUser(SignUpPage))
   | SignIn(session, teams, invitations) =>
-    let teamList = teams |> (teams |> List.length > 1 ? SelectableList.create : SelectableList.createAndSelect);
+    let teamList =
+      teams
+      |> (
+        teams |> List.length > 1 ?
+          SelectableList.create : SelectableList.createAndSelect
+      );
     ReasonReact.Update(
       SignedInUser({
         dashboardMenu: EntriesMenu,
@@ -183,18 +188,8 @@ let reducer = (action, _state) =>
       }),
     );
   | AddNewEntry(team, userData) =>
-    let newEntry =
-      (
-        team
-        |> Team.entries
-        |> SelectableList.all
-        |> List.filter(Entry.unsaved)
-        |> List.length
-      )
-      + 1
-      |> Entry.newUnsaved;
-
-    let updatedEntries = team |> Team.entries |> SelectableList.add(newEntry);
+    let updatedEntries =
+      team |> Team.entries |> SelectableList.add(Entry.newUnsaved());
     let updatedTeam = team |> Team.replaceEntries(updatedEntries);
     ReasonReact.Update(
       SignedInUser({

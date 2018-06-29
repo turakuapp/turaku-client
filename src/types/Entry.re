@@ -89,13 +89,10 @@ let unpersisted = t =>
   | Edited(_) => true
   };
 
-let newUnsaved = idx =>
+let newUnsaved = () =>
   Unsaved(
-    {
-      title: "New Entry #" ++ string_of_int(idx),
-      fields: Field.forNewEntry(),
-    },
-    "unsaved-" ++ string_of_int(idx),
+    {title: "New Entry", fields: Field.forNewEntry()},
+    "unsaved-" ++ (Js.Date.now() |> string_of_float),
   );
 
 let unsaved = t =>
