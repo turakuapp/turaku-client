@@ -62,37 +62,3 @@ let make = (~ctx: ctx, ~appSend, _children) => {
       </div>
     </div>,
 };
-/* export default class Dashboard extends React.Component {
-     constructor(props) {
-       super(props);
-       this.state = { signingOut: false };
-       this.signOut = this.signOut.bind(this);
-     }
-
-     signOut() {
-       let service = new SessionSignOutService(this.props.appState.token);
-       let that = this;
-
-       this.setState({ signingOut: true }, () => {
-         service.signOut().then(() => {
-           that.props.setAppState(initialState());
-         });
-       });
-     }
-
-     haveUnsavedEntries() {
-       return !_.isEmpty(this.props.appState.unsavedEntries);
-     }
-
-     render() {
-       if (!_.isObject(this.props.appState.team)) {
-         return <Redirect to="/teams" />;
-       }
-
-       return (
-         !!!!!!!!!
-         EXTRACTED
-         !!!!!!!!!
-       );
-     }
-   } */

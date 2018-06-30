@@ -246,85 +246,11 @@ let make = (~ctx, ~appSend, _children) => {
      }
 
      async updateEntry(entryId) {
-       console.log(`Updating existing entry with ID ${entryId}`);
-
-       await this.createMissingTags(entryId);
-
-       const updateService = new UpdateEntryService(
-         this.props.appState.token,
-         this.props.appState.team.password,
-         entryId,
-         this.updatedEntry(entryId),
-         this.entryTagIds(entryId)
-       );
-
-       const updatedEntryId = await updateService.execute();
-
-       console.log(
-         `Entry with ID ${entryId} has been updated. Updating app state...`
-       );
-
-       const entriesClone = _.cloneDeep(this.props.appState.entries);
-       const unsavedEntriesClone = _.cloneDeep(this.props.appState.unsavedEntries);
-       entriesClone[updatedEntryId] = this.updatedEntry(entryId, false);
-       delete unsavedEntriesClone[entryId];
-
-       const newAppState = {
-         entries: entriesClone,
-         unsavedEntries: unsavedEntriesClone
-       };
-
-       console.log("Updating appState with data: ", newAppState);
-
-       this.props.setAppState(newAppState, () => {
-         console.log("New app state should include: ", newAppState);
-       });
+       !!! EXTRACTED !!!
      }
 
      async createEntry(unsavedEntryId) {
-       console.log("Creating new entry with temp ID: " + unsavedEntryId);
-
-       await this.createMissingTags(unsavedEntryId);
-
-       const createService = new CreateEntryService(
-         this.props.appState.token,
-         this.props.appState.team.password,
-         this.props.appState.team.id,
-         this.updatedEntry(unsavedEntryId),
-         this.entryTagIds(unsavedEntryId)
-       );
-
-       const savedEntryId = await createService.execute();
-
-       console.log(
-         "New entry with temp ID " +
-         unsavedEntryId +
-         " now has permanent ID " +
-         savedEntryId +
-         ". Updating..."
-       );
-
-       // TODO: Shouldn't this step be setting the persisted flag for the newly created entry?
-
-       const entriesClone = _.cloneDeep(this.props.appState.entries);
-       const unsavedEntriesClone = _.cloneDeep(this.props.appState.unsavedEntries);
-       entriesClone[savedEntryId] = this.updatedEntry(unsavedEntryId);
-       delete unsavedEntriesClone[unsavedEntryId];
-
-       const newAppState = {
-         entries: entriesClone,
-         unsavedEntries: unsavedEntriesClone
-       };
-
-       if (this.props.appState.entryId === unsavedEntryId) {
-         newAppState.entryId = "" + savedEntryId;
-       }
-
-       console.log("Updating appState with data: ", newAppState);
-
-       this.props.setAppState(newAppState, () => {
-         console.log("New app state should include: ", newAppState);
-       });
+       !!! EXTRACTED !!!
      }
 
      render() {

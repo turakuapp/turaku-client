@@ -58,12 +58,3 @@ let make = (~ctx, ~appSend, _children) => {
       />
     </div>,
 };
-/* export default class EntryChoice extends React.Component {
-     entry() {
-       if (this.props.appState.unsavedEntries.hasOwnProperty(this.props.entryId)) {
-         return this.props.appState.unsavedEntries[this.props.entryId];
-       } else {
-         return this.props.appState.entries[this.props.entryId];
-       }
-     }
-   }*/
