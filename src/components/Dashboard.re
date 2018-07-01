@@ -39,7 +39,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
     <div className="container-fluid">
       <div className="row">
         <div className="col dashboard__navigation">
-          <Tags ctx={userData: ctx.userData} appSend />
+          <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
           <hr />
           <div
             onClick=(navigateToTeamMenu(ctx, appSend))

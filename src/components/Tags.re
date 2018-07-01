@@ -2,7 +2,10 @@ let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("Tags");
 
-type ctx = {userData: Turaku.userData};
+type ctx = {
+  userData: Turaku.userData,
+  team: Team.t,
+};
 
 let navigateToAllEntries = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
@@ -13,6 +16,18 @@ let navigateToAllEntries = (ctx, appSend, event) => {
   };
 };
 
+let tagLinks = (ctx, appSend) =>
+  ctx.team
+  |> Team.tags
+  |> SelectableList.all
+  |> List.map(tag =>
+       <div className="dashboard__navlink" key=(tag |> Tag.id)>
+         (tag |> Tag.name |> str)
+       </div>
+     )
+  |> Array.of_list
+  |> ReasonReact.array;
+
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
@@ -22,10 +37,7 @@ let make = (~ctx, ~appSend, _children) => {
         className="dashboard__navlink">
         (str("All tags"))
       </div>
-      <div className="dashboard__navlink"> ("Tag 1" |> str) </div>
-      <div className="dashboard__navlink"> ("Tag 2" |> str) </div>
-      <div className="dashboard__navlink"> ("Tag 3" |> str) </div>
-      <div className="dashboard__navlink"> ("..." |> str) </div>
+      (tagLinks(ctx, appSend))
     </div>,
 };
 /* export default class Tags extends React.Component {

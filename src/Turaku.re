@@ -29,7 +29,7 @@ type action =
   | SelectSignUp
   | SignUp
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
-  | RefreshEntries(Team.t, list(Entry.t), userData)
+  | RefreshEntries(Team.t, list(Entry.t), list(Tag.t), userData)
   | RefreshTeamMembers(
       Team.t,
       list(TeamMember.t),
@@ -113,9 +113,11 @@ let reducer = (action, state) =>
   | SignOut(session) =>
     session |> Session.signOut;
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})));
-  | RefreshEntries(team, entries, userData) =>
+  | RefreshEntries(team, entries, tags, userData) =>
     let updatedTeam =
-      team |> Team.replaceEntries(entries |> SelectableList.create);
+      team
+      |> Team.replaceEntries(entries |> SelectableList.create)
+      |> Team.replaceTags(tags |> SelectableList.create);
 
     ReasonReact.Update(
       SignedInUser({

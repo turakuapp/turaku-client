@@ -6,6 +6,7 @@ type t = {
   unsavedEntries: SelectableList.t(UnsavedEntry.t),
   teamMembers: SelectableList.t(TeamMember.t),
   invitations: SelectableList.t(InvitationToUser.t),
+  tags: SelectableList.t(Tag.t),
 }
 and id = string;
 
@@ -22,6 +23,7 @@ let name = t => t.name;
 let id = t => t.id;
 let password = t => t.password;
 let entries = t => t.entries;
+let tags = t => t.tags;
 let teamMembers = t => t.teamMembers;
 let invitations = t => t.invitations;
 
@@ -33,15 +35,15 @@ let create = (id, name, password) => {
   unsavedEntries: SelectableList.empty(),
   teamMembers: SelectableList.empty(),
   invitations: SelectableList.empty(),
+  tags: SelectableList.empty(),
 };
 
 let createCryptographicKey = t =>
   t.password |> CryptographicKey.keyFromTeamPassword;
 
 let replaceEntries = (entries, t) => {...t, entries};
-
+let replaceTags = (tags, t) => {...t, tags};
 let replaceTeamMembers = (teamMembers, t) => {...t, teamMembers};
-
 let replaceInvitations = (invitations, t) => {...t, invitations};
 
 let addInvitation = (invitation, t) => {

@@ -45,6 +45,14 @@ module EntriesQuery = [%graphql
   {|
   query($teamId: ID!) {
     team(id: $teamId) {
+      tags {
+        id
+        encryptedName {
+          iv
+          ciphertext
+        }
+        nameHash
+      }
       entries {
         id
         encryptedData {
@@ -81,6 +89,25 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
   encryptedEntries |> Array.to_list |> aux([]);
 };
 
+let decryptTags = (decryptionKey, encryptedTags) => {
+  let rec aux = (decryptedTags, tags) =>
+    switch (tags) {
+    | [tag, ...remainingTags] =>
+      let iv = InitializationVector.fromString(tag##encryptedName##iv);
+      let ciphertext = CipherText.fromString(tag##encryptedName##ciphertext);
+      EncryptedData.create(iv, ciphertext)
+      |> EncryptedData.decrypt(decryptionKey)
+      |> Js.Promise.then_(plaintext => {
+           Js.log(plaintext);
+           let tag =
+             Tag.create(tag##id, ~name=plaintext, ~nameHash=tag##nameHash);
+           remainingTags |> aux([tag, ...decryptedTags]);
+         });
+    | [] => decryptedTags |> Js.Promise.resolve
+    };
+  encryptedTags |> Array.to_list |> aux([]);
+};
+
 let loadEntries = (ctx, appSend) =>
   EntriesQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
@@ -90,12 +117,24 @@ let loadEntries = (ctx, appSend) =>
          ++ (response##team##entries |> Array.length |> string_of_int),
        );
        let decryptionKey = ctx.team |> Team.createCryptographicKey;
-       response##team##entries |> decryptEntries(decryptionKey);
+       response##team##entries
+       |> decryptEntries(decryptionKey)
+       |> Js.Promise.then_(decryptedEntries => {
+            Js.log(
+              "Loaded tags! Count: "
+              ++ (response##team##tags |> Array.length |> string_of_int),
+            );
+
+            response##team##tags
+            |> decryptTags(decryptionKey)
+            |> Js.Promise.then_(decryptedTags =>
+                 (decryptedEntries, decryptedTags) |> Js.Promise.resolve
+               );
+          });
      })
-  |> Js.Promise.then_(decryptedEntries => {
-       appSend(
-         Turaku.RefreshEntries(ctx.team, decryptedEntries, ctx.userData),
-       );
+  |> Js.Promise.then_(decryptedEntriesAndTags => {
+       let (entries, tags) = decryptedEntriesAndTags;
+       appSend(Turaku.RefreshEntries(ctx.team, entries, tags, ctx.userData));
        Js.Promise.resolve();
      })
   |> ignore;
