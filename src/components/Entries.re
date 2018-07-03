@@ -16,7 +16,7 @@ let component = ReasonReact.reducerComponent("Entries");
 
 let addEntry = (ctx, appSend, _event) => {
   Js.log("Add a new entry");
-  appSend(Turaku.AddNewEntry(ctx.team, ctx.userData));
+  appSend(Turaku.AddNewEntry);
 };
 
 let entryChoices = (ctx, state, appSend) =>

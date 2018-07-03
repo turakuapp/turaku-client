@@ -50,12 +50,22 @@ type action =
   | SelectTeamMember(Team.t, TeamMember.t, userData)
   | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
-  | AddNewEntry(Team.t, userData)
+  | AddNewEntry
   | EditEntryTitle(Team.t, Entry.t, string, userData)
   | EditEntryField(Team.t, Entry.t, Field.t, int, userData)
   | ReplaceEntry(Team.t, Entry.t, Entry.t);
 
 let initialState = SignedOutUser(LoadingPage);
+
+let withSelectedTeam = (f, state) =>
+  switch (state) {
+  | SignedInUser(userData) =>
+    switch (userData.teams |> SelectableList.selected) {
+    | Some(team) => f(team, userData)
+    | None => ReasonReact.NoUpdate
+    }
+  | SignedOutUser(_) => ReasonReact.NoUpdate
+  };
 
 let reducer = (action, state) =>
   switch (action) {
@@ -189,16 +199,21 @@ let reducer = (action, state) =>
         teams: userData.teams |> SelectableList.replace(team, updatedTeam),
       }),
     );
-  | AddNewEntry(team, userData) =>
-    let updatedEntries =
-      team |> Team.entries |> SelectableList.add(Entry.newUnsaved());
-    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
+  | AddNewEntry =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedEntries =
+           team |> Team.entries |> SelectableList.add(Entry.newUnsaved());
+         let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
+
   | SelectTeamMenu(userData) =>
     ReasonReact.Update(
       SignedInUser({
