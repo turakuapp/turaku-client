@@ -90,13 +90,6 @@ let saveChanges = (ctx, appSend) => {
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
-  willUnmount: _self =>
-    if (ctx.entry |> Entry.unpersisted) {
-      Js.log(
-        "Auto-saving (on unmount) entry with ID: " ++ (ctx.entry |> Entry.id),
-      );
-      saveChanges(ctx, appSend);
-    },
   didUpdate: _oldAndNew => {
     let selectedEntry = ctx.team |> Team.entries |> SelectableList.selected;
     if (ctx.entry |> Entry.unpersisted && Some(ctx.entry) != selectedEntry) {
