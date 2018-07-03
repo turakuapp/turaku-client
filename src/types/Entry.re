@@ -92,7 +92,7 @@ let unpersisted = t =>
 let newUnsaved = () =>
   Unsaved(
     {title: "New Entry", fields: Field.forNewEntry()},
-    "unsaved-" ++ (Js.Date.now() |> string_of_float),
+    "unsaved-" ++ (Js.Date.now() |> Js.Float.toString),
   );
 
 let unsaved = t =>
