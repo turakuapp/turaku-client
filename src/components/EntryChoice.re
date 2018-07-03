@@ -52,9 +52,15 @@ let make = (~ctx, ~appSend, _children) => {
       className=(containerClasses(ctx)) onClick=(chooseEntry(ctx, appSend))>
       (changesMarker(ctx))
       (ctx.entry |> title)
-      <SaveNowButton
-        ctx={userData: ctx.userData, team: ctx.team, entry: ctx.entry}
-        appSend
-      />
+      (
+        if (ctx.entry |> Entry.unpersisted) {
+          <SaveNowButton
+            ctx={userData: ctx.userData, team: ctx.team, entry: ctx.entry}
+            appSend
+          />;
+        } else {
+          ReasonReact.null;
+        }
+      )
     </div>,
 };

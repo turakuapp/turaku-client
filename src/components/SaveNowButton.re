@@ -8,7 +8,12 @@ type ctx = {
   entry: Entry.t,
 };
 
-let component = ReasonReact.statelessComponent("SaveNowButton");
+type state = {saving: bool};
+
+type action =
+  | Save;
+
+let component = ReasonReact.reducerComponent("SaveNowButton");
 
 module CreateEntryQuery = [%graphql
   {|
@@ -36,8 +41,7 @@ module UpdateEntryQuery = [%graphql
   |}
 ];
 
-let saveChanges = (ctx, appSend) => {
-  Js.log("Saving entry: " ++ (ctx.entry |> Entry.id));
+let saveChangesInBackground = (ctx, appSend) => {
   let key = ctx.team |> Team.createCryptographicKey;
   ctx.entry
   |> Entry.Codec.encode
@@ -88,27 +92,45 @@ let saveChanges = (ctx, appSend) => {
   |> ignore;
 };
 
+let saveChanges = (ctx, send, appSend) => {
+  Js.log("Saving entry: " ++ (ctx.entry |> Entry.id));
+  send(Save);
+  saveChangesInBackground(ctx, appSend);
+};
+
 let make = (~ctx, ~appSend, _children) => {
   ...component,
-  didUpdate: _oldAndNew => {
+  willUnmount: ({state}) =>
+    if (ctx.entry |> Entry.unpersisted && ! state.saving) {
+      Js.log(
+        "Auto-saving (on unmount) entry with ID: " ++ (ctx.entry |> Entry.id),
+      );
+      saveChangesInBackground(ctx, appSend);
+    },
+  didUpdate: ({newSelf}) => {
     let selectedEntry = ctx.team |> Team.entries |> SelectableList.selected;
-    if (ctx.entry |> Entry.unpersisted && Some(ctx.entry) != selectedEntry) {
+    if (ctx.entry
+        |> Entry.unpersisted
+        && Some(ctx.entry) != selectedEntry
+        && ! newSelf.state.saving) {
       Js.log("Auto-saving entry with ID: " ++ (ctx.entry |> Entry.id));
-      saveChanges(ctx, appSend);
+      saveChanges(ctx, newSelf.send, appSend);
     };
   },
-  render: _self =>
-    if (ctx.entry |> Entry.unpersisted) {
-      <span className="float-right">
-        <button
-          className="btn btn-primary btn-sm"
-          onClick=(_e => saveChanges(ctx, appSend))>
-          <Icon kind=Icon.Save />
-        </button>
-      </span>;
-    } else {
-      ReasonReact.null;
+  initialState: () => {saving: false},
+  reducer: (action, _state) =>
+    switch (action) {
+    | Save => ReasonReact.Update({saving: true})
     },
+  render: ({state, send}) =>
+    <span className="float-right">
+      <button
+        className="btn btn-primary btn-sm"
+        onClick=(_e => saveChanges(ctx, send, appSend))
+        disabled=state.saving>
+        (state.saving ? <Icon kind=Icon.Loading /> : <Icon kind=Icon.Save />)
+      </button>
+    </span>,
 };
 /* export default class SaveBar extends React.Component {
      constructor(props) {
