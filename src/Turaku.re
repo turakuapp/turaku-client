@@ -29,7 +29,7 @@ type action =
   | SelectSignUp
   | SignUp
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
-  | RefreshEntries(Team.t, list(Entry.t), list(Tag.t), userData)
+  | RefreshEntries(list(Entry.t), list(Tag.t))
   | RefreshTeamMembers(
       Team.t,
       list(TeamMember.t),
@@ -123,18 +123,41 @@ let reducer = (action, state) =>
   | SignOut(session) =>
     session |> Session.signOut;
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})));
-  | RefreshEntries(team, entries, tags, userData) =>
-    let updatedTeam =
-      team
-      |> Team.replaceEntries(entries |> SelectableList.create)
-      |> Team.replaceTags(tags |> SelectableList.create);
+  | RefreshEntries(entries, tags) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedEntries = entries |> SelectableList.create;
 
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
+         let updatedEntries =
+           switch (team |> Team.entries |> SelectableList.selected) {
+           | Some(previousEntry) =>
+             switch (
+               entries
+               |> Array.of_list
+               |> Js.Array.find(loadedEntry =>
+                    loadedEntry |> Entry.id == (previousEntry |> Entry.id)
+                  )
+             ) {
+             | Some(loadedSelectedEntry) =>
+               updatedEntries |> SelectableList.select(loadedSelectedEntry)
+             | None => updatedEntries
+             }
+           | None => updatedEntries
+           };
+
+         let updatedTeam =
+           team
+           |> Team.replaceEntries(updatedEntries)
+           |> Team.replaceTags(tags |> SelectableList.create);
+
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
   | RefreshTeamMembers(team, teamMembers, invitations, userData) =>
     let updatedTeam =
       team
