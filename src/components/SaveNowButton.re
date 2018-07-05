@@ -86,7 +86,9 @@ let saveChangesInBackground = (ctx, appSend) => {
        }
      )
   |> Js.Promise.then_(updatedEntry => {
-       appSend(Turaku.ReplaceEntry(ctx.entry, updatedEntry));
+       appSend(
+         Turaku.ReplaceEntry(ctx.team |> Team.id, ctx.entry, updatedEntry),
+       );
        Js.Promise.resolve();
      })
   |> ignore;

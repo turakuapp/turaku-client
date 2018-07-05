@@ -52,7 +52,7 @@ type action =
   | AddNewEntry
   | EditEntryTitle(Team.t, Entry.t, string, userData)
   | EditEntryField(Team.t, Entry.t, Field.t, int, userData)
-  | ReplaceEntry(Entry.t, Entry.t);
+  | ReplaceEntry(Team.id, Entry.t, Entry.t);
 
 let initialState = SignedOutUser(LoadingPage);
 
@@ -305,19 +305,31 @@ let reducer = (action, state) =>
       Js.log("Show entries with this tag, probably?");
       failwith("Tag selection hasn't been implemented yet.");
     }
-  | ReplaceEntry(oldEntry, newEntry) =>
+  | ReplaceEntry(teamId, oldEntry, newEntry) =>
     state
-    |> withSelectedTeam((team, userData) => {
-         let updatedEntries =
-           team |> Team.entries |> SelectableList.replace(oldEntry, newEntry);
-         let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+    |> withUser(userData => {
+         let team =
+           userData.teams
+           |> SelectableList.all
+           |> Array.of_list
+           |> Js.Array.find(team => team |> Team.id == teamId);
 
-         ReasonReact.Update(
-           SignedInUser({
-             ...userData,
-             teams:
-               userData.teams |> SelectableList.replace(team, updatedTeam),
-           }),
-         );
+         switch (team) {
+         | Some(team) =>
+           let updatedEntries =
+             team
+             |> Team.entries
+             |> SelectableList.replace(oldEntry, newEntry);
+           let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+
+           ReasonReact.Update(
+             SignedInUser({
+               ...userData,
+               teams:
+                 userData.teams |> SelectableList.replace(team, updatedTeam),
+             }),
+           );
+         | None => ReasonReact.NoUpdate
+         };
        })
   };

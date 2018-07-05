@@ -133,7 +133,7 @@ let createTeam = (ctx, appSend, state, event) => {
          )
        | Some(t) =>
          let team = Team.create(t##id, state.teamName, state.teamPassword);
-         appSend(Turaku.AddTeam(team, ctx.userData));
+         appSend(Turaku.AddTeam(team));
        };
        Js.Promise.resolve();
      })
