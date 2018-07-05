@@ -31,10 +31,9 @@ type action =
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
   | RefreshEntries(list(Entry.t), list(Tag.t))
   | RefreshTeamMembers(
-      Team.t,
+      Team.id,
       list(TeamMember.t),
       list(InvitationToUser.t),
-      userData,
     )
   | SkipLoading
   | AddTeam(Team.t, userData)
@@ -168,24 +167,33 @@ let reducer = (action, state) =>
            }),
          );
        })
-  | RefreshTeamMembers(team, teamMembers, invitations, userData) =>
-    let updatedTeam =
-      team
-      |> Team.replaceTeamMembers(teamMembers |> SelectableList.create)
-      |> Team.replaceInvitations(invitations |> SelectableList.create);
+  | RefreshTeamMembers(teamId, teamMembers, invitations) =>
+    state
+    |> withSelectedTeam((team, userData) =>
+         if (team |> Team.id == teamId) {
+           let updatedTeam =
+             team
+             |> Team.replaceTeamMembers(teamMembers |> SelectableList.create)
+             |> Team.replaceInvitations(invitations |> SelectableList.create);
 
-    let teamMenuSelection =
-      switch (invitations) {
-      | [_, ..._] => InvitationSelected
-      | [] => TeamMemberSelected
-      };
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-        dashboardMenu: TeamMenu(teamMenuSelection),
-      }),
-    );
+           let teamMenuSelection =
+             switch (invitations) {
+             | [_, ..._] => InvitationSelected
+             | [] => TeamMemberSelected
+             };
+           ReasonReact.Update(
+             SignedInUser({
+               ...userData,
+               teams:
+                 userData.teams |> SelectableList.replace(team, updatedTeam),
+               dashboardMenu: TeamMenu(teamMenuSelection),
+             }),
+           );
+         } else {
+           ReasonReact.NoUpdate;
+         }
+       )
+
   | AddInvitationToUser(team, invitation, userData) =>
     let updatedTeam = team |> Team.addInvitation(invitation);
     ReasonReact.Update(

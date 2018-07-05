@@ -230,10 +230,9 @@ let refreshUsers = (ctx, appSend) =>
 
        appSend(
          Turaku.RefreshTeamMembers(
-           ctx.team,
+           ctx.team |> Team.id,
            teamMembers,
            invitations,
-           ctx.userData,
          ),
        );
        Js.Promise.resolve();
