@@ -39,7 +39,7 @@ type action =
   | SkipLoading
   | AddTeam(Team.t, userData)
   | AcceptInvitation(Team.t, InvitationFromTeam.t, userData)
-  | SelectTeam(Team.t, userData)
+  | SelectTeam(Team.t)
   | DeselectTeam(userData)
   | SelectEntry(Team.t, Entry.t, userData)
   | SelectTeamMenu(userData)
@@ -67,6 +67,12 @@ let withSelectedTeam = (f, state) =>
   | SignedOutUser(_) => ReasonReact.NoUpdate
   };
 
+let withUser = (f, state) =>
+  switch (state) {
+  | SignedInUser(userData) => f(userData)
+  | SignedOutUser(_) => ReasonReact.NoUpdate
+  };
+
 let reducer = (action, state) =>
   switch (action) {
   | SelectSignIn =>
@@ -91,13 +97,17 @@ let reducer = (action, state) =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: true})))
   | SkipLoading =>
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
-  | SelectTeam(team, userData) =>
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.select(team),
-      }),
-    )
+  | SelectTeam(team) =>
+    state
+    |> withUser(userData =>
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams: userData.teams |> SelectableList.select(team),
+           }),
+         )
+       )
+
   | SelectEntry(team, entry, userData) =>
     let updatedEntries = team |> Team.entries |> SelectableList.select(entry);
     let updatedTeam = team |> Team.replaceEntries(updatedEntries);

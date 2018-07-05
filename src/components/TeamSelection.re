@@ -39,10 +39,10 @@ let invitations = (ctx, appSend) =>
     ReasonReact.null;
   };
 
-let selectTeam = (ctx, appSend, team, _event) => {
+let selectTeam = (appSend, team, _event) => {
   /* TODO: See how to select a team with old selectTeam function below. */
   Js.log2("Selecting Team with ID: ", team);
-  appSend(Turaku.SelectTeam(team, ctx.userData));
+  appSend(Turaku.SelectTeam(team));
 };
 
 let teams = (ctx, appSend) => {
@@ -58,7 +58,7 @@ let teams = (ctx, appSend) => {
             |> List.map((team: Team.t) =>
                  <li key=(team |> Team.id) className="mb-1">
                    <button
-                     onClick=(selectTeam(ctx, appSend, team))
+                     onClick=(selectTeam(appSend, team))
                      className="btn btn-sm btn-outline-dark">
                      (str(team |> Team.name))
                    </button>
