@@ -29,7 +29,7 @@ type action =
   | SelectSignUp
   | SignUp
   | SignIn(Session.t, list(Team.t), list(InvitationFromTeam.t))
-  | RefreshEntries(list(Entry.t), list(Tag.t))
+  | RefreshEntries(Team.id, list(Entry.t), list(Tag.t))
   | RefreshTeamMembers(
       Team.id,
       list(TeamMember.t),
@@ -56,21 +56,35 @@ type action =
 
 let initialState = SignedOutUser(LoadingPage);
 
-let withSelectedTeam = (f, state) =>
-  switch (state) {
-  | SignedInUser(userData) =>
-    switch (userData.teams |> SelectableList.selected) {
-    | Some(team) => f(team, userData)
-    | None => ReasonReact.NoUpdate
-    }
-  | SignedOutUser(_) => ReasonReact.NoUpdate
-  };
-
 let withUser = (f, state) =>
   switch (state) {
   | SignedInUser(userData) => f(userData)
   | SignedOutUser(_) => ReasonReact.NoUpdate
   };
+
+let withSelectedTeam = (f, state) =>
+  state
+  |> withUser(userData =>
+       switch (userData.teams |> SelectableList.selected) {
+       | Some(team) => f(team, userData)
+       | None => ReasonReact.NoUpdate
+       }
+     );
+
+let withTeam = (teamId, f, state) =>
+  state
+  |> withUser(userData => {
+       let team =
+         userData.teams
+         |> SelectableList.all
+         |> Array.of_list
+         |> Js.Array.find(team => team |> Team.id == teamId);
+
+       switch (team) {
+       | Some(team) => f(team, userData)
+       | None => ReasonReact.NoUpdate
+       };
+     });
 
 let reducer = (action, state) =>
   switch (action) {
@@ -136,45 +150,49 @@ let reducer = (action, state) =>
   | SignOut(session) =>
     session |> Session.signOut;
     ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})));
-  | RefreshEntries(entries, tags) =>
+  | RefreshEntries(teamId, entries, tags) =>
     state
-    |> withSelectedTeam((team, userData) => {
-         let updatedEntries = entries |> SelectableList.create;
+    |> withTeam(
+         teamId,
+         (team, userData) => {
+           let updatedEntries = entries |> SelectableList.create;
 
-         let updatedEntries =
-           switch (team |> Team.entries |> SelectableList.selected) {
-           | Some(previousEntry) =>
-             switch (
-               entries
-               |> Array.of_list
-               |> Js.Array.find(loadedEntry =>
-                    loadedEntry |> Entry.id == (previousEntry |> Entry.id)
-                  )
-             ) {
-             | Some(loadedSelectedEntry) =>
-               updatedEntries |> SelectableList.select(loadedSelectedEntry)
+           let updatedEntries =
+             switch (team |> Team.entries |> SelectableList.selected) {
+             | Some(previousEntry) =>
+               switch (
+                 entries
+                 |> Array.of_list
+                 |> Js.Array.find(loadedEntry =>
+                      loadedEntry |> Entry.id == (previousEntry |> Entry.id)
+                    )
+               ) {
+               | Some(loadedSelectedEntry) =>
+                 updatedEntries |> SelectableList.select(loadedSelectedEntry)
+               | None => updatedEntries
+               }
              | None => updatedEntries
-             }
-           | None => updatedEntries
-           };
+             };
 
-         let updatedTeam =
-           team
-           |> Team.replaceEntries(updatedEntries)
-           |> Team.replaceTags(tags |> SelectableList.create);
+           let updatedTeam =
+             team
+             |> Team.replaceEntries(updatedEntries)
+             |> Team.replaceTags(tags |> SelectableList.create);
 
-         ReasonReact.Update(
-           SignedInUser({
-             ...userData,
-             teams:
-               userData.teams |> SelectableList.replace(team, updatedTeam),
-           }),
-         );
-       })
+           ReasonReact.Update(
+             SignedInUser({
+               ...userData,
+               teams:
+                 userData.teams |> SelectableList.replace(team, updatedTeam),
+             }),
+           );
+         },
+       )
   | RefreshTeamMembers(teamId, teamMembers, invitations) =>
     state
-    |> withSelectedTeam((team, userData) =>
-         if (team |> Team.id == teamId) {
+    |> withTeam(
+         teamId,
+         (team, userData) => {
            let updatedTeam =
              team
              |> Team.replaceTeamMembers(teamMembers |> SelectableList.create)
@@ -193,9 +211,7 @@ let reducer = (action, state) =>
                dashboardMenu: TeamMenu(teamMenuSelection),
              }),
            );
-         } else {
-           ReasonReact.NoUpdate;
-         }
+         },
        )
 
   | AddInvitationToUser(team, invitation, userData) =>
@@ -307,15 +323,9 @@ let reducer = (action, state) =>
     }
   | ReplaceEntry(teamId, oldEntry, newEntry) =>
     state
-    |> withUser(userData => {
-         let team =
-           userData.teams
-           |> SelectableList.all
-           |> Array.of_list
-           |> Js.Array.find(team => team |> Team.id == teamId);
-
-         switch (team) {
-         | Some(team) =>
+    |> withTeam(
+         teamId,
+         (team, userData) => {
            let updatedEntries =
              team
              |> Team.entries
@@ -329,7 +339,6 @@ let reducer = (action, state) =>
                  userData.teams |> SelectableList.replace(team, updatedTeam),
              }),
            );
-         | None => ReasonReact.NoUpdate
-         };
-       })
+         },
+       )
   };

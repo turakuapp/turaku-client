@@ -134,7 +134,7 @@ let loadEntries = (ctx, appSend) =>
      })
   |> Js.Promise.then_(decryptedEntriesAndTags => {
        let (entries, tags) = decryptedEntriesAndTags;
-       appSend(Turaku.RefreshEntries(entries, tags));
+       appSend(Turaku.RefreshEntries(ctx.team |> Team.id, entries, tags));
        Js.Promise.resolve();
      })
   |> ignore;
