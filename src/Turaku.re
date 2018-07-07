@@ -39,19 +39,19 @@ type action =
   | AddTeam(Team.t)
   | AcceptInvitation(Team.t, InvitationFromTeam.t)
   | SelectTeam(Team.t)
-  | DeselectTeam(userData)
-  | SelectEntry(Team.t, Entry.t, userData)
-  | SelectTeamMenu(userData)
-  | SelectTag(option(Tag.t), userData)
+  | DeselectTeam
+  | SelectEntry(Entry.t)
+  | SelectTeamMenu
+  | SelectTag(option(Tag.t))
   | SignOut(Session.t)
   | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
-  | SelectInvitation(Team.t, InvitationToUser.t, userData)
-  | SelectTeamMember(Team.t, TeamMember.t, userData)
+  | SelectInvitation(InvitationToUser.t)
+  | SelectTeamMember(TeamMember.t)
   | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
   | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
   | AddNewEntry
-  | EditEntryTitle(Team.t, Entry.t, string, userData)
-  | EditEntryField(Team.t, Entry.t, Field.t, int, userData)
+  | EditEntryTitle(string)
+  | EditEntryField(Field.t, int)
   | ReplaceEntry(Team.id, Entry.t, Entry.t);
 
 let initialState = SignedOutUser(LoadingPage);
@@ -85,6 +85,15 @@ let withTeam = (teamId, f, state) =>
        | None => ReasonReact.NoUpdate
        };
      });
+
+let withSelectedEntry = (f, state) =>
+  state
+  |> withSelectedTeam((team, userData) =>
+       switch (team |> Team.entries |> SelectableList.selected) {
+       | Some(entry) => f(entry, team, userData)
+       | None => ReasonReact.NoUpdate
+       }
+     );
 
 let reducer = (action, state) =>
   switch (action) {
@@ -121,12 +130,18 @@ let reducer = (action, state) =>
          )
        )
 
-  | SelectEntry(team, entry, userData) =>
-    let updatedEntries = team |> Team.entries |> SelectableList.select(entry);
-    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-    let updatedTeams =
-      userData.teams |> SelectableList.replace(team, updatedTeam);
-    ReasonReact.Update(SignedInUser({...userData, teams: updatedTeams}));
+  | SelectEntry(entry) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedEntries =
+           team |> Team.entries |> SelectableList.select(entry);
+         let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+         let updatedTeams =
+           userData.teams |> SelectableList.replace(team, updatedTeam);
+         ReasonReact.Update(
+           SignedInUser({...userData, teams: updatedTeams}),
+         );
+       })
   | AddTeam(team) =>
     state
     |> withUser(userData =>
@@ -242,28 +257,36 @@ let reducer = (action, state) =>
         invitations: userData.invitations |> List.filter(i => i != invitation),
       }),
     )
-  | EditEntryTitle(team, entry, title, userData) =>
-    let updatedEntry = entry |> Entry.editTitle(title);
-    let updatedEntries =
-      team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
-    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
-  | EditEntryField(team, entry, field, index, userData) =>
-    let updatedEntry = entry |> Entry.editField(field, index);
-    let updatedEntries =
-      team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
-    let updatedTeam = team |> Team.replaceEntries(updatedEntries);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
+  | EditEntryTitle(title) =>
+    state
+    |> withSelectedEntry((entry, team, userData) => {
+         let updatedEntry = entry |> Entry.editTitle(title);
+         let updatedEntries =
+           team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
+         let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
+  | EditEntryField(field, index) =>
+    state
+    |> withSelectedEntry((entry, team, userData) => {
+         let updatedEntry = entry |> Entry.editField(field, index);
+         let updatedEntries =
+           team |> Team.entries |> SelectableList.replace(entry, updatedEntry);
+         let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
   | AddNewEntry =>
     state
     |> withSelectedTeam((team, userData) => {
@@ -279,52 +302,70 @@ let reducer = (action, state) =>
          );
        })
 
-  | SelectTeamMenu(userData) =>
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        dashboardMenu: TeamMenu(TeamMemberSelected),
-      }),
-    )
-  | DeselectTeam(userData) =>
-    let updatedTeams = userData.teams |> SelectableList.deselect;
-    ReasonReact.Update(SignedInUser({...userData, teams: updatedTeams}));
-  | SelectInvitation(team, invitation, userData) =>
-    let updatedInvitations =
-      team |> Team.invitations |> SelectableList.select(invitation);
-    let updatedTeam = team |> Team.replaceInvitations(updatedInvitations);
-    let updatedTeams =
-      userData.teams |> SelectableList.replace(team, updatedTeam);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: updatedTeams,
-        dashboardMenu: TeamMenu(InvitationSelected),
-      }),
-    );
-  | SelectTeamMember(team, teamMember, userData) =>
-    let updatedTeamMembers =
-      team |> Team.teamMembers |> SelectableList.select(teamMember);
-    let updatedTeam = team |> Team.replaceTeamMembers(updatedTeamMembers);
-    let updatedTeams =
-      userData.teams |> SelectableList.replace(team, updatedTeam);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: updatedTeams,
-        dashboardMenu: TeamMenu(TeamMemberSelected),
-      }),
-    );
-  | SelectTag(tag, userData) =>
-    switch (tag) {
-    | None =>
-      ReasonReact.Update(
-        SignedInUser({...userData, dashboardMenu: EntriesMenu}),
-      )
-    | Some(tag) =>
-      Js.log("Show entries with this tag, probably?");
-      failwith("Tag selection hasn't been implemented yet.");
-    }
+  | SelectTeamMenu =>
+    state
+    |> withSelectedTeam((_team, userData) =>
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             dashboardMenu: TeamMenu(TeamMemberSelected),
+           }),
+         )
+       )
+  | DeselectTeam =>
+    state
+    |> withSelectedTeam((_team, userData) => {
+         let updatedTeams = userData.teams |> SelectableList.deselect;
+         ReasonReact.Update(
+           SignedInUser({...userData, teams: updatedTeams}),
+         );
+       })
+  | SelectInvitation(invitation) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedInvitations =
+           team |> Team.invitations |> SelectableList.select(invitation);
+         let updatedTeam =
+           team |> Team.replaceInvitations(updatedInvitations);
+         let updatedTeams =
+           userData.teams |> SelectableList.replace(team, updatedTeam);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams: updatedTeams,
+             dashboardMenu: TeamMenu(InvitationSelected),
+           }),
+         );
+       })
+  | SelectTeamMember(teamMember) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedTeamMembers =
+           team |> Team.teamMembers |> SelectableList.select(teamMember);
+         let updatedTeam =
+           team |> Team.replaceTeamMembers(updatedTeamMembers);
+         let updatedTeams =
+           userData.teams |> SelectableList.replace(team, updatedTeam);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams: updatedTeams,
+             dashboardMenu: TeamMenu(TeamMemberSelected),
+           }),
+         );
+       })
+  | SelectTag(tag) =>
+    state
+    |> withSelectedTeam((_team, userData) =>
+         switch (tag) {
+         | None =>
+           ReasonReact.Update(
+             SignedInUser({...userData, dashboardMenu: EntriesMenu}),
+           )
+         | Some(_tag) =>
+           failwith("Tag selection hasn't been implemented yet.")
+         }
+       )
   | ReplaceEntry(teamId, oldEntry, newEntry) =>
     state
     |> withTeam(

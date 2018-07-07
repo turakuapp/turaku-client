@@ -26,7 +26,7 @@ let chooseEntry = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   Js.log("Clicked on event choice with ID: " ++ (ctx.entry |> Entry.id));
   if (! isCurrentChoice(ctx)) {
-    Turaku.SelectEntry(ctx.team, ctx.entry, ctx.userData) |> appSend;
+    Turaku.SelectEntry(ctx.entry) |> appSend;
   };
 };
 

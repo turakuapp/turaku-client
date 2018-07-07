@@ -22,14 +22,14 @@ let getMenu = (ctx, appSend) =>
 
 let navigateToTeams = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Turaku.DeselectTeam(ctx.userData) |> appSend;
+  Turaku.DeselectTeam |> appSend;
 };
 
 let navigateToTeamMenu = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   switch (ctx.userData.dashboardMenu) {
   | TeamMenu(_) => ()
-  | EntriesMenu => Turaku.SelectTeamMenu(ctx.userData) |> appSend
+  | EntriesMenu => Turaku.SelectTeamMenu |> appSend
   };
 };
 

@@ -11,7 +11,7 @@ let component = ReasonReact.statelessComponent("EntryEditor");
 let handleTitleChange = (ctx, appSend, _event) => {
   Js.log("Editing title");
   let title = DomUtils.getValueOfInputById("entry-editor__title");
-  appSend(Turaku.EditEntryTitle(ctx.team, ctx.entry, title, ctx.userData));
+  appSend(Turaku.EditEntryTitle(title));
 };
 
 let fields = (ctx, appSend) => {

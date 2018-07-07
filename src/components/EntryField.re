@@ -24,13 +24,7 @@ let editField = (ctx, appSend, _event) => {
   Js.log("Editing field with index: " ++ string_of_int(ctx.index));
   let v = id(ctx) |> DomUtils.getValueOfInputById;
   appSend(
-    Turaku.EditEntryField(
-      ctx.team,
-      ctx.entry,
-      ctx.field |> Field.editValue(v),
-      ctx.index,
-      ctx.userData,
-    ),
+    Turaku.EditEntryField(ctx.field |> Field.editValue(v), ctx.index),
   );
 };
 
