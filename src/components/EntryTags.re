@@ -1,9 +1,6 @@
 let str = ReasonReact.string;
 
-type ctx = {
-  userData: Turaku.userData,
-  entry: Entry.t,
-};
+type ctx = {entry: Entry.t};
 
 let component = ReasonReact.statelessComponent("EntryTags");
 
@@ -12,7 +9,18 @@ let make = (~ctx: ctx, ~appSend, _children) => {
   render: _self =>
     <div className="row">
       <div className="col-sm-2 font-weight-bold"> ("Tags" |> str) </div>
-      <div className="col"> ("Tags go here" |> str) </div>
+      <div className="col">
+        <input type_="text" />
+        <div>
+          (
+            ctx.entry
+            |> Entry.tagIds
+            |> Array.of_list
+            |> Js.Array.joinWith(", ")
+            |> str
+          )
+        </div>
+      </div>
     </div>,
 };
 /* export default class EntryTags extends React.Component {

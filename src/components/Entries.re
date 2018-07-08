@@ -59,6 +59,7 @@ module EntriesQuery = [%graphql
           iv
           ciphertext
         }
+        tagIds
       }
     }
   }
@@ -80,7 +81,10 @@ let decryptEntries = (decryptionKey, encryptedEntries) => {
            |> aux([
                 plaintext
                 |> Json.parseOrRaise
-                |> Entry.Codec.decode(entry##id),
+                |> Entry.Codec.decode(
+                     entry##id,
+                     entry##tagIds |> Array.to_list,
+                   ),
                 ...decryptedEntries,
               ]);
          });

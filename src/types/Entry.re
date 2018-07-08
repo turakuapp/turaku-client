@@ -5,6 +5,7 @@ type t =
 and entry = {
   title: string,
   fields: list(Field.t),
+  tagIds: list(Tag.id),
 }
 and id = string;
 
@@ -16,12 +17,13 @@ let entry = t =>
   };
 
 module Codec = {
-  let decode = (id, json) =>
+  let decode = (id, tagIds, json) =>
     Json.Decode.(
       Saved(
         {
           title: json |> field("title", string),
           fields: json |> field("fields", list(Field.Codec.decode)),
+          tagIds,
         },
         id,
       )
@@ -45,8 +47,9 @@ let id = t =>
 
 let title = t => entry(t).title;
 let fields = t => entry(t).fields;
+let tagIds = t => entry(t).tagIds;
 
-let createEntry = (title, fields) => {title, fields};
+let createEntry = (title, fields, tagIds) => {title, fields, tagIds};
 
 let editEntry = (newEntry, t) =>
   switch (t) {
@@ -61,7 +64,7 @@ let editEntry = (newEntry, t) =>
   };
 
 let editTitle = (title, t) => {
-  let newEntry = createEntry(title, t |> fields);
+  let newEntry = createEntry(title, t |> fields, t |> tagIds);
   t |> editEntry(newEntry);
 };
 
@@ -78,7 +81,11 @@ let replaceField = (field, index, fields) => {
 
 let editField = (field, index, t) => {
   let newEntry =
-    createEntry(t |> title, t |> fields |> replaceField(field, index));
+    createEntry(
+      t |> title,
+      t |> fields |> replaceField(field, index),
+      t |> tagIds,
+    );
   t |> editEntry(newEntry);
 };
 
@@ -91,7 +98,7 @@ let unpersisted = t =>
 
 let newUnsaved = () =>
   Unsaved(
-    {title: "New Entry", fields: Field.forNewEntry()},
+    {title: "New Entry", fields: Field.forNewEntry(), tagIds: []},
     "unsaved-" ++ (Js.Date.now() |> Js.Float.toString),
   );
 
