@@ -1,28 +1,33 @@
 let str = ReasonReact.string;
 
-type ctx = {entry: Entry.t};
-
 let component = ReasonReact.statelessComponent("EntryTags");
 
-let make = (~ctx: ctx, ~appSend, _children) => {
+let make = (~team, ~entry, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="row">
       <div className="col-sm-2 font-weight-bold"> ("Tags" |> str) </div>
       <div className="col">
         <input type_="text" />
-        <div>
+        <div className="mt-1">
           (
-            ctx.entry
+            entry
             |> Entry.tagIds
+            |> List.map(tagId => <EntryTag key=tagId team tagId />)
             |> Array.of_list
-            |> Js.Array.joinWith(", ")
-            |> str
+            |> ReasonReact.array
           )
         </div>
       </div>
     </div>,
 };
+
+let myJsObject = {"foo": 1};
+
+type tesla = {. color: string};
+
+let obj: tesla = {val red = "Red"; pub color = red};
+
 /* export default class EntryTags extends React.Component {
      constructor(props) {
        super(props);

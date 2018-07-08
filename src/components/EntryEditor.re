@@ -52,6 +52,6 @@ let make = (~ctx, ~appSend, _children) => {
         </div>
       </div>
       (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
-      <EntryTags ctx={entry: ctx.entry} appSend />
+      <EntryTags team=ctx.team entry=ctx.entry appSend />
     </div>,
 };

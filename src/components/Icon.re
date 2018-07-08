@@ -7,7 +7,8 @@ type kind =
   | Submit
   | Loading
   | Success
-  | Error;
+  | Error
+  | Delete;
 
 let toText = kind =>
   switch (kind) {
@@ -15,7 +16,8 @@ let toText = kind =>
   | Submit => "(SUBMIT)"
   | Loading => "(LOADING)"
   | Success => "(SUCCESS)"
-  | Error => "(ERROR)"
+  | Error => "(ERR)"
+  | Delete => "(DEL)"
   };
 
 let make = (~kind, _children) => {
