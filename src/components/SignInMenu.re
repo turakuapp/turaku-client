@@ -85,8 +85,7 @@ let handleSubmit = (appSend, event) => {
        | None => Js.Promise.reject(AuthenticationFailure(response##errors))
        };
      })
-  |> Js.Promise.then_(rawSessionAndHash => {
-       let (rawSession, encryptionHash) = rawSessionAndHash;
+  |> Js.Promise.then_(((rawSession, encryptionHash)) => {
        let accessToken = rawSession##token |> AccessToken.create;
        let session = Session.create(accessToken, encryptionHash);
        let key = session |> Session.getCryptographicKey;
@@ -96,8 +95,7 @@ let handleSubmit = (appSend, event) => {
          rawSession##user##teams,
        );
      })
-  |> Js.Promise.then_(sessionsAndTeams => {
-       let ((rawSession, session), teams) = sessionsAndTeams;
+  |> Js.Promise.then_((((rawSession, session), teams)) => {
        session |> Session.saveInLocalStorage;
        appSend(
          Turaku.SignIn(

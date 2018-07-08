@@ -112,28 +112,23 @@ let loadEntries = (ctx, appSend) =>
   EntriesQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
   |> Js.Promise.then_(response => {
-       Js.log(
-         "Loaded entries! Count: "
-         ++ (response##team##entries |> Array.length |> string_of_int),
-       );
        let decryptionKey = ctx.team |> Team.createCryptographicKey;
-       response##team##entries
-       |> decryptEntries(decryptionKey)
-       |> Js.Promise.then_(decryptedEntries => {
-            Js.log(
-              "Loaded tags! Count: "
-              ++ (response##team##tags |> Array.length |> string_of_int),
-            );
+       let team = response##team;
 
-            response##team##tags
-            |> decryptTags(decryptionKey)
-            |> Js.Promise.then_(decryptedTags =>
-                 (decryptedEntries, decryptedTags) |> Js.Promise.resolve
-               );
-          });
+       Js.Promise.all2((
+         team##entries |> decryptEntries(decryptionKey),
+         team##tags |> decryptTags(decryptionKey),
+       ));
      })
-  |> Js.Promise.then_(decryptedEntriesAndTags => {
-       let (entries, tags) = decryptedEntriesAndTags;
+  |> Js.Promise.then_(((entries, tags)) => {
+       Js.log(
+         "Loaded "
+         ++ (entries |> List.length |> string_of_int)
+         ++ " entries and "
+         ++ (tags |> List.length |> string_of_int)
+         ++ " tags!",
+       );
+
        appSend(Turaku.RefreshEntries(ctx.team |> Team.id, entries, tags));
        Js.Promise.resolve();
      })

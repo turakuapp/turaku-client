@@ -56,6 +56,9 @@ let removeInvitation = (invitation, t) => {
   invitations: t |> invitations |> SelectableList.remove(invitation),
 };
 
+/**
+ * TODO: This decrypts teams one-by-one, which is slow. Dispatch all decrypt
+ * promises, and resolve them together with Js.Promise.all. */
 let decryptTeams = (response, decryptionKey, encryptedTeams) => {
   let rec aux = (decryptedTeams, teams) =>
     switch (teams) {

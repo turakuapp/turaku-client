@@ -51,8 +51,7 @@ let make = (~appSend, _children) => {
                 session |> Session.getCryptographicKey,
               )
          )
-      |> Js.Promise.then_(responseAndTeams => {
-           let (response, teams) = responseAndTeams;
+      |> Js.Promise.then_(((response, teams)) => {
            let invitations =
              response##session##user##incomingInvitations
              |> Array.map(i =>
