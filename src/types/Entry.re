@@ -89,6 +89,16 @@ let editField = (field, index, t) => {
   t |> editEntry(newEntry);
 };
 
+let removeTag = (tagId, t) => {
+  let newEntry =
+    createEntry(
+      t |> title,
+      t |> fields,
+      t |> tagIds |> List.filter(id => id != tagId),
+    );
+  t |> editEntry(newEntry);
+};
+
 let unpersisted = t =>
   switch (t) {
   | Saved(_) => false

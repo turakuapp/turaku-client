@@ -38,7 +38,9 @@ let make = (~team, ~entry, ~appSend, _children) => {
           (
             entry
             |> Entry.tagIds
-            |> List.map(tagId => <EntryTag key=tagId team tagId />)
+            |> List.map(tagId =>
+                 <EntryTag key=tagId team entry tagId appSend />
+               )
             |> Array.of_list
             |> ReasonReact.array
           )

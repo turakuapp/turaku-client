@@ -52,7 +52,8 @@ type action =
   | AddNewEntry
   | EditEntryTitle(string)
   | EditEntryField(Field.t, int)
-  | ReplaceEntry(Team.id, Entry.t, Entry.t);
+  | ReplaceEntry(Team.id, Entry.t, Entry.t)
+  | RemoveTag(Entry.t, Tag.id);
 
 let initialState = SignedOutUser(LoadingPage);
 
@@ -385,5 +386,30 @@ let reducer = (action, state) =>
              }),
            );
          },
+       )
+  | RemoveTag(eventEntry, tagId) =>
+    state
+    |> withSelectedEntry((entry, team, userData) =>
+         if (entry |> Entry.id == (eventEntry |> Entry.id)) {
+           let updatedEntries =
+             team
+             |> Team.entries
+             |> SelectableList.replace(
+                  entry,
+                  entry |> Entry.removeTag(tagId),
+                );
+
+           let updatedTeam = team |> Team.replaceEntries(updatedEntries);
+
+           ReasonReact.Update(
+             SignedInUser({
+               ...userData,
+               teams:
+                 userData.teams |> SelectableList.replace(team, updatedTeam),
+             }),
+           );
+         } else {
+           ReasonReact.NoUpdate;
+         }
        )
   };
