@@ -5,7 +5,9 @@ type state = {name: string};
 type action =
   | UpdateName(string);
 
-let component = ReasonReact.reducerComponent("EntryTags");
+type retainedProps = {entry: Entry.t};
+
+let component = ReasonReact.reducerComponentWithRetainedProps("EntryTags");
 
 let updateName = (send, event) => {
   let name = ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value;
@@ -15,6 +17,15 @@ let updateName = (send, event) => {
 let make = (~team, ~entry, ~appSend, _children) => {
   ...component,
   initialState: () => {name: ""},
+  retainedProps: {
+    entry: entry,
+  },
+  didUpdate: ({oldSelf, newSelf}) =>
+    if (oldSelf.retainedProps.entry
+        |> Entry.id != (newSelf.retainedProps.entry |> Entry.id)
+        && newSelf.state.name != "") {
+      newSelf.send(UpdateName(""));
+    },
   reducer: (action, state) =>
     switch (action) {
     | UpdateName(name) => ReasonReact.Update({name: name})
