@@ -1,14 +1,28 @@
 let str = ReasonReact.string;
 
-let component = ReasonReact.statelessComponent("EntryTags");
+type state = {name: string};
+
+type action =
+  | UpdateName(string);
+
+let component = ReasonReact.reducerComponent("EntryTags");
+
+let updateName = (send, event) => {
+  let name = ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value;
+  send(UpdateName(name));
+};
 
 let make = (~team, ~entry, ~appSend, _children) => {
   ...component,
-  render: _self =>
+  initialState: () => {name: ""},
+  reducer: (action, state) =>
+    switch (action) {
+    | UpdateName(name) => ReasonReact.Update({name: name})
+    },
+  render: ({state, send}) =>
     <div className="row">
       <div className="col-sm-2 font-weight-bold"> ("Tags" |> str) </div>
       <div className="col">
-        <input type_="text" />
         <div className="mt-1">
           (
             entry
@@ -18,6 +32,14 @@ let make = (~team, ~entry, ~appSend, _children) => {
             |> ReasonReact.array
           )
         </div>
+        <input
+          className="mt-2"
+          type_="text"
+          onChange=(updateName(send))
+          value=state.name
+          placeholder="Add tags"
+        />
+        <TagOptions team entry search=state.name />
       </div>
     </div>,
 };
