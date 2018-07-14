@@ -7,7 +7,7 @@ type action =
 
 type retainedProps = {entry: Entry.t};
 
-let component = ReasonReact.reducerComponentWithRetainedProps("EntryTags");
+let component = ReasonReact.reducerComponent("EntryTags");
 
 let updateName = (send, event) => {
   let name = ReactDOMRe.domElementToObj(ReactEventRe.Form.target(event))##value;
@@ -17,16 +17,7 @@ let updateName = (send, event) => {
 let make = (~team, ~entry, ~appSend, _children) => {
   ...component,
   initialState: () => {name: ""},
-  retainedProps: {
-    entry: entry,
-  },
-  didUpdate: ({oldSelf, newSelf}) =>
-    if (oldSelf.retainedProps.entry
-        |> Entry.id != (newSelf.retainedProps.entry |> Entry.id)
-        && newSelf.state.name != "") {
-      newSelf.send(UpdateName(""));
-    },
-  reducer: (action, state) =>
+  reducer: (action, _state) =>
     switch (action) {
     | UpdateName(name) => ReasonReact.Update({name: name})
     },
@@ -51,6 +42,7 @@ let make = (~team, ~entry, ~appSend, _children) => {
           onChange=(updateName(send))
           value=state.name
           placeholder="Add tags"
+          onBlur=(_e => send(UpdateName("")))
         />
         <TagOptions team entry search=state.name />
       </div>
