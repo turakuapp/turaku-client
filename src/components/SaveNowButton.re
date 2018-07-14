@@ -55,7 +55,7 @@ let saveChangesInBackground = (ctx, appSend) => {
              encryptedData |> EncryptedData.iv |> InitializationVector.toString,
            ~ciphertext=
              encryptedData |> EncryptedData.ciphertext |> CipherText.toString,
-           ~tagIds=[||],
+           ~tagIds=ctx.entry |> Entry.tagIds |> Array.of_list,
            (),
          )
          |> Api.sendAuthenticatedQuery(ctx.userData.session)
@@ -74,7 +74,7 @@ let saveChangesInBackground = (ctx, appSend) => {
              encryptedData |> EncryptedData.iv |> InitializationVector.toString,
            ~ciphertext=
              encryptedData |> EncryptedData.ciphertext |> CipherText.toString,
-           ~tagIds=[||],
+           ~tagIds=ctx.entry |> Entry.tagIds |> Array.of_list,
            (),
          )
          |> Api.sendAuthenticatedQuery(ctx.userData.session)
