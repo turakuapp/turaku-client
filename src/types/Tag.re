@@ -9,3 +9,4 @@ let create = (id, ~name, ~nameHash) => {id, name, nameHash};
 
 let id = t => t.id;
 let name = t => t.name;
+let nameHash = t => t.nameHash;

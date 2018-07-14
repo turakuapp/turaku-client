@@ -53,7 +53,8 @@ type action =
   | EditEntryTitle(string)
   | EditEntryField(Field.t, int)
   | ReplaceEntry(Team.id, Entry.t, Entry.t)
-  | RemoveTag(Entry.t, Tag.id);
+  | RemoveTag(Entry.t, Tag.id)
+  | AddTagToEntry(Entry.t, Tag.t);
 
 let initialState = SignedOutUser(LoadingPage);
 
@@ -412,4 +413,45 @@ let reducer = (action, state) =>
            ReasonReact.NoUpdate;
          }
        )
+  | AddTagToEntry(entry, tag) =>
+    state
+    |> withSelectedEntry((selectedEntry, team, userData) => {
+         let tagId = tag |> Tag.id;
+
+         let updatedTeam =
+           if (selectedEntry |> Entry.id == (entry |> Entry.id)) {
+             let entryWithNewTag = selectedEntry |> Entry.addTag(tagId);
+             let updatedEntries =
+               team
+               |> Team.entries
+               |> SelectableList.replace(selectedEntry, entryWithNewTag);
+             team |> Team.replaceEntries(updatedEntries);
+           } else {
+             team;
+           };
+
+         let existingTag =
+           updatedTeam
+           |> Team.tags
+           |> SelectableList.all
+           |> ListUtils.find_opt(existingTag => existingTag |> Tag.id == tagId);
+
+         /* If the tag isn't in the list of team tags, we need to add it. */
+         let updatedTeam =
+           switch (existingTag) {
+           | None =>
+             let updatedTags =
+               updatedTeam |> Team.tags |> SelectableList.add(tag);
+             updatedTeam |> Team.replaceTags(updatedTags);
+           | Some(_) => updatedTeam
+           };
+
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
   };

@@ -18,6 +18,7 @@ let editTitle: (string, t) => t;
 let editField: (Field.t, int, t) => t;
 
 let removeTag: (Tag.id, t) => t;
+let addTag: (Tag.id, t) => t;
 
 let save: (id, t) => t;
 

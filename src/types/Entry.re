@@ -99,6 +99,12 @@ let removeTag = (tagId, t) => {
   t |> editEntry(newEntry);
 };
 
+let addTag = (tagId, t) => {
+  let newEntry =
+    createEntry(t |> title, t |> fields, [tagId, ...t |> tagIds]);
+  t |> editEntry(newEntry);
+};
+
 let unpersisted = t =>
   switch (t) {
   | Saved(_) => false
