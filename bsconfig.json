@@ -1,12 +1,6 @@
 {
   "name": "reason-scripts",
-  "sources": [
-    "src",
-    "src/components",
-    "src/services",
-    "src/utils",
-    "src/types"
-  ],
+  "sources": ["src", "src/components", "src/utils", "src/types"],
   "bs-dependencies": [
     "reason-react",
     "@glennsl/bs-jest",
@@ -14,14 +8,10 @@
     "bs-webapi",
     "bs-fetch"
   ],
-  "ppx-flags": [
-    "graphql_ppx/ppx"
-  ],
+  "ppx-flags": ["graphql_ppx/ppx"],
   "reason": {
     "react-jsx": 2
   },
-  "bsc-flags": [
-    "-bs-super-errors"
-  ],
+  "bsc-flags": ["-bs-super-errors"],
   "refmt": 3
 }

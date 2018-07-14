@@ -136,9 +136,3 @@ let make = (~ctx, ~appSend, _children) => {
       </div>
     </div>,
 };
-
-let myJsObject = {"foo": 1};
-
-type tesla = {. color: string};
-
-let obj: tesla = {val red = "Red"; pub color = red};
