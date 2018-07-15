@@ -16,6 +16,7 @@
   "homepage": "./",
   "main": "src/electron-starter.js",
   "scripts": {
+    "tailwind:dev": "tailwind build ./src/tailwind/index.css -c ./tailwind.js -o src/index.css",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
@@ -30,6 +31,7 @@
     "bs-webapi": "^0.10.0",
     "electron": "^1.8.2",
     "graphql_ppx": "^0.2.3",
-    "reason-react": "^0.4.2"
+    "reason-react": "^0.4.2",
+    "tailwindcss": "^0.6.3"
   }
 }

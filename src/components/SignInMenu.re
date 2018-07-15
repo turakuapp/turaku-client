@@ -164,12 +164,12 @@ let make = (~data, ~appSend, _children) => {
                 placeholder="Password"
               />
             </div>
-            <button _type="submit" className="mt-2 btn btn-primary">
+            <button _type="submit" className="mt-2 btn btn-blue">
               (str("Sign In"))
             </button>
             <button
               onClick=(gotoSignUp(appSend))
-              className="mt-2 ml-2 btn btn-secondary">
+              className="mt-2 ml-2 btn btn-blue">
               (str("Sign Up"))
             </button>
           </form>

@@ -30,3 +30,6 @@ yarn-error.log*
 
 # BSB lockfile
 .bsb.lock
+
+# Tailwind generated CSS.
+src/index.css
