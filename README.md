@@ -3,7 +3,7 @@
 ## Development Status
 
 - ReactJS Prototype: **Completed in Dec 2017**
-- ReasonML + GraphQL conversion: **Completed in July 2018** ([Github issue](https://github.com/turakuapp/turaku-client/issues/1).
+- ReasonML + GraphQL conversion: **Completed in July 2018** ([Github issue](https://github.com/turakuapp/turaku-client/issues/1)).
 - Private Alpha: **Check [Alpha milestone](https://github.com/turakuapp/turaku-client/milestone/1).**
 - User permissions implementation
 - Public Beta
