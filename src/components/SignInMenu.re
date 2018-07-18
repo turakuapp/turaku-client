@@ -119,7 +119,7 @@ let handleSubmit = (appSend, event) => {
 
 let signedUpAlert = (data: Turaku.signInPageData) =>
   if (data.justSignedUp) {
-    <div className="alert alert-success" role="alert">
+    <div className="p-2 bg-yellow-light rounded mb-3">
       (
         str(
           "Thank you for signing up! Please confirm your email address before signing in.",
@@ -135,33 +135,32 @@ let gotoSignUp = (appSend, _event) => Turaku.SelectSignUp |> appSend;
 let make = (~data, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="container">
-      <div className="row justify-content-center sign-in__centered-container">
-        <div className="col-md-6 align-self-center">
+    <div className="container mx-auto px-4">
+      <div className="flex justify-center h-screen">
+        <div className="w-full md:w-1/2 self-center">
           (signedUpAlert(data))
           <form onSubmit=(handleSubmit(appSend))>
-            <div className="form-group">
+            <div className="mb-3">
               <label htmlFor="sign-in-form__email">
                 (str("Email address"))
               </label>
               <input
+                autoFocus=true
                 required=true
                 _type="email"
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-in-form__email"
-                placeholder="Your registered email address"
               />
             </div>
-            <div className="form-group">
+            <div className="mb-3">
               <label htmlFor="sign-in-form__password">
                 (str("Password"))
               </label>
               <input
                 required=true
                 _type="password"
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-in-form__password"
-                placeholder="Password"
               />
             </div>
             <button _type="submit" className="mt-2 btn btn-blue">
