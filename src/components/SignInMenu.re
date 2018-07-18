@@ -137,10 +137,10 @@ let make = (~data, ~appSend, _children) => {
   render: _self =>
     <div className="container mx-auto px-4">
       <div className="flex justify-center h-screen">
-        <div className="w-full md:w-1/2 self-center">
+        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
           (signedUpAlert(data))
           <form onSubmit=(handleSubmit(appSend))>
-            <div className="mb-3">
+            <div>
               <label htmlFor="sign-in-form__email">
                 (str("Email address"))
               </label>
@@ -152,7 +152,7 @@ let make = (~data, ~appSend, _children) => {
                 id="sign-in-form__email"
               />
             </div>
-            <div className="mb-3">
+            <div className="mt-3">
               <label htmlFor="sign-in-form__password">
                 (str("Password"))
               </label>
@@ -163,14 +163,14 @@ let make = (~data, ~appSend, _children) => {
                 id="sign-in-form__password"
               />
             </div>
-            <button _type="submit" className="mt-2 btn btn-blue">
+            <button _type="submit" className="mt-5 btn btn-blue">
               (str("Sign In"))
             </button>
-            <button
+            <a
               onClick=(gotoSignUp(appSend))
-              className="mt-2 ml-2 btn btn-blue">
+              className="mt-5 ml-2 btn underline cursor-pointer">
               (str("Sign Up"))
-            </button>
+            </a>
           </form>
         </div>
       </div>

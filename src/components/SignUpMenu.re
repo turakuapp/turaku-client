@@ -62,79 +62,73 @@ let make = (~appSend, _children) => {
     | AttemptSignUp => ReasonReact.Update({inProgress: true})
     },
   render: ({state, send}) =>
-    <div className="container">
-      <div className="row justify-content-center sign-in__centered-container">
-        <div className="col-md-6 align-self-center">
+    <div className="container mx-auto px-4">
+      <div className="flex justify-center h-screen">
+        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
           <form onSubmit=(handleSignUp(appSend, send))>
             <div className="form-group">
               <label htmlFor="sign-up-form__name"> (str("Name")) </label>
               <input
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__name"
                 placeholder="What should we call you?"
                 required=true
               />
             </div>
-            <div className="form-group">
+            <div className="mt-3">
               <label htmlFor="sign-up-form__email">
                 (str("Email address"))
               </label>
               <input
                 _type="email"
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__email"
                 required=true
               />
-              <small id="emailHelp" className="form-text text-muted">
+              <small className="block text-grey-dark mt-1">
                 (str("We'll never share your email with anyone else."))
               </small>
             </div>
-            <div className="form-group">
+            <div className="mt-3">
               <label htmlFor="sign-up-form__password">
                 (str("Password"))
               </label>
               <input
                 _type="password"
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__password"
-                placeholder="Password"
                 required=true
               />
             </div>
-            <div className="form-group">
+            <div className="mt-3">
               <label htmlFor="sign-up-form__password-confirmation">
                 (str("Confirm Password"))
               </label>
               <input
                 _type="password"
-                className="form-control"
+                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__password-confirmation"
                 placeholder="Again, to be sure"
                 required=true
               />
-              <small id="emailHelp" className="form-text text-muted">
+              <small className="block text-grey-dark mt-1">
                 (
-                  str(
-                    "Please store this password in your personal password manager. If you forget your password, you will need another team admin to invite you back in. Read about ",
-                  )
+                  "Please store this password in your personal password manager. "
+                  |> str
                 )
-                <a href="help.turaku.com/security">
-                  (str("how Turaku secures your data"))
-                </a>
-                (str(" to learn more."))
               </small>
             </div>
             <button
               _type="submit"
               disabled=state.inProgress
-              className="mt-2 btn btn-primary">
+              className="mt-5 btn btn-blue">
               (str("Sign Up"))
             </button>
-            <button
+            <a
               onClick=(gotoSignIn(appSend))
-              className="mt-2 ml-2 btn btn-secondary">
+              className="mt-5 ml-2 btn underline cursor-pointer">
               (str("Sign In"))
-            </button>
+            </a>
           </form>
         </div>
       </div>
