@@ -121,12 +121,12 @@ let make = (~appSend, _children) => {
             <button
               _type="submit"
               disabled=state.inProgress
-              className="mt-5 btn btn-blue">
+              className="mt-5 btn bg-green hover:bg-green-dark text-white">
               (str("Sign Up"))
             </button>
             <a
               onClick=(gotoSignIn(appSend))
-              className="mt-5 ml-2 btn underline cursor-pointer">
+              className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
               (str("Sign In"))
             </a>
           </form>

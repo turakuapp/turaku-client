@@ -1,5 +1,3 @@
-[%bs.raw {|require("./teamSelection.css")|}];
-
 type state = {
   createFormVisible: bool,
   teamPassword: TeamPassword.t,
@@ -52,14 +50,14 @@ let teams = (ctx, appSend) => {
     <div>
       <h2> (str("Your Teams")) </h2>
       <div>
-        <ul className="mt-3 teams__ul">
+        <ul className="mt-3 list-reset">
           (
             allTeams
             |> List.map((team: Team.t) =>
-                 <li key=(team |> Team.id) className="mb-1">
+                 <li key=(team |> Team.id) className="mt-2">
                    <button
                      onClick=(selectTeam(appSend, team))
-                     className="btn btn-sm btn-outline-dark">
+                     className="btn btn-blue">
                      (str(team |> Team.name))
                    </button>
                  </li>
@@ -68,7 +66,6 @@ let teams = (ctx, appSend) => {
             |> ReasonReact.array
           )
         </ul>
-        <hr />
       </div>
     </div>;
   } else {
@@ -76,15 +73,12 @@ let teams = (ctx, appSend) => {
   };
 };
 
-let createTeamButton = (state, send) =>
-  if (state.createFormVisible) {
-    <span />;
-  } else {
-    <button
-      className="btn btn-primary" onClick=(_event => send(ToggleCreateForm))>
-      (str("Create a new Team"))
-    </button>;
-  };
+let createTeamButton = send =>
+  <button
+    className="btn border hover:bg-grey-light mt-2"
+    onClick=(_event => send(ToggleCreateForm))>
+    (str("Create a new Team"))
+  </button>;
 
 module CreateTeamQuery = [%graphql
   {|
@@ -155,64 +149,63 @@ let updateTeamName = (send, _event) => {
 };
 
 let createTeamForm = (ctx, appSend, state, send) =>
-  if (state.createFormVisible) {
-    <form onSubmit=(createTeam(ctx, appSend, state))>
-      <div className="form-group">
-        <label htmlFor="teams__form-name"> (str("Name of your team")) </label>
-        <input
-          required=true
-          className="form-control"
-          id="teams__form-name"
-          placeholder="Enter your team's name"
-          onChange=(updateTeamName(send))
-        />
-        <small id="teams__form-name-help" className="form-text text-muted">
-          (str("You can add team members later."))
-        </small>
-      </div>
-      <div className="form-group">
-        <label htmlFor="teams__form-password"> (str("Team Password")) </label>
-        <input
-          required=true
-          className="form-control"
-          id="teams__form-password"
-          value=(state.teamPassword |> TeamPassword.toString)
-          onChange=(updateTeamPassword(send))
-        />
-        <small id="teams__form-password-help" className="form-text text-muted">
-          <ul>
-            <li>
-              (
-                str(
-                  "Type random characters into the password field to improve its ",
-                )
-              )
-              <em> (str("randomness")) </em>
-              (str("."))
-            </li>
-            <li>
-              (
-                str("This is the password used to encode your team's records.")
-              )
-            </li>
-            <li>
-              (str("It will be encrypted before being sent to Turaku."))
-            </li>
-          </ul>
-        </small>
-      </div>
-      <button _type="submit" className="btn btn-primary">
-        (str("Create"))
-      </button>
-      <button
-        className="btn btn-secondary ml-2"
-        onClick=(_event => send(ToggleCreateForm))>
-        (str("Cancel"))
-      </button>
-    </form>;
-  } else {
-    <span />;
-  };
+  <form onSubmit=(createTeam(ctx, appSend, state))>
+    <div>
+      <label htmlFor="teams__form-name"> ("Name of your team" |> str) </label>
+      <input
+        autoFocus=true
+        required=true
+        className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
+        id="teams__form-name"
+        onChange=(updateTeamName(send))
+      />
+      <small className="block text-grey-dark mt-1">
+        ("You can add team members later." |> str)
+      </small>
+    </div>
+    <div className="mt-3">
+      <label htmlFor="teams__form-password"> ("Team password" |> str) </label>
+      <input
+        required=true
+        className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
+        id="teams__form-password"
+        value=(state.teamPassword |> TeamPassword.toString)
+        onChange=(updateTeamPassword(send))
+      />
+      <ul className="pl-8 mt-2">
+        <li>
+          <small className="block text-grey-dark">
+            (
+              "Type random characters into the password field to improve its "
+              |> str
+            )
+            <em> ("randomness" |> str) </em>
+            ("." |> str)
+          </small>
+        </li>
+        <li>
+          <small className="block text-grey-dark mt-1">
+            ("This is the password used to encode your team's records." |> str)
+          </small>
+        </li>
+        <li>
+          <small className="block text-grey-dark mt-1">
+            ("It will be encrypted before being sent to Turaku." |> str)
+          </small>
+        </li>
+      </ul>
+    </div>
+    <button
+      _type="submit"
+      className="btn mt-5 bg-green hover:bg-green-dark text-white">
+      (str("Create"))
+    </button>
+    <button
+      className="btn mt-5 ml-2 border hover:bg-grey-light cursor-pointer"
+      onClick=(_event => send(ToggleCreateForm))>
+      ("Cancel" |> str)
+    </button>
+  </form>;
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
@@ -234,13 +227,16 @@ let make = (~ctx, ~appSend, _children) => {
     | UpdateTeamName(name) => ReasonReact.Update({...state, teamName: name})
     },
   render: ({state, send}) =>
-    <div className="container">
-      <div className="row justify-content-center sign-in__centered-container">
-        <div className="col-md-6 align-self-center">
+    <div className="container mx-auto px-4">
+      <div className="flex justify-center h-screen">
+        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
           (invitations(ctx, appSend))
-          (teams(ctx, appSend))
-          (createTeamButton(state, send))
-          (createTeamForm(ctx, appSend, state, send))
+          (
+            state.createFormVisible ?
+              createTeamForm(ctx, appSend, state, send) :
+              [|teams(ctx, appSend), createTeamButton(send)|]
+              |> ReasonReact.array
+          )
         </div>
       </div>
     </div>,

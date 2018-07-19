@@ -168,7 +168,7 @@ let make = (~data, ~appSend, _children) => {
             </button>
             <a
               onClick=(gotoSignUp(appSend))
-              className="mt-5 ml-2 btn underline cursor-pointer">
+              className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
               (str("Sign Up"))
             </a>
           </form>
