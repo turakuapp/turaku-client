@@ -1,5 +1,3 @@
-[%bs.raw {|require("./entryChoice.css")|}];
-
 let str = ReasonReact.string;
 
 type ctx = {
@@ -14,9 +12,9 @@ let isCurrentChoice = ctx =>
   ctx.team |> Team.entries |> SelectableList.selected == Some(ctx.entry);
 
 let containerClasses = ctx => {
-  let classes = "mb-2 p-2 entry-choice";
+  let classes = "cursor-pointer p-2 font-thin hover:bg-grey-lighter";
   if (ctx |> isCurrentChoice) {
-    classes ++ " entry-choice--chosen";
+    classes ++ " bg-grey-lighter";
   } else {
     classes;
   };

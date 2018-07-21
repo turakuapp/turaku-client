@@ -1,5 +1,4 @@
 [%bs.raw {|require("./teamMenu.css")|}];
-[%bs.raw {|require("./entryChoice.css")|}];
 
 let str = ReasonReact.string;
 
@@ -32,7 +31,7 @@ let invitationToggle = (state, send) =>
   };
 
 let containerClasses = ctx => {
-  let classes = "mt-2 p-2 entry-choice";
+  let classes = "mt-2 p-2";
   /* if (ctx |> isCurrentChoice) {
        classes ++ " entry-choice--chosen";
      } else { */

@@ -180,7 +180,7 @@ let make = (~ctx, ~appSend, _children) => {
           (entryChoices(ctx, state, appSend) |> ReasonReact.array)
         </div>
       </div>
-      <div className="w-4/5 entries__editor-container">
+      <div className="w-4/5 bg-grey-lighter">
         (
           ctx.team
           |> Team.entries
