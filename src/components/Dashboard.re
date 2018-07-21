@@ -39,14 +39,14 @@ let make = (~ctx: ctx, ~appSend, _children) => {
     <div className="flex">
       <div className="w-1/6 h-screen bg-grey flex flex-col justify-between">
         <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
-        <div>
+        <div className="mb-2">
           <div
             onClick=(navigateToTeamMenu(ctx, appSend))
-            className="cursor-pointer p-1 hover:bg-grey-light">
+            className="cursor-pointer p-2 pl-4 hover:bg-grey-light">
             (str("Members"))
           </div>
           <div
-            className="cursor-pointer p-1 hover:bg-grey-light"
+            className="cursor-pointer p-2 pl-4 hover:bg-grey-light"
             onClick=(navigateToTeams(ctx, appSend))>
             (str("Switch Team"))
           </div>

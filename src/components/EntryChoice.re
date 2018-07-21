@@ -14,7 +14,7 @@ let isCurrentChoice = ctx =>
 let containerClasses = ctx => {
   let classes = "cursor-pointer p-2 font-thin hover:bg-grey-lighter";
   if (ctx |> isCurrentChoice) {
-    classes ++ " bg-grey-lighter";
+    classes ++ " bg-grey-lighter font-normal";
   } else {
     classes;
   };

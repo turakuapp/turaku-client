@@ -50,13 +50,14 @@ let make = (~ctx, ~appSend, _children) => {
     },
   render: ({state, send}) =>
     if (state.inProgress) {
-      <button className="btn btn-secondary btn-sm" disabled=true>
-        (str("Signing out..."))
-      </button>;
+      <div className="cursor-wait p-2 pl-4 text-grey-dark">
+        ("Signing out..." |> str)
+      </div>;
     } else {
-      <button
-        className="btn btn-secondary btn-sm" onClick=(_e => send(SignOut))>
-        (str("Sign Out"))
-      </button>;
+      <div
+        className="cursor-pointer p-2 pl-4 hover:bg-grey-light"
+        onClick=(_e => send(SignOut))>
+        ("Sign Out" |> str)
+      </div>;
     },
 };
