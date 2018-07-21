@@ -22,7 +22,7 @@ let tagLinks = (ctx, appSend) =>
   |> SelectableList.all
   |> List.map(tag =>
        <div
-         className="cursor-pointer p-1 hover:bg-grey-light"
+         className="cursor-pointer p-2 pl-6 font-thin hover:bg-grey-light"
          key=(tag |> Tag.id)>
          (tag |> Tag.name |> str)
        </div>
@@ -33,11 +33,11 @@ let tagLinks = (ctx, appSend) =>
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="pt-3">
+    <div className="mt-2">
       <div
         onClick=(navigateToAllEntries(ctx, appSend))
-        className="cursor-pointer p-1 hover:bg-grey-light">
-        (str("All tags"))
+        className="cursor-pointer p-2 pl-4 hover:bg-grey-light">
+        ("All tags" |> str)
       </div>
       (tagLinks(ctx, appSend))
     </div>,

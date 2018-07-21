@@ -1,5 +1,3 @@
-[%bs.raw {|require("./entries.css")|}];
-
 let str = ReasonReact.string;
 
 type ctx = {
@@ -162,29 +160,27 @@ let make = (~ctx, ~appSend, _children) => {
     },
   didMount: _self => loadEntries(ctx, appSend),
   render: ({state, send}) =>
-    <div className="row">
-      <div className="col-3">
-        <div className="entries__search mt-2">
+    <div className="flex">
+      <div className="w-1/5 flex flex-col h-screen">
+        <div className="py-2 flex flex-no-shrink flex-col">
           <input
             id="sign-in-menu__search"
             _type="text"
             onChange=(updateSearch(send))
             placeholder="Search"
-            className="mr-2"
+            className="p-2 rounded mx-2"
           />
           <button
-            className="btn btn-primary btn-sm"
+            className="btn btn-blue mt-2 mx-2"
             onClick=(addEntry(ctx, appSend))>
-            (str("Add new"))
+            (str("Add a new entry"))
           </button>
         </div>
-        <div className="entries__nav">
-          <div className="entries__scroll">
-            (entryChoices(ctx, state, appSend) |> ReasonReact.array)
-          </div>
+        <div className="overflow-scroll">
+          (entryChoices(ctx, state, appSend) |> ReasonReact.array)
         </div>
       </div>
-      <div className="col entries__editor-container">
+      <div className="w-4/5 entries__editor-container">
         (
           ctx.team
           |> Team.entries
