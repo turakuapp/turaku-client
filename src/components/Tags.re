@@ -21,7 +21,9 @@ let tagLinks = (ctx, appSend) =>
   |> Team.tags
   |> SelectableList.all
   |> List.map(tag =>
-       <div className="dashboard__navlink" key=(tag |> Tag.id)>
+       <div
+         className="cursor-pointer p-1 hover:bg-grey-light"
+         key=(tag |> Tag.id)>
          (tag |> Tag.name |> str)
        </div>
      )
@@ -34,7 +36,7 @@ let make = (~ctx, ~appSend, _children) => {
     <div className="pt-3">
       <div
         onClick=(navigateToAllEntries(ctx, appSend))
-        className="dashboard__navlink">
+        className="cursor-pointer p-1 hover:bg-grey-light">
         (str("All tags"))
       </div>
       (tagLinks(ctx, appSend))

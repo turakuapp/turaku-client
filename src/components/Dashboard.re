@@ -1,5 +1,3 @@
-[%bs.raw {|require("./dashboard.css")|}];
-
 let str = ReasonReact.string;
 
 type ctx = {
@@ -36,29 +34,29 @@ let navigateToTeamMenu = (ctx, appSend, event) => {
 let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col dashboard__navigation">
-          <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
-          <hr />
-          <div
-            onClick=(navigateToTeamMenu(ctx, appSend))
-            className="dashboard__navlink">
-            (str("Members"))
-          </div>
-          <hr />
-          <div
-            className="dashboard__navlink"
-            onClick=(navigateToTeams(ctx, appSend))>
-            (str("Switch Team"))
-          </div>
-          <hr />
-          <SignOutButton ctx={userData: ctx.userData} appSend />
+    /* <div className="flex justify-center h-screen">
+       <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0"> */
+    <div className="flex">
+      <div className="w-1/6 h-screen bg-grey">
+        <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
+        <hr />
+        <div
+          onClick=(navigateToTeamMenu(ctx, appSend))
+          className="cursor-pointer p-1 hover:bg-grey-light">
+          (str("Members"))
         </div>
-        <div className="col-10 dashboard__content">
-          (getMenu(ctx, appSend))
-          <span />
+        <hr />
+        <div
+          className="cursor-pointer p-1 hover:bg-grey-light"
+          onClick=(navigateToTeams(ctx, appSend))>
+          (str("Switch Team"))
         </div>
+        <hr />
+        <SignOutButton ctx={userData: ctx.userData} appSend />
+      </div>
+      <div className="w-5/6 bg-grey-light">
+        (getMenu(ctx, appSend))
+        <span />
       </div>
     </div>,
 };
