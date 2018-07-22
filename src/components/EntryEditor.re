@@ -38,18 +38,17 @@ let fields = (ctx, appSend) => {
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div>
-      <div className="row">
-        <div className="col offset-sm-2">
-          <input
-            _type="text"
-            value=(ctx.entry |> Entry.title)
-            onChange=(handleTitleChange(ctx, appSend))
-            className="my-2"
-            placeholder="Entry Title"
-            id="entry-editor__title"
-          />
-        </div>
+    <div className="px-2">
+      <div className="flex mt-2">
+        <div className="w-32 mr-2" />
+        <input
+          _type="text"
+          value=(ctx.entry |> Entry.title)
+          onChange=(handleTitleChange(ctx, appSend))
+          className="w-1/2 text-lg p-2 bg-grey-lighter hover:bg-white focus:bg-white font-bold"
+          placeholder="Entry Title"
+          id="entry-editor__title"
+        />
       </div>
       (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
       <EntryTags

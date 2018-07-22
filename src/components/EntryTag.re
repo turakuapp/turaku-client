@@ -1,5 +1,3 @@
-[%bs.raw {|require("./EntryTag.css")|}];
-
 let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("EntryTag");
@@ -17,9 +15,7 @@ let make = (~team, ~entry, ~tagId, ~appSend, _children) => {
       |> SelectableList.all
       |> List.find(tag => tag |> Tag.id == tagId);
 
-    <span
-      className="p-1 mr-1 entry-tag__container"
-      onClick=(removeTag(entry, tagId, appSend))>
+    <span className="p-1 mr-1" onClick=(removeTag(entry, tagId, appSend))>
       (tag |> Tag.name |> str)
       (" " |> str)
       <Icon kind=Icon.Delete />

@@ -102,8 +102,11 @@ let make = (~ctx, ~appSend, _children) => {
       ReasonReact.Update({name: ""});
     },
   render: ({state, send}) =>
-    <div className="row">
-      <div className="col-sm-2 font-weight-bold"> ("Tags" |> str) </div>
+    <div className="flex mt-1">
+      <div
+        className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
+        ("Tags" |> str)
+      </div>
       <div className="col">
         <div className="mt-1">
           (

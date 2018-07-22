@@ -45,19 +45,19 @@ let make = (~ctx, ~appSend, _children) => {
     | UnforceReveal => ReasonReact.Update({reveal: false})
     },
   render: ({state, send}) =>
-    <div className="row">
-      <div className="col-sm-2 font-weight-bold">
+    <div className="flex mt-1">
+      <div
+        className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
         /* TODO: Clicking the field name should copy the contents */
          (ctx.field |> Field.key |> str) </div>
-      <div className="col">
-        <input
-          value=(fieldValue(ctx))
-          type_=(fieldType(ctx, state))
-          onChange=(editField(ctx, appSend))
-          id=(id(ctx))
-          onFocus=(_e => send(ForceReveal))
-          onBlur=(_e => send(UnforceReveal))
-        />
-      </div>
+      <input
+        className="w-1/2 p-2 rounded bg-grey-lighter hover:bg-white focus:bg-white"
+        value=(fieldValue(ctx))
+        type_=(fieldType(ctx, state))
+        onChange=(editField(ctx, appSend))
+        id=(id(ctx))
+        onFocus=(_e => send(ForceReveal))
+        onBlur=(_e => send(UnforceReveal))
+      />
     </div>,
 };
