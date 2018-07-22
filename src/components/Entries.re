@@ -162,18 +162,17 @@ let make = (~ctx, ~appSend, _children) => {
   render: ({state, send}) =>
     <div className="flex">
       <div className="w-1/5 flex flex-col h-screen">
-        <div className="py-2 flex flex-no-shrink flex-col">
+        <div className="py-2 flex flex-no-shrink flex-row mx-2">
           <input
             id="sign-in-menu__search"
             _type="text"
             onChange=(updateSearch(send))
             placeholder="Search"
-            className="p-2 rounded mx-2"
+            className="pl-2 rounded"
           />
           <button
-            className="btn btn-blue mt-2 mx-2"
-            onClick=(addEntry(ctx, appSend))>
-            (str("Add a new entry"))
+            className="ml-2 btn btn-blue" onClick=(addEntry(ctx, appSend))>
+            ("+" |> str)
           </button>
         </div>
         <div className="overflow-scroll">
