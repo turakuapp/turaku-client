@@ -12,9 +12,9 @@ let isCurrentChoice = ctx =>
   ctx.team |> Team.entries |> SelectableList.selected == Some(ctx.entry);
 
 let containerClasses = ctx => {
-  let classes = "cursor-pointer p-2 font-thin hover:bg-grey-lighter";
+  let classes = "cursor-pointer p-2 font-thin hover:bg-white";
   if (ctx |> isCurrentChoice) {
-    classes ++ " bg-grey-lighter font-normal";
+    classes ++ " bg-white font-normal";
   } else {
     classes;
   };

@@ -55,7 +55,7 @@ let make = (~ctx, ~appSend, _children) => {
       </div>;
     } else {
       <div
-        className="cursor-pointer p-2 pl-4 hover:bg-grey-light"
+        className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter"
         onClick=(_e => send(SignOut))>
         ("Sign Out" |> str)
       </div>;

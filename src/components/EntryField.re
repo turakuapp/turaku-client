@@ -51,7 +51,7 @@ let make = (~ctx, ~appSend, _children) => {
         /* TODO: Clicking the field name should copy the contents */
          (ctx.field |> Field.key |> str) </div>
       <input
-        className="w-1/2 p-2 rounded bg-grey-lighter hover:bg-white focus:bg-white"
+        className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
         value=(fieldValue(ctx))
         type_=(fieldType(ctx, state))
         onChange=(editField(ctx, appSend))

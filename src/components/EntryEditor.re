@@ -45,7 +45,7 @@ let make = (~ctx, ~appSend, _children) => {
           _type="text"
           value=(ctx.entry |> Entry.title)
           onChange=(handleTitleChange(ctx, appSend))
-          className="w-1/2 text-lg p-2 bg-grey-lighter hover:bg-white focus:bg-white font-bold"
+          className="w-1/2 text-lg p-2 bg-white hover:bg-grey-lighter focus:bg-grey-lighter font-bold"
           placeholder="Entry Title"
           id="entry-editor__title"
         />

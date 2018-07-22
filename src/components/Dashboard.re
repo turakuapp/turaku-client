@@ -37,23 +37,24 @@ let make = (~ctx: ctx, ~appSend, _children) => {
     /* <div className="flex justify-center h-screen">
        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0"> */
     <div className="flex">
-      <div className="w-1/6 h-screen bg-grey flex flex-col justify-between">
+      <div
+        className="w-1/6 h-screen bg-grey-light flex flex-col justify-between">
         <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
         <div className="mb-2">
           <div
             onClick=(navigateToTeamMenu(ctx, appSend))
-            className="cursor-pointer p-2 pl-4 hover:bg-grey-light">
+            className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter">
             (str("Members"))
           </div>
           <div
-            className="cursor-pointer p-2 pl-4 hover:bg-grey-light"
+            className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter"
             onClick=(navigateToTeams(ctx, appSend))>
             (str("Switch Team"))
           </div>
           <SignOutButton ctx={userData: ctx.userData} appSend />
         </div>
       </div>
-      <div className="w-5/6 bg-grey-light">
+      <div className="w-5/6 bg-grey-lighter">
         (getMenu(ctx, appSend))
         <span />
       </div>
