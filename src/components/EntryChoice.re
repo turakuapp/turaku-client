@@ -12,7 +12,7 @@ let isCurrentChoice = ctx =>
   ctx.team |> Team.entries |> SelectableList.selected == Some(ctx.entry);
 
 let containerClasses = ctx => {
-  let classes = "cursor-pointer p-2 font-thin hover:bg-white";
+  let classes = "cursor-pointer p-2 font-thin hover:bg-white flex justify-between items-center";
   if (ctx |> isCurrentChoice) {
     classes ++ " bg-white font-normal";
   } else {
@@ -36,19 +36,11 @@ let title = entry => {
   };
 };
 
-let changesMarker = ctx =>
-  if (ctx.entry |> Entry.unpersisted) {
-    "(*) " |> str;
-  } else {
-    ReasonReact.null;
-  };
-
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div
       className=(containerClasses(ctx)) onClick=(chooseEntry(ctx, appSend))>
-      (changesMarker(ctx))
       (ctx.entry |> title)
       (
         if (ctx.entry |> Entry.unpersisted) {

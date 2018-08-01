@@ -30,7 +30,7 @@ module FontAwesomeIcon = {
   [@bs.deriving abstract]
   type jsProps = {
     icon: fontAwesomeSolidSvgIcon,
-    size: string,
+    size: Js.nullable(string),
     fixedWidth: Js.nullable(bool),
     inverse: Js.nullable(bool),
     spin: Js.nullable(bool),
@@ -38,13 +38,13 @@ module FontAwesomeIcon = {
   };
 
   let make =
-      (~icon, ~size, ~fixedWidth=?, ~inverse=?, ~spin=?, ~pulse=?, children) =>
+      (~icon, ~size=?, ~fixedWidth=?, ~inverse=?, ~spin=?, ~pulse=?, children) =>
     ReasonReact.wrapJsForReason(
       ~reactClass=fontAwesomeIcon,
       ~props=
         jsProps(
           ~icon,
-          ~size,
+          ~size=Js.Nullable.fromOption(size),
           ~fixedWidth=Js.Nullable.fromOption(fixedWidth),
           ~inverse=Js.Nullable.fromOption(inverse),
           ~spin=Js.Nullable.fromOption(spin),
@@ -60,6 +60,7 @@ module Size = {
   type t =
     | Xs
     | Sm
+    | Md
     | Lg
     | X2
     | X3
@@ -69,14 +70,15 @@ module Size = {
 
   let toString = size =>
     switch (size) {
-    | Xs => "xs"
-    | Sm => "sm"
-    | Lg => "lg"
-    | X2 => "2x"
-    | X3 => "3x"
-    | X5 => "5x"
-    | X7 => "7x"
-    | X10 => "10x"
+    | Xs => Some("xs")
+    | Sm => Some("sm")
+    | Md => None
+    | Lg => Some("lg")
+    | X2 => Some("2x")
+    | X3 => Some("3x")
+    | X5 => Some("5x")
+    | X7 => Some("7x")
+    | X10 => Some("10x")
     };
 };
 
@@ -111,7 +113,7 @@ let reactIcon = (kind, size) => {
     | Loading => true
     };
 
-  <FontAwesomeIcon icon size pulse />;
+  <FontAwesomeIcon icon ?size pulse />;
 };
 
 let make = (~kind, ~size, _children) => {

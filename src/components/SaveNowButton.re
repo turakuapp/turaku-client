@@ -125,17 +125,12 @@ let make = (~ctx, ~appSend, _children) => {
     | Save => ReasonReact.Update({saving: true})
     },
   render: ({state, send}) =>
-    <span className="float-right">
-      <button
-        className="btn btn-primary btn-sm"
-        onClick=(_e => saveChanges(ctx, send, appSend))
-        disabled=state.saving>
-        (
-          state.saving ?
-            <Icon kind=Icon.Loading size=Icon.Size.Lg /> :
-            <Icon kind=Icon.Save size=Icon.Size.Lg />
-        )
-      </button>
+    <span onClick=(_e => saveChanges(ctx, send, appSend))>
+      (
+        state.saving ?
+          <Icon kind=Icon.Loading size=Icon.Size.Md /> :
+          <Icon kind=Icon.Save size=Icon.Size.Md />
+      )
     </span>,
 };
 /* export default class SaveBar extends React.Component {
