@@ -18,7 +18,7 @@ let make = (~team, ~entry, ~tagId, ~appSend, _children) => {
     <span className="p-1 mr-1" onClick=(removeTag(entry, tagId, appSend))>
       (tag |> Tag.name |> str)
       (" " |> str)
-      <Icon kind=Icon.Delete />
+      <Icon kind=Icon.Delete size=Icon.Size.Xs />
     </span>;
   },
 };

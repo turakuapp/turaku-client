@@ -130,7 +130,11 @@ let make = (~ctx, ~appSend, _children) => {
         className="btn btn-primary btn-sm"
         onClick=(_e => saveChanges(ctx, send, appSend))
         disabled=state.saving>
-        (state.saving ? <Icon kind=Icon.Loading /> : <Icon kind=Icon.Save />)
+        (
+          state.saving ?
+            <Icon kind=Icon.Loading size=Icon.Size.Lg /> :
+            <Icon kind=Icon.Save size=Icon.Size.Lg />
+        )
       </button>
     </span>,
 };
