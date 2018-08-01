@@ -90,15 +90,28 @@ type kind =
 
 let reactIcon = (kind, size) => {
   let size = Size.toString(size);
-  switch (kind) {
-  | Save => <FontAwesomeIcon icon=FontAwesomeIcon.faSave size />
-  | Submit => <FontAwesomeIcon icon=FontAwesomeIcon.faCloudUpload size />
-  | Loading =>
-    <FontAwesomeIcon icon=FontAwesomeIcon.faSpinner size pulse=true />
-  | Success => <FontAwesomeIcon icon=FontAwesomeIcon.faCheckCircle size />
-  | Error => <FontAwesomeIcon icon=FontAwesomeIcon.faExclamationCircle size />
-  | Delete => <FontAwesomeIcon icon=FontAwesomeIcon.faTrash size />
-  };
+
+  let icon =
+    switch (kind) {
+    | Save => FontAwesomeIcon.faSave
+    | Submit => FontAwesomeIcon.faCloudUpload
+    | Loading => FontAwesomeIcon.faSpinner
+    | Success => FontAwesomeIcon.faCheckCircle
+    | Error => FontAwesomeIcon.faExclamationCircle
+    | Delete => FontAwesomeIcon.faTrash
+    };
+
+  let pulse =
+    switch (kind) {
+    | Save
+    | Submit
+    | Success
+    | Error
+    | Delete => false
+    | Loading => true
+    };
+
+  <FontAwesomeIcon icon size pulse />;
 };
 
 let make = (~kind, ~size, _children) => {
