@@ -7,22 +7,13 @@ type ctx = {
   team: Team.t,
 };
 
-let navigateToAllEntries = (ctx, appSend, event) => {
-  event |> DomUtils.preventMouseEventDefault;
-  /* let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData); */
-  switch (ctx.userData.dashboardMenu) {
-  | EntriesMenu => ()
-  | TeamMenu(_) => Turaku.SelectTag(None) |> appSend
-  };
-};
-
 let tagLinks = (ctx, appSend) =>
   ctx.team
   |> Team.tags
   |> SelectableList.all
   |> List.map(tag =>
        <div
-         className="cursor-pointer p-2 pl-6 font-thin hover:bg-grey-lighter"
+         className="cursor-pointer p-2 text-sm pl-4 font-thin hover:bg-grey-lighter"
          key=(tag |> Tag.id)>
          (tag |> Tag.name |> str)
        </div>
@@ -33,67 +24,10 @@ let tagLinks = (ctx, appSend) =>
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="mt-2">
-      <div
-        onClick=(navigateToAllEntries(ctx, appSend))
-        className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter">
-        ("All tags" |> str)
+    <div className="mt-4">
+      <div className="uppercase text-xs font-bold tracking-wide pl-4 mb-1">
+        ("Tags" |> str)
       </div>
       (tagLinks(ctx, appSend))
     </div>,
 };
-/* export default class Tags extends React.Component {
-     componentDidMount() {
-       const listService = new ListTagsService(
-         this.props.appState.token,
-         this.props.appState.team.id
-       );
-
-       listService.list().then(encryptedTags => {
-         for (const encryptedTag of encryptedTags) {
-           this.decryptAndStoreTag(encryptedTag);
-         }
-       });
-     }
-
-     async decryptAndStoreTag(tag) {
-       const cryptoService = new CryptoService(
-         this.props.appState.team.password,
-         true
-       );
-
-       const name = await cryptoService.decrypt(tag.encryptedName);
-       const tagsClone = _.cloneDeep(this.props.appState.tags);
-
-       tagsClone[tag.id] = { name: name, nameHash: tag.nameHash };
-
-       this.props.setAppState({ tags: tagsClone });
-     }
-
-     savedTags() {
-       if (_.isEmpty(this.props.appState.tags)) {
-         return;
-       }
-
-       return _.map(this.props.appState.tags, tag => {
-         return (
-           <div>
-             <a href="#">{tag.name}</a>
-           </div>
-         );
-       });
-     }
-
-     render() {
-       return (
-         <div>
-           <h3>Tags</h3>
-
-           <div>
-             <Link to="/dash/entries/all">All tags</Link>
-             {this.savedTags()}
-           </div>
-         </div>
-       );
-     }
-   } */

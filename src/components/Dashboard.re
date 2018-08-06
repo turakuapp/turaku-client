@@ -31,6 +31,15 @@ let navigateToTeamMenu = (ctx, appSend, event) => {
   };
 };
 
+let navigateToAllEntries = (ctx, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+  /* let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData); */
+  switch (ctx.userData.dashboardMenu) {
+  | EntriesMenu => ()
+  | TeamMenu(_) => Turaku.SelectTag(None) |> appSend
+  };
+};
+
 let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
@@ -39,7 +48,15 @@ let make = (~ctx: ctx, ~appSend, _children) => {
     <div className="flex">
       <div
         className="w-1/6 h-screen bg-grey-light flex flex-col justify-between">
-        <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
+        <div className="mt-2">
+          <div
+            onClick=(navigateToAllEntries(ctx, appSend))
+            className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter text-sm font-thin tracking-wide">
+            ("All entries" |> str)
+          </div>
+          <Tags ctx={userData: ctx.userData, team: ctx.team} appSend />
+          <EntryGroups />
+        </div>
         <div className="mb-2">
           <div
             onClick=(navigateToTeamMenu(ctx, appSend))

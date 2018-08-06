@@ -143,7 +143,8 @@ let getSelection = (ctx, appSend, entry) =>
       ctx={userData: ctx.userData, team: ctx.team, entry}
       appSend
     />
-  | None => <p> (str("Select an entry, or create a new one.")) </p>
+  | None =>
+    <p className="m-2"> (str("Select an entry, or create a new one.")) </p>
   };
 
 let updateSearch = (send, _event) => {
