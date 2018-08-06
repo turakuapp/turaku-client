@@ -251,19 +251,19 @@ let make = (~ctx, ~appSend, _children) => {
       ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
     },
   render: ({state, send}) =>
-    <div className="row">
-      <div className="col-3">
-        <div className="team-menu__members">
-          <div className="pt-2">
-            <input _type="text" placeholder="Search" className="mr-2" />
-            (invitationToggle(state, send))
-          </div>
+    <div className="flex">
+      <div className="w-1/5 flex flex-col h-screen">
+        <div className="py-2 flex flex-no-shrink flex-row mx-2">
+          <input _type="text" placeholder="Search" className="mr-2" />
+          (invitationToggle(state, send))
           (invitationForm(ctx, appSend, state, send))
+        </div>
+        <div className="overflow-scroll">
           (invitedMembers(ctx, appSend))
           (teamMemberOptions(ctx, appSend))
         </div>
       </div>
-      <div className="col team-menu__editor-container">
+      <div className="w-4/5 bg-white">
         (
           switch (ctx.teamMenuSelection) {
           | TeamMemberSelected =>
