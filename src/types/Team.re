@@ -4,8 +4,8 @@ type t = {
   password: TeamPassword.t,
   entries: SelectableList.t(Entry.t),
   unsavedEntries: SelectableList.t(UnsavedEntry.t),
-  teamMembers: SelectableList.t(TeamMember.t),
-  invitations: SelectableList.t(InvitationToUser.t),
+  teamMembers: list(TeamMember.t),
+  invitations: list(InvitationToUser.t),
   tags: SelectableList.t(Tag.t),
 }
 and id = string;
@@ -33,8 +33,8 @@ let create = (id, name, password) => {
   password,
   entries: SelectableList.empty(),
   unsavedEntries: SelectableList.empty(),
-  teamMembers: SelectableList.empty(),
-  invitations: SelectableList.empty(),
+  teamMembers: [],
+  invitations: [],
   tags: SelectableList.empty(),
 };
 
@@ -48,12 +48,12 @@ let replaceInvitations = (invitations, t) => {...t, invitations};
 
 let addInvitation = (invitation, t) => {
   ...t,
-  invitations: t.invitations |> SelectableList.add(invitation),
+  invitations: [invitation, ...t.invitations],
 };
 
 let removeInvitation = (invitation, t) => {
   ...t,
-  invitations: t |> invitations |> SelectableList.remove(invitation),
+  invitations: t.invitations |> List.filter(i => i != invitation),
 };
 
 /**

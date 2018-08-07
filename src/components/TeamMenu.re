@@ -2,31 +2,38 @@
 
 let str = ReasonReact.string;
 
-type state = {inviteFormVisible: bool};
+type selection =
+  | TeamMemberSelected(TeamMember.id)
+  | ExistingInvitationSelected(InvitationToUser.id)
+  | NewInvitationSelected;
+
+type state = {selection};
 
 type action =
-  | ToggleInviteForm;
+  | ShowInvitationForm
+  | SelectTeamMember(TeamMember.id)
+  | SelectInvitation(InvitationToUser.id);
 
 type ctx = {
   userData: Turaku.userData,
-  teamMenuSelection: Turaku.teamMenuSelection,
   team: Team.t,
 };
 
 let component = ReasonReact.reducerComponent("TeamMenu");
 
-let toggleInviteForm = (send, event) => {
+let showInvitationForm = (send, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  send(ToggleInviteForm);
+  send(ShowInvitationForm);
 };
 
-let invitationToggle = (state, send) =>
-  if (state.inviteFormVisible) {
-    ReasonReact.null;
-  } else {
-    <button className="mr-2 btn btn-blue" onClick=(toggleInviteForm(send))>
+let newInvitationButton = (state, send) =>
+  switch (state.selection) {
+  | TeamMemberSelected(_)
+  | ExistingInvitationSelected(_) =>
+    <button className="mr-2 btn btn-blue" onClick=(showInvitationForm(send))>
       ("+" |> str)
-    </button>;
+    </button>
+  | NewInvitationSelected => ReasonReact.null
   };
 
 let containerClasses = ctx => {
@@ -38,18 +45,18 @@ let containerClasses = ctx => {
   /* }; */
 };
 
-let selectTeamMember = (ctx, teamMember, appSend, event) => {
+let selectTeamMember = (ctx, teamMember, send, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Turaku.SelectTeamMember(teamMember) |> appSend;
+  send(SelectTeamMember(teamMember |> TeamMember.id));
 };
 
-let selectInvitation = (ctx, invitation, appSend, event) => {
+let selectInvitation = (ctx, invitation, send, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  Turaku.SelectInvitation(invitation) |> appSend;
+  send(SelectInvitation(invitation |> InvitationToUser.id));
 };
 
-let teamMemberOptions = (ctx, appSend) =>
-  switch (ctx.team |> Team.teamMembers |> SelectableList.all) {
+let teamMemberOptions = (ctx, send, appSend) =>
+  switch (ctx.team |> Team.teamMembers) {
   | [] => <div> ("Loading users..." |> str) </div>
   | teamMembers =>
     <div>
@@ -57,7 +64,7 @@ let teamMemberOptions = (ctx, appSend) =>
         teamMembers
         |> List.map(teamMember =>
              <div
-               onClick=(selectTeamMember(ctx, teamMember, appSend))
+               onClick=(selectTeamMember(ctx, teamMember, send, appSend))
                className=(containerClasses(ctx))
                key=(teamMember |> TeamMember.id)>
                (teamMember |> TeamMember.name |> str)
@@ -73,13 +80,12 @@ let teamMemberOptions = (ctx, appSend) =>
     </div>
   };
 
-let invitedMembers = (ctx, appSend) =>
+let invitedMembers = (ctx, send, appSend) =>
   ctx.team
   |> Team.invitations
-  |> SelectableList.all
   |> List.map(invitation =>
        <div
-         onClick=(selectInvitation(ctx, invitation, appSend))
+         onClick=(selectInvitation(ctx, invitation, send, appSend))
          className=(containerClasses(ctx))
          key=(invitation |> InvitationToUser.id)>
          (invitation |> InvitationToUser.email |> Email.toString |> str)
@@ -137,7 +143,7 @@ let inviteUser = (ctx, appSend, send, event) => {
          appSend(
            Turaku.AddInvitationToUser(ctx.team, invitation, ctx.userData),
          );
-         send(ToggleInviteForm);
+         send(SelectInvitation(invitation |> InvitationToUser.id));
        | None =>
          Js.log2(
            "Failed to send invitations. Errors array: ",
@@ -151,32 +157,51 @@ let inviteUser = (ctx, appSend, send, event) => {
   |> ignore;
 };
 
-let invitationForm = (ctx, appSend, state, send) =>
-  if (state.inviteFormVisible) {
-    <form onSubmit=(inviteUser(ctx, appSend, send)) className="p-2">
-      <div className="form-group">
-        <label htmlFor="users__invite-form-email">
-          ("Email Address" |> str)
-        </label>
-        <input
-          className="form-control"
-          id="users__invite-form-email"
-          placeholder="Team member's email address"
-          _type="email"
-          required=true
-        />
-      </div>
-      <button _type="submit" className="btn btn-primary">
-        ("Send Invite" |> str)
-      </button>
-      <button
-        className="btn btn-secondary ml-2" onClick=(toggleInviteForm(send))>
-        ("Cancel" |> str)
-      </button>
-    </form>;
-  } else {
-    ReasonReact.null;
+let defaultSelection = ctx =>
+  switch (ctx.team |> Team.invitations) {
+  | [invitation, ..._] =>
+    ExistingInvitationSelected(invitation |> InvitationToUser.id)
+  | [] =>
+    switch (ctx.team |> Team.teamMembers) {
+    | [teamMember, ..._] => TeamMemberSelected(teamMember |> TeamMember.id)
+    | [] => NewInvitationSelected
+    }
   };
+
+let hideInvitationForm = (ctx, send, event) => {
+  event |> DomUtils.preventMouseEventDefault;
+
+  switch (ctx |> defaultSelection) {
+  | ExistingInvitationSelected(invitationId) =>
+    send(SelectInvitation(invitationId))
+  | TeamMemberSelected(teamMemberId) => send(SelectTeamMember(teamMemberId))
+  | NewInvitationSelected => ()
+  };
+};
+
+let invitationForm = (ctx, appSend, state, send) =>
+  <form onSubmit=(inviteUser(ctx, appSend, send)) className="p-2">
+    <div className="form-group">
+      <label htmlFor="users__invite-form-email">
+        ("Email Address" |> str)
+      </label>
+      <input
+        className="form-control"
+        id="users__invite-form-email"
+        placeholder="Team member's email address"
+        _type="email"
+        required=true
+      />
+    </div>
+    <button _type="submit" className="btn btn-primary">
+      ("Send Invite" |> str)
+    </button>
+    <button
+      className="btn btn-secondary ml-2"
+      onClick=(hideInvitationForm(ctx, send))>
+      ("Cancel" |> str)
+    </button>
+  </form>;
 
 module UsersQuery = [%graphql
   {|
@@ -241,11 +266,17 @@ let editorPlaceholder =
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   didMount: _self => refreshUsers(ctx, appSend),
-  initialState: () => {inviteFormVisible: false},
-  reducer: (action, state) =>
+  initialState: () => {selection: ctx |> defaultSelection},
+  reducer: (action, _state) =>
     switch (action) {
-    | ToggleInviteForm =>
-      ReasonReact.Update({inviteFormVisible: ! state.inviteFormVisible})
+    | ShowInvitationForm =>
+      ReasonReact.Update({selection: NewInvitationSelected})
+    | SelectTeamMember(teamMemberId) =>
+      ReasonReact.Update({selection: TeamMemberSelected(teamMemberId)})
+    | SelectInvitation(invitationId) =>
+      ReasonReact.Update({
+        selection: ExistingInvitationSelected(invitationId),
+      })
     },
   render: ({state, send}) =>
     <div className="flex">
@@ -256,19 +287,24 @@ let make = (~ctx, ~appSend, _children) => {
             placeholder="Search"
             className="rounded flex-grow mx-2 pl-2 py-2"
           />
-          (invitationToggle(state, send))
+          (newInvitationButton(state, send))
         </div>
-        (invitationForm(ctx, appSend, state, send))
         <div className="overflow-scroll">
-          (invitedMembers(ctx, appSend))
-          (teamMemberOptions(ctx, appSend))
+          (invitedMembers(ctx, send, appSend))
+          (teamMemberOptions(ctx, send, appSend))
         </div>
       </div>
       <div className="w-4/5 bg-white">
         (
-          switch (ctx.teamMenuSelection) {
-          | TeamMemberSelected =>
-            switch (ctx.team |> Team.teamMembers |> SelectableList.selected) {
+          switch (state.selection) {
+          | TeamMemberSelected(teamMemberId) =>
+            switch (
+              ctx.team
+              |> Team.teamMembers
+              |> ListUtils.find_opt(teamMember =>
+                   teamMember |> TeamMember.id == teamMemberId
+                 )
+            ) {
             | Some(teamMember) =>
               <TeamMemberEditor
                 ctx={userData: ctx.userData, teamMember}
@@ -277,8 +313,14 @@ let make = (~ctx, ~appSend, _children) => {
             | None => editorPlaceholder
             }
 
-          | InvitationSelected =>
-            switch (ctx.team |> Team.invitations |> SelectableList.selected) {
+          | ExistingInvitationSelected(invitationId) =>
+            switch (
+              ctx.team
+              |> Team.invitations
+              |> ListUtils.find_opt(invitation =>
+                   invitation |> InvitationToUser.id == invitationId
+                 )
+            ) {
             | Some(invitation) =>
               <InvitationEditor
                 ctx={userData: ctx.userData, team: ctx.team, invitation}
@@ -286,6 +328,7 @@ let make = (~ctx, ~appSend, _children) => {
               />
             | None => editorPlaceholder
             }
+          | NewInvitationSelected => invitationForm(ctx, appSend, state, send)
           }
         )
       </div>

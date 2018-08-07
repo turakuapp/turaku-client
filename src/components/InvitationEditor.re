@@ -44,6 +44,12 @@ let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="m-3">
+      <h1>
+        ("Invitation to " |> str)
+        <code>
+          (ctx.invitation |> InvitationToUser.email |> Email.toString |> str)
+        </code>
+      </h1>
       <div>
         ("This new user will need the team password to join your team:" |> str)
       </div>

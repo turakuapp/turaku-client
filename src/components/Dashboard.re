@@ -11,11 +11,8 @@ let getMenu = (ctx, appSend) =>
   switch (ctx.userData.dashboardMenu) {
   | Turaku.EntriesMenu =>
     <Entries ctx={userData: ctx.userData, team: ctx.team} appSend />
-  | TeamMenu(teamMenuSelection) =>
-    <TeamMenu
-      ctx={userData: ctx.userData, team: ctx.team, teamMenuSelection}
-      appSend
-    />
+  | TeamMenu =>
+    <TeamMenu ctx={userData: ctx.userData, team: ctx.team} appSend />
   };
 
 let navigateToTeams = (ctx, appSend, event) => {
