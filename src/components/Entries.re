@@ -163,7 +163,7 @@ let make = (~ctx, ~appSend, _children) => {
   render: ({state, send}) =>
     <div className="flex">
       <div className="w-1/5 flex flex-col h-screen">
-        <div className="py-2 flex flex-no-shrink flex-row mx-2">
+        <div className="mt-2 flex flex-no-shrink flex-row mx-2">
           <input
             id="sign-in-menu__search"
             _type="text"
@@ -176,7 +176,7 @@ let make = (~ctx, ~appSend, _children) => {
             ("+" |> str)
           </button>
         </div>
-        <div className="overflow-scroll">
+        <div className="overflow-scroll mt-2">
           (entryChoices(ctx, state, appSend) |> ReasonReact.array)
         </div>
       </div>

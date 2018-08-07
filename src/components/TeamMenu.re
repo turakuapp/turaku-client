@@ -24,9 +24,8 @@ let invitationToggle = (state, send) =>
   if (state.inviteFormVisible) {
     ReasonReact.null;
   } else {
-    <button
-      className="btn btn-primary btn-sm" onClick=(toggleInviteForm(send))>
-      ("Invite" |> str)
+    <button className="mr-2 btn btn-blue" onClick=(toggleInviteForm(send))>
+      ("+" |> str)
     </button>;
   };
 
@@ -154,9 +153,7 @@ let inviteUser = (ctx, appSend, send, event) => {
 
 let invitationForm = (ctx, appSend, state, send) =>
   if (state.inviteFormVisible) {
-    <form
-      onSubmit=(inviteUser(ctx, appSend, send))
-      className="p-2 team-menu__invite-form">
+    <form onSubmit=(inviteUser(ctx, appSend, send)) className="p-2">
       <div className="form-group">
         <label htmlFor="users__invite-form-email">
           ("Email Address" |> str)
@@ -253,11 +250,15 @@ let make = (~ctx, ~appSend, _children) => {
   render: ({state, send}) =>
     <div className="flex">
       <div className="w-1/5 flex flex-col h-screen">
-        <div className="py-2 flex flex-no-shrink flex-row mx-2">
-          <input _type="text" placeholder="Search" className="mr-2" />
+        <div className="mt-2 flex flex-no-shrink flex-row">
+          <input
+            _type="text"
+            placeholder="Search"
+            className="rounded flex-grow mx-2 pl-2 py-2"
+          />
           (invitationToggle(state, send))
-          (invitationForm(ctx, appSend, state, send))
         </div>
+        (invitationForm(ctx, appSend, state, send))
         <div className="overflow-scroll">
           (invitedMembers(ctx, appSend))
           (teamMemberOptions(ctx, appSend))
