@@ -61,6 +61,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           id="entry-field__input-0"
           _type="text"
           value=(ctx.team |> Team.password |> TeamPassword.toString)
+          readOnly=true
         />
       </div>
       <div className="flex mt-1">

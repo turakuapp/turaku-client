@@ -1,14 +1,25 @@
 let str = ReasonReact.string;
+
 type ctx = {
   userData: Turaku.userData,
   teamMember: TeamMember.t,
 };
 
-let component = ReasonReact.statelessComponent("TeamMemberEditor");
+type state = {name: string};
+
+type action =
+  | UpdateName(string);
+
+let component = ReasonReact.reducerComponent("TeamMemberEditor");
 
 let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
-  render: _self =>
+  initialState: () => {name: ctx.teamMember |> TeamMember.name},
+  reducer: (action, _state) =>
+    switch (action) {
+    | UpdateName(name) => ReasonReact.Update({name: name})
+    },
+  render: ({state, send}) =>
     <div className="px-2">
       <div className="flex mt-2">
         <div className="w-32 mr-2" />
@@ -17,7 +28,15 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           id="entry-editor__title"
           placeholder="Team Member's Name"
           _type="text"
-          value=(ctx.teamMember |> TeamMember.name)
+          value=state.name
+          onChange=(
+            event => {
+              let newValue = ReactDOMRe.domElementToObj(
+                               ReactEventRe.Form.target(event),
+                             )##value;
+              send(UpdateName(newValue));
+            }
+          )
         />
       </div>
       <div className="flex mt-2">
@@ -30,6 +49,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           id="entry-field__input-0"
           _type="text"
           value=(ctx.teamMember |> TeamMember.email |> Email.toString)
+          readOnly=true
         />
       </div>
     </div>,
