@@ -1,5 +1,3 @@
-[%bs.raw {|require("./invitationEditor.css")|}];
-
 let str = ReasonReact.string;
 
 type ctx = {
@@ -43,26 +41,44 @@ let deleteInvitation = (ctx, appSend, event) => {
 let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
-    <div className="m-3">
-      <h1>
-        ("Invitation to " |> str)
-        <code>
-          (ctx.invitation |> InvitationToUser.email |> Email.toString |> str)
-        </code>
-      </h1>
-      <div>
-        ("This new user will need the team password to join your team:" |> str)
+    <div className="px-2">
+      <div className="flex mt-4">
+        <div className="w-32 mr-2" />
+        <div className="text-lg font-bold pl-2">
+          ("Invitation to " |> str)
+          <span className="text-blue-darker">
+            (ctx.invitation |> InvitationToUser.email |> Email.toString |> str)
+          </span>
+        </div>
       </div>
-      <div className="my-3">
-        <span className="p-2 invitation-editor__team-password">
-          (ctx.team |> Team.password |> TeamPassword.toString |> str)
-        </span>
+      <div className="flex mt-2">
+        <div
+          className="cursor-pointer w-32 font-thin text-sm hover:font-normal p-2 text-right mr-2">
+          ("Team Password" |> str)
+        </div>
+        <input
+          className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
+          id="entry-field__input-0"
+          _type="text"
+          value=(ctx.team |> Team.password |> TeamPassword.toString)
+        />
       </div>
-      <div> ("...or, you can delete this invitation." |> str) </div>
-      <button
-        className="mt-3 btn btn-danger"
-        onClick=(deleteInvitation(ctx, appSend))>
-        ("Delete Invitation" |> str)
-      </button>
+      <div className="flex mt-1">
+        <div className="w-32 mr-2" />
+        <small className="text-grey-dark pl-2">
+          (
+            "This new user will need the team password to join your team."
+            |> str
+          )
+        </small>
+      </div>
+      <div className="flex mt-4">
+        <div className="w-32 mr-2" />
+        <button
+          className="btn bg-red hover:bg-red-dark text-white"
+          onClick=(deleteInvitation(ctx, appSend))>
+          ("Delete Invitation" |> str)
+        </button>
+      </div>
     </div>,
 };

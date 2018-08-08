@@ -1,5 +1,3 @@
-[%bs.raw {|require("./teamMenu.css")|}];
-
 let str = ReasonReact.string;
 
 type selection =
@@ -193,28 +191,41 @@ let hideInvitationForm = (ctx, send, event) => {
 };
 
 let invitationForm = (ctx, appSend, state, send) =>
-  <form onSubmit=(inviteUser(ctx, appSend, send)) className="p-2">
-    <div className="form-group">
-      <label htmlFor="users__invite-form-email">
-        ("Email Address" |> str)
-      </label>
-      <input
-        className="form-control"
-        id="users__invite-form-email"
-        placeholder="Team member's email address"
-        _type="email"
-        required=true
-      />
+  <div className="mt-4 ml-2">
+    <div className="flex">
+      <div className="w-32 mr-2" />
+      <div className="text-lg font-bold pl-2">
+        ("Invite a team member" |> str)
+      </div>
     </div>
-    <button _type="submit" className="btn btn-primary">
-      ("Send Invite" |> str)
-    </button>
-    <button
-      className="btn btn-secondary ml-2"
-      onClick=(hideInvitationForm(ctx, send))>
-      ("Cancel" |> str)
-    </button>
-  </form>;
+    <form className="mt-4" onSubmit=(inviteUser(ctx, appSend, send))>
+      <div className="flex mt-1">
+        <div
+          className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
+          ("Email address" |> str)
+        </div>
+        <input
+          className="w-1/2 p-2 rounded bg-grey-lighter"
+          id="users__invite-form-email"
+          _type="email"
+          required=true
+        />
+      </div>
+      <div className="flex mt-2">
+        <div className="w-32 mr-2" />
+        <button
+          _type="submit"
+          className="btn bg-green hover:bg-green-dark text-white">
+          ("Send Invite" |> str)
+        </button>
+        <button
+          className="ml-2 btn btn-blue"
+          onClick=(hideInvitationForm(ctx, send))>
+          ("Cancel" |> str)
+        </button>
+      </div>
+    </form>
+  </div>;
 
 module UsersQuery = [%graphql
   {|
