@@ -36,13 +36,25 @@ let newInvitationButton = (state, send) =>
   | NewInvitationSelected => ReasonReact.null
   };
 
-let containerClasses = ctx => {
-  let classes = "mt-2 p-2";
-  /* if (ctx |> isCurrentChoice) {
-       classes ++ " entry-choice--chosen";
-     } else { */
-  classes;
-  /* }; */
+let containerClasses = (state, ~teamMember=?, ~invitation=?, ()) => {
+  let classes = "cursor-pointer p-2 font-thin hover:bg-white flex justify-between items-center";
+
+  let selected =
+    switch (state.selection) {
+    | TeamMemberSelected(teamMemberId) =>
+      switch (teamMember) {
+      | Some(teamMember) => teamMember |> TeamMember.id == teamMemberId
+      | None => false
+      }
+    | ExistingInvitationSelected(invitationId) =>
+      switch (invitation) {
+      | Some(invitation) => invitation |> InvitationToUser.id == invitationId
+      | None => false
+      }
+    | NewInvitationSelected => false
+    };
+
+  selected ? classes ++ " bg-white font-normal" : classes;
 };
 
 let selectTeamMember = (ctx, teamMember, send, appSend, event) => {
@@ -55,7 +67,7 @@ let selectInvitation = (ctx, invitation, send, appSend, event) => {
   send(SelectInvitation(invitation |> InvitationToUser.id));
 };
 
-let teamMemberOptions = (ctx, send, appSend) =>
+let teamMemberOptions = (ctx, state, send, appSend) =>
   switch (ctx.team |> Team.teamMembers) {
   | [] => <div> ("Loading users..." |> str) </div>
   | teamMembers =>
@@ -65,13 +77,9 @@ let teamMemberOptions = (ctx, send, appSend) =>
         |> List.map(teamMember =>
              <div
                onClick=(selectTeamMember(ctx, teamMember, send, appSend))
-               className=(containerClasses(ctx))
+               className=(containerClasses(state, ~teamMember, ()))
                key=(teamMember |> TeamMember.id)>
                (teamMember |> TeamMember.name |> str)
-               (" - " |> str)
-               <code>
-                 (teamMember |> TeamMember.email |> Email.toString |> str)
-               </code>
              </div>
            )
         |> Array.of_list
@@ -80,24 +88,29 @@ let teamMemberOptions = (ctx, send, appSend) =>
     </div>
   };
 
-let invitedMembers = (ctx, send, appSend) =>
+let invitedMembers = (ctx, state, send, appSend) =>
   ctx.team
   |> Team.invitations
   |> List.map(invitation =>
        <div
          onClick=(selectInvitation(ctx, invitation, send, appSend))
-         className=(containerClasses(ctx))
+         className=(containerClasses(state, ~invitation, ()))
          key=(invitation |> InvitationToUser.id)>
-         (invitation |> InvitationToUser.email |> Email.toString |> str)
-         (" - " |> str)
-         <code>
+         <em>
            (
              switch (invitation |> InvitationToUser.name) {
              | Some(name) => name |> str
-             | None => <em> ("Unregistered" |> str) </em>
+             | None =>
+               invitation |> InvitationToUser.email |> Email.toString |> str
              }
            )
-         </code>
+         </em>
+         (
+           switch (invitation |> InvitationToUser.name) {
+           | Some(_) => <Icon kind=Icon.EnvelopeOpen size=Icon.Size.Md />
+           | None => <Icon kind=Icon.Envelope size=Icon.Size.Md />
+           }
+         )
        </div>
      )
   |> Array.of_list
@@ -289,9 +302,9 @@ let make = (~ctx, ~appSend, _children) => {
           />
           (newInvitationButton(state, send))
         </div>
-        <div className="overflow-scroll">
-          (invitedMembers(ctx, send, appSend))
-          (teamMemberOptions(ctx, send, appSend))
+        <div className="overflow-scroll mt-2">
+          (invitedMembers(ctx, state, send, appSend))
+          (teamMemberOptions(ctx, state, send, appSend))
         </div>
       </div>
       <div className="w-4/5 bg-white">

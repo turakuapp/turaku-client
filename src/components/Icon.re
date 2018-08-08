@@ -27,6 +27,12 @@ module FontAwesomeIcon = {
   [@bs.module "@fortawesome/free-solid-svg-icons"]
   external faCloudUpload : fontAwesomeSolidSvgIcon = "";
 
+  [@bs.module "@fortawesome/free-solid-svg-icons"]
+  external faEnvelope : fontAwesomeSolidSvgIcon = "";
+
+  [@bs.module "@fortawesome/free-solid-svg-icons"]
+  external faEnvelopeOpen : fontAwesomeSolidSvgIcon = "";
+
   [@bs.deriving abstract]
   type jsProps = {
     icon: fontAwesomeSolidSvgIcon,
@@ -88,7 +94,9 @@ type kind =
   | Loading
   | Success
   | Error
-  | Delete;
+  | Delete
+  | Envelope
+  | EnvelopeOpen;
 
 let reactIcon = (kind, size) => {
   let size = Size.toString(size);
@@ -101,6 +109,8 @@ let reactIcon = (kind, size) => {
     | Success => FontAwesomeIcon.faCheckCircle
     | Error => FontAwesomeIcon.faExclamationCircle
     | Delete => FontAwesomeIcon.faTrash
+    | Envelope => FontAwesomeIcon.faEnvelope
+    | EnvelopeOpen => FontAwesomeIcon.faEnvelopeOpen
     };
 
   let pulse =
@@ -109,6 +119,8 @@ let reactIcon = (kind, size) => {
     | Submit
     | Success
     | Error
+    | Envelope
+    | EnvelopeOpen
     | Delete => false
     | Loading => true
     };
