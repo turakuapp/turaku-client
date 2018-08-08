@@ -42,9 +42,9 @@ let make = (~ctx: ctx, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="px-2">
-      <div className="flex mt-4">
+      <div className="flex mt-2">
         <div className="w-32 mr-2" />
-        <div className="text-lg font-bold pl-2">
+        <div className="text-lg font-bold p-2">
           ("Invitation to " |> str)
           <span className="text-blue-darker">
             (ctx.invitation |> InvitationToUser.email |> Email.toString |> str)
