@@ -3,7 +3,8 @@ let str = ReasonReact.string;
 type selection =
   | TeamMemberSelected(TeamMember.id)
   | ExistingInvitationSelected(InvitationToUser.id)
-  | NewInvitationSelected;
+  | NewInvitationSelected
+  | NothingSelected;
 
 type state = {selection};
 
@@ -26,6 +27,7 @@ let showInvitationForm = (send, event) => {
 
 let newInvitationButton = (state, send) =>
   switch (state.selection) {
+  | NothingSelected
   | TeamMemberSelected(_)
   | ExistingInvitationSelected(_) =>
     <button className="mr-2 btn btn-blue" onClick=(showInvitationForm(send))>
@@ -49,7 +51,8 @@ let containerClasses = (state, ~teamMember=?, ~invitation=?, ()) => {
       | Some(invitation) => invitation |> InvitationToUser.id == invitationId
       | None => false
       }
-    | NewInvitationSelected => false
+    | NewInvitationSelected
+    | NothingSelected => false
     };
 
   selected ? classes ++ " bg-white font-normal" : classes;
@@ -175,7 +178,7 @@ let defaultSelection = ctx =>
   | [] =>
     switch (ctx.team |> Team.teamMembers) {
     | [teamMember, ..._] => TeamMemberSelected(teamMember |> TeamMember.id)
-    | [] => NewInvitationSelected
+    | [] => NothingSelected
     }
   };
 
@@ -186,7 +189,8 @@ let hideInvitationForm = (ctx, send, event) => {
   | ExistingInvitationSelected(invitationId) =>
     send(SelectInvitation(invitationId))
   | TeamMemberSelected(teamMemberId) => send(SelectTeamMember(teamMemberId))
-  | NewInvitationSelected => ()
+  | NewInvitationSelected
+  | NothingSelected => ()
   };
 };
 
@@ -285,7 +289,9 @@ let refreshUsers = (ctx, appSend) =>
   |> ignore;
 
 let editorPlaceholder =
-  <span> ("Select a team member, or invite someone." |> str) </span>;
+  <div className="mt-2 ml-2">
+    ("Select a team member, or invite someone." |> str)
+  </div>;
 
 let make = (~ctx, ~appSend, _children) => {
   ...component,
@@ -353,6 +359,7 @@ let make = (~ctx, ~appSend, _children) => {
             | None => editorPlaceholder
             }
           | NewInvitationSelected => invitationForm(ctx, appSend, state, send)
+          | NothingSelected => editorPlaceholder
           }
         )
       </div>
