@@ -59,7 +59,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
         <input
           className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
           id="entry-field__input-0"
-          _type="text"
+          type_="text"
           value=(ctx.team |> Team.password |> TeamPassword.toString)
           readOnly=true
         />

@@ -12,7 +12,7 @@ type state = {search: string};
 
 let component = ReasonReact.reducerComponent("Entries");
 
-let addEntry = (ctx, appSend, _event) => {
+let addEntry = (appSend, _event) => {
   Js.log("Add a new entry");
   appSend(Turaku.AddNewEntry);
 };
@@ -166,13 +166,12 @@ let make = (~ctx, ~appSend, _children) => {
         <div className="mt-2 flex flex-no-shrink flex-row mx-2">
           <input
             id="sign-in-menu__search"
-            _type="text"
+            type_="text"
             onChange=(updateSearch(send))
             placeholder="Search"
             className="pl-2 rounded flex-grow"
           />
-          <button
-            className="ml-2 btn btn-blue" onClick=(addEntry(ctx, appSend))>
+          <button className="ml-2 btn btn-blue" onClick=(addEntry(appSend))>
             ("+" |> str)
           </button>
         </div>

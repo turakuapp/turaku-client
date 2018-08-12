@@ -16,6 +16,7 @@
 
 # GraphQL Schema
 graphql_schema.json
+.graphql_ppx_cache/
 
 # misc
 .DS_Store

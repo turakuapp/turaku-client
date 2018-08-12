@@ -23,7 +23,7 @@ let containerClasses = ctx => {
 let chooseEntry = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   Js.log("Clicked on event choice with ID: " ++ (ctx.entry |> Entry.id));
-  if (! isCurrentChoice(ctx)) {
+  if (!isCurrentChoice(ctx)) {
     Turaku.SelectEntry(ctx.entry) |> appSend;
   };
 };

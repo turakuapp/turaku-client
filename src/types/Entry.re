@@ -71,7 +71,7 @@ let editTitle = (title, t) => {
 let replaceField = (field, index, fields) => {
   let rec aux = (c, idx, xs) =>
     switch (xs) {
-    | [h, ...t] when idx == index => (c |> List.rev) @ [field, ...t]
+    | [_h, ...t] when idx == index => (c |> List.rev) @ [field, ...t]
     | [h, ...t] => aux([h, ...c], idx + 1, t)
     | [] => c |> List.rev
     };

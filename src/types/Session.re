@@ -3,7 +3,7 @@ type t = {
   encryptionHash: EncryptionHash.t,
 };
 
-let shouldRestore = () : bool => true;
+let shouldRestore = (): bool => true;
 
 let create = (accessToken, encryptionHash) => {accessToken, encryptionHash};
 

@@ -2,36 +2,36 @@ let str = ReasonReact.string;
 
 module FontAwesomeIcon = {
   [@bs.module "@fortawesome/react-fontawesome"]
-  external fontAwesomeIcon : ReasonReact.reactClass = "FontAwesomeIcon";
+  external fontAwesomeIcon: ReasonReact.reactClass = "FontAwesomeIcon";
 
   type fontAwesomeSolidSvgIcon;
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faCoffee : fontAwesomeSolidSvgIcon = "";
+  external faCoffee: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faSave : fontAwesomeSolidSvgIcon = "";
+  external faSave: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faTrash : fontAwesomeSolidSvgIcon = "";
+  external faTrash: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faExclamationCircle : fontAwesomeSolidSvgIcon = "";
+  external faExclamationCircle: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faCheckCircle : fontAwesomeSolidSvgIcon = "";
+  external faCheckCircle: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faSpinner : fontAwesomeSolidSvgIcon = "";
+  external faSpinner: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faCloudUpload : fontAwesomeSolidSvgIcon = "";
+  external faCloudUpload: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faEnvelope : fontAwesomeSolidSvgIcon = "";
+  external faEnvelope: fontAwesomeSolidSvgIcon = "";
 
   [@bs.module "@fortawesome/free-solid-svg-icons"]
-  external faEnvelopeOpen : fontAwesomeSolidSvgIcon = "";
+  external faEnvelopeOpen: fontAwesomeSolidSvgIcon = "";
 
   [@bs.deriving abstract]
   type jsProps = {

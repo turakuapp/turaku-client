@@ -17,8 +17,7 @@ type ctx = {
 let component = ReasonReact.reducerComponent("EntryTags");
 
 let updateName = (send, event) => {
-  let targetObject =
-    event |> ReactEventRe.Form.target |> ReactDOMRe.domElementToObj;
+  let targetObject = event->ReactEvent.Form.target;
   send(UpdateName(targetObject##value));
 };
 

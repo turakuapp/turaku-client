@@ -80,7 +80,7 @@ let make = (~appSend, _children) => {
                 (str("Email address"))
               </label>
               <input
-                _type="email"
+                type_="email"
                 className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__email"
                 required=true
@@ -94,7 +94,7 @@ let make = (~appSend, _children) => {
                 (str("Password"))
               </label>
               <input
-                _type="password"
+                type_="password"
                 className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__password"
                 required=true
@@ -105,7 +105,7 @@ let make = (~appSend, _children) => {
                 (str("Confirm Password"))
               </label>
               <input
-                _type="password"
+                type_="password"
                 className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-up-form__password-confirmation"
                 placeholder="Again, to be sure"
@@ -119,7 +119,7 @@ let make = (~appSend, _children) => {
               </small>
             </div>
             <button
-              _type="submit"
+              type_="submit"
               disabled=state.inProgress
               className="mt-5 btn bg-green hover:bg-green-dark text-white">
               (str("Sign Up"))

@@ -196,7 +196,7 @@ let createTeamForm = (ctx, appSend, state, send) =>
       </ul>
     </div>
     <button
-      _type="submit"
+      type_="submit"
       className="btn mt-5 bg-green hover:bg-green-dark text-white">
       (str("Create"))
     </button>
@@ -219,7 +219,7 @@ let make = (~ctx, ~appSend, _children) => {
     | ToggleCreateForm =>
       ReasonReact.Update({
         ...state,
-        createFormVisible: ! state.createFormVisible,
+        createFormVisible: !state.createFormVisible,
       })
     | UpdateTeamPassword(password) =>
       /* TODO: Hash the password every time it is updated. See old code below in function updateTeamPassword. */

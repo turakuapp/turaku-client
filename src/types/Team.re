@@ -10,15 +10,6 @@ type t = {
 }
 and id = string;
 
-type ts = {
-  selected: t,
-  rest: list(t),
-};
-
-let selected = ts => ts.selected;
-
-let addItem = (i, ts) => {selected: i, rest: [ts.selected, ...ts.rest]};
-
 let name = t => t.name;
 let id = t => t.id;
 let password = t => t.password;

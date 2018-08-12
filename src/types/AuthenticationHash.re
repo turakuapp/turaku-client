@@ -7,7 +7,7 @@
 type t = string;
 
 /* TODO: Hash.create should return an opaque type t. There should be a toString method to return a string. */
-let create = (password, authenticationSalt: Salt.t) : Js.Promise.t(t) =>
+let create = (password, authenticationSalt: Salt.t): Js.Promise.t(t) =>
   Hash.create(password, authenticationSalt)
   |> Js.Promise.then_(arrayBuffer =>
        arrayBuffer

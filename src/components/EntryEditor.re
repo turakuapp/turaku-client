@@ -8,7 +8,7 @@ type ctx = {
 
 let component = ReasonReact.statelessComponent("EntryEditor");
 
-let handleTitleChange = (ctx, appSend, _event) => {
+let handleTitleChange = (_ctx, appSend, _event) => {
   Js.log("Editing title");
   let title = DomUtils.getValueOfInputById("entry-editor__title");
   appSend(Turaku.EditEntryTitle(title));
@@ -42,7 +42,7 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="flex mt-2">
         <div className="w-32 mr-2" />
         <input
-          _type="text"
+          type_="text"
           value=(ctx.entry |> Entry.title)
           onChange=(handleTitleChange(ctx, appSend))
           className="w-1/2 text-lg p-2 bg-white hover:bg-grey-lighter focus:bg-grey-lighter font-bold"

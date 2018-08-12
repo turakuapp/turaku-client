@@ -7,7 +7,7 @@ type ctx = {
   team: Team.t,
 };
 
-let tagLinks = (ctx, appSend) =>
+let tagLinks = (ctx, _appSend) =>
   ctx.team
   |> Team.tags
   |> SelectableList.all

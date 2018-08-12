@@ -126,7 +126,7 @@ let make = (~ctx, ~appSend, _children) => {
             required=true
             id="invitations__team-password"
             className="w-100"
-            _type="text"
+            type_="text"
             value=state.teamPassword
             onChange=(updateTeamPassword(send))
             placeholder="Enter your team's password to accept"

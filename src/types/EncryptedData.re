@@ -10,18 +10,18 @@ type encryptionAlgorithm = {
 };
 
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
-external subtleEncrypt :
+external subtleEncrypt:
   (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
   Js.Promise.t(ArrayBuffer.t) =
   "encrypt";
 
 [@bs.val] [@bs.scope ("window", "crypto", "subtle")]
-external subtleDecrypt :
+external subtleDecrypt:
   (encryptionAlgorithm, CryptographicKey.t, UnsignedByteArray.t) =>
   Js.Promise.t(UnsignedByteArray.t) =
   "decrypt";
 
-let algorithm = iv : encryptionAlgorithm => {"name": "AES-CBC", "iv": iv};
+let algorithm = iv: encryptionAlgorithm => {"name": "AES-CBC", "iv": iv};
 
 let encrypt = (key, plaintext) => {
   let iv = InitializationVector.create();

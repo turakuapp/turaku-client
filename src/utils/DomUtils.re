@@ -1,8 +1,8 @@
 [@bs.send]
-external preventEventDefault : ReactEventRe.Form.t => unit = "preventDefault";
+external preventEventDefault: ReactEvent.Form.t => unit = "preventDefault";
 
 [@bs.send]
-external preventMouseEventDefault : ReactEventRe.Mouse.t => unit =
+external preventMouseEventDefault: ReactEvent.Mouse.t => unit =
   "preventDefault";
 
 let getValueOfInputById = id => {

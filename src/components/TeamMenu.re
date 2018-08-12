@@ -58,17 +58,17 @@ let containerClasses = (state, ~teamMember=?, ~invitation=?, ()) => {
   selected ? classes ++ " bg-white font-normal" : classes;
 };
 
-let selectTeamMember = (ctx, teamMember, send, appSend, event) => {
+let selectTeamMember = (teamMember, send, event) => {
   event |> DomUtils.preventMouseEventDefault;
   send(SelectTeamMember(teamMember |> TeamMember.id));
 };
 
-let selectInvitation = (ctx, invitation, send, appSend, event) => {
+let selectInvitation = (invitation, send, event) => {
   event |> DomUtils.preventMouseEventDefault;
   send(SelectInvitation(invitation |> InvitationToUser.id));
 };
 
-let teamMemberOptions = (ctx, state, send, appSend) =>
+let teamMemberOptions = (ctx, state, send) =>
   switch (ctx.team |> Team.teamMembers) {
   | [] => <div> ("Loading users..." |> str) </div>
   | teamMembers =>
@@ -77,7 +77,7 @@ let teamMemberOptions = (ctx, state, send, appSend) =>
         teamMembers
         |> List.map(teamMember =>
              <div
-               onClick=(selectTeamMember(ctx, teamMember, send, appSend))
+               onClick=(selectTeamMember(teamMember, send))
                className=(containerClasses(state, ~teamMember, ()))
                key=(teamMember |> TeamMember.id)>
                (teamMember |> TeamMember.name |> str)
@@ -89,12 +89,12 @@ let teamMemberOptions = (ctx, state, send, appSend) =>
     </div>
   };
 
-let invitedMembers = (ctx, state, send, appSend) =>
+let invitedMembers = (ctx, state, send) =>
   ctx.team
   |> Team.invitations
   |> List.map(invitation =>
        <div
-         onClick=(selectInvitation(ctx, invitation, send, appSend))
+         onClick=(selectInvitation(invitation, send))
          className=(containerClasses(state, ~invitation, ()))
          key=(invitation |> InvitationToUser.id)>
          <em>
@@ -194,7 +194,7 @@ let hideInvitationForm = (ctx, send, event) => {
   };
 };
 
-let invitationForm = (ctx, appSend, state, send) =>
+let invitationForm = (ctx, appSend, send) =>
   <div className="mt-4 ml-2">
     <div className="flex">
       <div className="w-32 mr-2" />
@@ -211,14 +211,14 @@ let invitationForm = (ctx, appSend, state, send) =>
         <input
           className="w-1/2 p-2 rounded bg-grey-lighter"
           id="users__invite-form-email"
-          _type="email"
+          type_="email"
           required=true
         />
       </div>
       <div className="flex mt-2">
         <div className="w-32 mr-2" />
         <button
-          _type="submit"
+          type_="submit"
           className="btn bg-green hover:bg-green-dark text-white">
           ("Send Invite" |> str)
         </button>
@@ -313,15 +313,15 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="w-1/5 flex flex-col h-screen">
         <div className="mt-2 flex flex-no-shrink flex-row">
           <input
-            _type="text"
+            type_="text"
             placeholder="Search"
             className="rounded flex-grow mx-2 pl-2 py-2"
           />
           (newInvitationButton(state, send))
         </div>
         <div className="overflow-scroll mt-2">
-          (invitedMembers(ctx, state, send, appSend))
-          (teamMemberOptions(ctx, state, send, appSend))
+          (invitedMembers(ctx, state, send))
+          (teamMemberOptions(ctx, state, send))
         </div>
       </div>
       <div className="w-4/5 bg-white">
@@ -358,7 +358,7 @@ let make = (~ctx, ~appSend, _children) => {
               />
             | None => editorPlaceholder
             }
-          | NewInvitationSelected => invitationForm(ctx, appSend, state, send)
+          | NewInvitationSelected => invitationForm(ctx, appSend, send)
           | NothingSelected => editorPlaceholder
           }
         )

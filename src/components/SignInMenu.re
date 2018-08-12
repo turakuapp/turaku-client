@@ -147,7 +147,7 @@ let make = (~data, ~appSend, _children) => {
               <input
                 autoFocus=true
                 required=true
-                _type="email"
+                type_="email"
                 className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-in-form__email"
               />
@@ -158,12 +158,12 @@ let make = (~data, ~appSend, _children) => {
               </label>
               <input
                 required=true
-                _type="password"
+                type_="password"
                 className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
                 id="sign-in-form__password"
               />
             </div>
-            <button _type="submit" className="mt-5 btn btn-blue">
+            <button type_="submit" className="mt-5 btn btn-blue">
               (str("Sign In"))
             </button>
             <a

@@ -103,7 +103,7 @@ let saveChanges = (ctx, send, appSend) => {
 let make = (~ctx, ~appSend, _children) => {
   ...component,
   willUnmount: ({state}) =>
-    if (ctx.entry |> Entry.unpersisted && ! state.saving) {
+    if (ctx.entry |> Entry.unpersisted && !state.saving) {
       Js.log(
         "Auto-saving (on unmount) entry with ID: " ++ (ctx.entry |> Entry.id),
       );
@@ -114,7 +114,7 @@ let make = (~ctx, ~appSend, _children) => {
     if (ctx.entry
         |> Entry.unpersisted
         && Some(ctx.entry) != selectedEntry
-        && ! newSelf.state.saving) {
+        && !newSelf.state.saving) {
       Js.log("Auto-saving entry with ID: " ++ (ctx.entry |> Entry.id));
       saveChanges(ctx, newSelf.send, appSend);
     };

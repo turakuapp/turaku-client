@@ -2,12 +2,14 @@ let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("EntryTag");
 
-let removeTag = (entry, tagId, appSend, event) =>
+let removeTag = (entry, tagId, appSend, event) => {
+  event |> DomUtils.preventMouseEventDefault;
   appSend(Turaku.RemoveTag(entry, tagId));
+};
 
 let make = (~team, ~entry, ~tagId, ~appSend, _children) => {
   ...component,
-  render: self => {
+  render: _self => {
     /* This uses the unsafe List.find. Use find_option / find_opt when it becomes available. */
     let tag =
       team

@@ -15,7 +15,7 @@ let getMenu = (ctx, appSend) =>
     <TeamMenu ctx={userData: ctx.userData, team: ctx.team} appSend />
   };
 
-let navigateToTeams = (ctx, appSend, event) => {
+let navigateToTeams = (appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   Turaku.DeselectTeam |> appSend;
 };
@@ -23,7 +23,7 @@ let navigateToTeams = (ctx, appSend, event) => {
 let navigateToTeamMenu = (ctx, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
   switch (ctx.userData.dashboardMenu) {
-  | TeamMenu(_) => ()
+  | TeamMenu => ()
   | EntriesMenu => Turaku.SelectTeamMenu |> appSend
   };
 };
@@ -33,7 +33,7 @@ let navigateToAllEntries = (ctx, appSend, event) => {
   /* let entryId = Turaku.someEntry(ctx.userData, ctx.dashboardPageData); */
   switch (ctx.userData.dashboardMenu) {
   | EntriesMenu => ()
-  | TeamMenu(_) => Turaku.SelectTag(None) |> appSend
+  | TeamMenu => Turaku.SelectTag(None) |> appSend
   };
 };
 
@@ -62,7 +62,7 @@ let make = (~ctx: ctx, ~appSend, _children) => {
           </div>
           <div
             className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter"
-            onClick=(navigateToTeams(ctx, appSend))>
+            onClick=(navigateToTeams(appSend))>
             (str("Switch Team"))
           </div>
           <SignOutButton ctx={userData: ctx.userData} appSend />
