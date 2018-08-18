@@ -8,7 +8,25 @@ type createSessionError = [
 
 exception CreateSessionFailure(array(createSessionError));
 
-let component = ReasonReact.statelessComponent("SignInMenu");
+type error =
+  | AuthenticationFailure
+  | InvalidEmail
+  | UnconfirmedEmail
+  | UnexpectedError(string);
+
+type state = {
+  errors: list(error),
+  email: Email.t,
+  password: string,
+};
+
+type action =
+  | AddError(error)
+  | UpdateEmail(string)
+  | UpdatePassword(string)
+  | ClearErrors;
+
+let component = ReasonReact.reducerComponent("SignInMenu");
 
 let str = ReasonReact.string;
 
@@ -55,7 +73,7 @@ module SignInQuery = [%graphql
   |}
 ];
 
-let handleCreateSessionFailure =
+let handleCreateSessionFailure = send =>
   [@bs.open]
   (
     fun
@@ -63,16 +81,16 @@ let handleCreateSessionFailure =
         errors
         |> Array.iter(error =>
              switch (error) {
-             | `AuthenticationFailure => Js.log("Authentication failure!")
-             | `InvalidEmail => Js.log("Server says email is invalid. :-(")
-             | `UnconfirmedEmail =>
-               Js.log(
-                 "You haven't confirmed your email yet. Check your inbox.",
-               )
+             | `AuthenticationFailure =>
+               send(AddError(AuthenticationFailure))
+             | `InvalidEmail => send(AddError(InvalidEmail))
+             | `UnconfirmedEmail => send(AddError(UnconfirmedEmail))
              | `BlankEmail
              | `BlankPassword =>
-               Js.log(
-                 "How did the UI allow a sign in request without email and / or password?",
+               send(
+                 AddError(
+                   UnexpectedError("Email and / or password are blank."),
+                 ),
                )
              }
            );
@@ -80,17 +98,19 @@ let handleCreateSessionFailure =
       }
   );
 
-let handleSubmit = (appSend, event) => {
+let handleSubmit = (appSend, state, send, event) => {
+  send(ClearErrors);
   event |> DomUtils.preventEventDefault;
-  let email =
-    DomUtils.getValueOfInputById("sign-in-form__email") |> Email.create;
-  let password = DomUtils.getValueOfInputById("sign-in-form__password");
+
+  let {email, password} = state;
+
   Js.log(
     "Attempting to sign in with email "
     ++ (email |> Email.toString)
     ++ " and password "
     ++ password,
   );
+
   /* Fetch the authentication salt to hash the password before attempting to sign in. */
   GetAuthenticationSaltQuery.make(~email=email |> Email.toString, ())
   |> Api.sendPublicQuery
@@ -148,10 +168,17 @@ let handleSubmit = (appSend, event) => {
        Js.Promise.resolve();
      })
   |> Js.Promise.catch(error =>
-       switch (error |> handleCreateSessionFailure) {
+       switch (error |> handleCreateSessionFailure(send)) {
        | Some(x) => x
        | None =>
-         Js.log2("Unhandled error occured: ", error);
+         Js.log(error);
+         send(
+           AddError(
+             UnexpectedError(
+               "Details of the error have been logged to the console.",
+             ),
+           ),
+         );
          Js.Promise.resolve();
        }
      )
@@ -173,35 +200,99 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
 
 let gotoSignUp = (appSend, _event) => Turaku.SelectSignUp |> appSend;
 
+let inputClasses = state => {
+  let classes = "rounded p-2 mt-2 w-full";
+
+  if (state.errors != []) {
+    classes ++ " text-white bg-red-light focus:bg-red";
+  } else {
+    classes ++ " bg-grey-light focus:bg-grey-lighter";
+  };
+};
+
+let toMessage = error =>
+  switch (error) {
+  | AuthenticationFailure => "The supplied email and password does not match any existing user."
+  | InvalidEmail => "The supplied email does not look like a valid email address."
+  | UnconfirmedEmail => "This is an unconfirmed email address. Please visit the confirmation link from your mailbox before trying to log in."
+  | UnexpectedError(message) => "Unexpected Error: " ++ message
+  };
+
+let toMessageKey = error =>
+  switch (error) {
+  | AuthenticationFailure => "AuthenticationFailure"
+  | InvalidEmail => "InvalidEmail"
+  | UnconfirmedEmail => "UnconfirmedEmail"
+  | UnexpectedError(_) =>
+    "UnexpectedError-" ++ (Js.Math.random_int(100, 999) |> string_of_int)
+  };
+
+let errorMessages = state =>
+  if (state.errors != []) {
+    <ul className="mt-2 list-reset text-sm text-red-darker">
+      (
+        state.errors
+        |> Array.of_list
+        |> Array.map(error =>
+             <li key=(error |> toMessageKey)> (error |> toMessage |> str) </li>
+           )
+        |> ReasonReact.array
+      )
+    </ul>;
+  } else {
+    ReasonReact.null;
+  };
+
 let make = (~data, ~appSend, _children) => {
   ...component,
-  render: _self =>
+  initialState: () => {errors: [], email: Email.create(""), password: ""},
+  reducer: (action, state) =>
+    switch (action) {
+    | AddError(error) =>
+      ReasonReact.Update({...state, errors: [error, ...state.errors]})
+    | UpdateEmail(email) =>
+      ReasonReact.Update({...state, email: email |> Email.create, errors: []})
+    | UpdatePassword(password) =>
+      ReasonReact.Update({...state, password, errors: []})
+    | ClearErrors => ReasonReact.Update({...state, errors: []})
+    },
+  render: ({state, send}) =>
     <div className="container mx-auto px-4">
       <div className="flex justify-center h-screen">
         <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
           (signedUpAlert(data))
-          <form onSubmit=(handleSubmit(appSend))>
+          <form onSubmit=(handleSubmit(appSend, state, send))>
             <div>
               <label htmlFor="sign-in-form__email">
                 (str("Email address"))
               </label>
               <input
+                value=(state.email |> Email.toString)
+                onChange=(
+                  event =>
+                    UpdateEmail(event->ReactEvent.Form.target##value) |> send
+                )
                 autoFocus=true
                 required=true
                 type_="email"
-                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
-                id="sign-in-form__email"
+                className=(inputClasses(state))
               />
             </div>
+            (errorMessages(state))
             <div className="mt-3">
               <label htmlFor="sign-in-form__password">
                 (str("Password"))
               </label>
               <input
+                value=state.password
+                onChange=(
+                  event =>
+                    UpdatePassword(event->ReactEvent.Form.target##value)
+                    |> send
+                )
                 required=true
                 type_="password"
-                className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
-                id="sign-in-form__password"
+                className=(inputClasses(state))
               />
             </div>
             <button type_="submit" className="mt-5 btn btn-blue">
