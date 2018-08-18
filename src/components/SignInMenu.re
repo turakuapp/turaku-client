@@ -1,4 +1,12 @@
-exception AuthenticationFailure(array(string));
+type createSessionError = [
+  | `AuthenticationFailure
+  | `BlankEmail
+  | `BlankPassword
+  | `InvalidEmail
+  | `UnconfirmedEmail
+];
+
+exception CreateSessionFailure(array(createSessionError));
 
 let component = ReasonReact.statelessComponent("SignInMenu");
 
@@ -47,6 +55,31 @@ module SignInQuery = [%graphql
   |}
 ];
 
+let handleCreateSessionFailure =
+  [@bs.open]
+  (
+    fun
+    | CreateSessionFailure(errors) => {
+        errors
+        |> Array.iter(error =>
+             switch (error) {
+             | `AuthenticationFailure => Js.log("Authentication failure!")
+             | `InvalidEmail => Js.log("Server says email is invalid. :-(")
+             | `UnconfirmedEmail =>
+               Js.log(
+                 "You haven't confirmed your email yet. Check your inbox.",
+               )
+             | `BlankEmail
+             | `BlankPassword =>
+               Js.log(
+                 "How did the UI allow a sign in request without email and / or password?",
+               )
+             }
+           );
+        Js.Promise.resolve();
+      }
+  );
+
 let handleSubmit = (appSend, event) => {
   event |> DomUtils.preventEventDefault;
   let email =
@@ -82,7 +115,7 @@ let handleSubmit = (appSend, event) => {
          |> Js.Promise.then_(encryptionHash =>
               Js.Promise.resolve((rawSession, encryptionHash))
             );
-       | None => Js.Promise.reject(AuthenticationFailure(response##errors))
+       | None => Js.Promise.reject(CreateSessionFailure(response##errors))
        };
      })
   |> Js.Promise.then_(((rawSession, encryptionHash)) => {
@@ -114,6 +147,14 @@ let handleSubmit = (appSend, event) => {
        );
        Js.Promise.resolve();
      })
+  |> Js.Promise.catch(error =>
+       switch (error |> handleCreateSessionFailure) {
+       | Some(x) => x
+       | None =>
+         Js.log2("Unhandled error occured: ", error);
+         Js.Promise.resolve();
+       }
+     )
   |> ignore;
 };
 
