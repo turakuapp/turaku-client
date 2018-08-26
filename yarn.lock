@@ -148,25 +148,25 @@
     lodash "^4.17.5"
     to-fast-properties "^2.0.0"
 
-"@fortawesome/fontawesome-common-types@^0.2.0-9":
+"@fortawesome/fontawesome-common-types@^0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.2.tgz#7fd64eacf7f64e4d7619d21b0b2f2467f5a70611"
 
 "@fortawesome/fontawesome-svg-core@^1.2.0-14":
-  version "1.2.0-14"
-  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-1.2.0-14.tgz#48100da29b39658fad374ebd1386161ab35af564"
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-1.2.2.tgz#b431e7efb3e3a1887e596daa6ed0d241d2d1aea5"
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.0-9"
+    "@fortawesome/fontawesome-common-types" "^0.2.2"
 
 "@fortawesome/free-solid-svg-icons@^5.1.0-11":
-  version "5.1.0-11"
-  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.1.0-11.tgz#4a346eaada93276edb133b140492e8d7cfa2aa47"
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.2.0.tgz#b51c1d49278ef538a97c0ce9575a1b54cc1a52dc"
   dependencies:
-    "@fortawesome/fontawesome-common-types" "^0.2.0-9"
+    "@fortawesome/fontawesome-common-types" "^0.2.2"
 
 "@fortawesome/react-fontawesome@^0.1.0-11":
-  version "0.1.0-11"
-  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.1.0-11.tgz#83299a5c09bec79522abba33e93bff796f2f6d4e"
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.1.2.tgz#baad4a6508867567aea20c1551bf62ff090d8121"
   dependencies:
     humps "^2.0.1"
     prop-types "^15.5.10"
@@ -1801,9 +1801,13 @@ combined-stream@1.0.6, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@2.15.x, commander@^2.11.0, commander@~2.15.0:
+commander@2.15.x, commander@~2.15.0:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
+
+commander@^2.11.0:
+  version "2.17.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.17.1.tgz#bd77ab7de6de94205ceacc72f1716d29f20a77bf"
 
 comment-regex@^1.0.0:
   version "1.0.1"
@@ -4648,12 +4652,16 @@ jest@^23.5.0:
     jest-cli "^23.5.0"
 
 js-base64@^2.1.9:
-  version "2.4.5"
-  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.5.tgz#e293cd3c7c82f070d700fc7a1ca0a2e69f101f92"
+  version "2.4.8"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.4.8.tgz#57a9b130888f956834aa40c5b165ba59c758f033"
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.2.tgz#9866df395102130e38f7f996bceb65443209c25b"
+
+"js-tokens@^3.0.0 || ^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
 
 js-yaml@^3.4.3, js-yaml@^3.7.0, js-yaml@^3.9.1:
   version "3.12.0"
@@ -4988,10 +4996,10 @@ longest@^1.0.1:
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
 
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.3.1.tgz#d1a8ad33fa9ce0e713d65fdd0ac8b748d478c848"
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
   dependencies:
-    js-tokens "^3.0.0"
+    js-tokens "^3.0.0 || ^4.0.0"
 
 loud-rejection@^1.0.0:
   version "1.6.0"
@@ -6258,10 +6266,9 @@ prompts@^0.1.9:
     sisteransi "^0.1.1"
 
 prop-types@^15.5.10, prop-types@^15.6.0:
-  version "15.6.1"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
+  version "15.6.2"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.2.tgz#05d5ca77b4453e985d60fc7ff8c859094a497102"
   dependencies:
-    fbjs "^0.8.16"
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
@@ -6416,9 +6423,18 @@ react-dev-utils@^5.0.1:
     strip-ansi "3.0.1"
     text-table "0.2.0"
 
-"react-dom@>=15.0.0 || >=16.0.0", react-dom@^16.4.1:
+"react-dom@>=15.0.0 || >=16.0.0":
   version "16.4.1"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.1.tgz#7f8b0223b3a5fbe205116c56deb85de32685dad6"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
+react-dom@^16.4.1:
+  version "16.4.2"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.4.2.tgz#4afed569689f2c561d2b8da0b819669c38a0bda4"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -6429,9 +6445,18 @@ react-error-overlay@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-4.0.0.tgz#d198408a85b4070937a98667f500c832f86bd5d4"
 
-"react@>=15.0.0 || >=16.0.0", react@^16.4.1:
+"react@>=15.0.0 || >=16.0.0":
   version "16.4.1"
   resolved "https://registry.yarnpkg.com/react/-/react-16.4.1.tgz#de51ba5764b5dbcd1f9079037b862bd26b82fe32"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
+react@^16.4.1:
+  version "16.4.2"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.4.2.tgz#2cd90154e3a9d9dd8da2991149fdca3c260e129f"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -7395,8 +7420,8 @@ supports-color@^4.2.1:
     has-flag "^2.0.0"
 
 supports-color@^5.3.0, supports-color@^5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.4.0.tgz#1c6b337402c2137605efe19f10fec390f6faab54"
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.5.0.tgz#e2e69a44ac8772f78a1ec0b35b689df6530efc8f"
   dependencies:
     has-flag "^3.0.0"
 
@@ -7458,8 +7483,8 @@ table@^4.0.1:
     string-width "^2.1.1"
 
 tailwindcss@^0.6.3:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-0.6.3.tgz#973d33342f3d1d1f9c9d20aa42b9fa9ca57f2ed0"
+  version "0.6.5"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-0.6.5.tgz#f692f875c373721d65ccecba5eb16fa949bcbb97"
   dependencies:
     commander "^2.11.0"
     css.escape "^1.5.1"
@@ -7722,8 +7747,8 @@ unique-string@^1.0.0:
     crypto-random-string "^1.0.0"
 
 universalify@^0.1.0:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/universalify/-/universalify-0.1.1.tgz#fa71badd4437af4c148841e3b3b165f9e9e590b7"
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/universalify/-/universalify-0.1.2.tgz#b646f69be3942dabcecc9d6639c80dc105efaa66"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
