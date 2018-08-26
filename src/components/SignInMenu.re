@@ -212,9 +212,9 @@ let inputClasses = state => {
 
 let toMessage = error =>
   switch (error) {
-  | AuthenticationFailure => "The supplied email and password does not match any existing user."
-  | InvalidEmail => "The supplied email does not look like a valid email address."
-  | UnconfirmedEmail => "This is an unconfirmed email address. Please visit the confirmation link from your mailbox before trying to log in."
+  | AuthenticationFailure => "These credentials do not match any existing user."
+  | InvalidEmail => "This does not look like a valid email address."
+  | UnconfirmedEmail => "This is an unconfirmed email address; please visit the confirmation link from your mailbox before trying to log in."
   | UnexpectedError(message) => "Unexpected Error: " ++ message
   };
 
