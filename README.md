@@ -1,5 +1,22 @@
 # Turaku Client
 
+## Development Setup
+
+Install all packages, and run the `start` script.
+
+```
+yarn install
+yarn run start
+```
+
+This should be all that is required to boot up the application in your browser. The API (unreleased) should be online for the app to work properly.
+
+In some cases, you may also need to tell Bucklescript to watch and build ReasonML files manually, before using the `start` script listed above:
+
+```
+yarn run bsb -make-world -w
+```
+
 ## Development Status
 
 - ReactJS Prototype: **Completed in Dec 2017**
