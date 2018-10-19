@@ -2,10 +2,11 @@
 
 ## Development Setup
 
-Install all packages, and run the `start` script.
+Install all packages, build CSS with Tailwind, and run the `start` script.
 
 ```
 yarn install
+yarn run tailwind build src/tailwind/index.css -o src/index.css
 yarn run start
 ```
 
