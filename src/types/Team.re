@@ -50,7 +50,7 @@ let removeInvitation = (invitation, t) => {
 /**
  * TODO: This decrypts teams one-by-one, which is slow. Dispatch all decrypt
  * promises, and resolve them together with Js.Promise.all. */
-let decryptTeams = (response, decryptionKey, encryptedTeams) => {
+let decryptTeams = (decryptionKey, encryptedTeams) => {
   let rec aux = (decryptedTeams, teams) =>
     switch (teams) {
     | [team, ...remainingTeams] =>
@@ -65,7 +65,7 @@ let decryptTeams = (response, decryptionKey, encryptedTeams) => {
            let team = create(team##id, team##name, teamPassword);
            remainingTeams |> aux([team, ...decryptedTeams]);
          });
-    | [] => Js.Promise.resolve((response, decryptedTeams))
+    | [] => Js.Promise.resolve(decryptedTeams)
     };
   encryptedTeams |> Array.to_list |> aux([]);
 };

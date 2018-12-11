@@ -22,19 +22,16 @@ let removeInvitation: (InvitationToUser.t, t) => t;
 
 let decryptTeams:
   (
-    'a,
     CryptographicKey.source,
-    array(
-      {
+    array({
+      ..
+      "encryptedPassword": {
         ..
-        "encryptedPassword": {
-          ..
-          "ciphertext": string,
-          "iv": string,
-        },
-        "id": id,
-        "name": string,
+        "ciphertext": string,
+        "iv": string,
       },
-    )
+      "id": id,
+      "name": string,
+    })
   ) =>
-  Js.Promise.t(('a, list(t)));
+  Js.Promise.t(list(t));

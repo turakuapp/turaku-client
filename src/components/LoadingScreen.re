@@ -1,3 +1,15 @@
+exception RestoreSessionFailure;
+
+let handleRestoreSessionFailure = appSend =>
+  [@bs.open]
+  (
+    fun
+    | RestoreSessionFailure => {
+        appSend(Turaku.SkipLoading);
+        Js.Promise.resolve();
+      }
+  );
+
 let str = ReasonReact.string;
 
 let component = ReasonReact.statelessComponent("LoadingScreen");
@@ -45,28 +57,44 @@ let make = (~appSend, _children) => {
       RestoreSessionQuery.make()
       |> Api.sendAuthenticatedQuery(session)
       |> Js.Promise.then_(response =>
-           response##session##user##teams
-           |> Team.decryptTeams(
-                response,
-                session |> Session.getCryptographicKey,
-              )
-         )
-      |> Js.Promise.then_(((response, teams)) => {
-           let invitations =
-             response##session##user##incomingInvitations
-             |> Array.map(i =>
-                  InvitationFromTeam.create(
-                    i##id,
-                    ~teamName=i##team##name,
-                    ~invitingUserEmail=i##invitingUser##email |> Email.create,
+           switch (response##session) {
+           | Some(incomingSession) =>
+             let teams =
+               incomingSession##user##teams
+               |> Team.decryptTeams(session |> Session.getCryptographicKey);
+
+             let invitations =
+               incomingSession##user##incomingInvitations
+               |> Array.map(i =>
+                    InvitationFromTeam.create(
+                      i##id,
+                      ~teamName=i##team##name,
+                      ~invitingUserEmail=
+                        i##invitingUser##email |> Email.create,
+                    )
                   )
-                )
-             |> Array.to_list;
+               |> Array.to_list
+               |> Js.Promise.resolve;
+
+             Js.Promise.all2((teams, invitations));
+           | None => Js.Promise.reject(RestoreSessionFailure)
+           }
+         )
+      |> Js.Promise.then_(((teams, invitations)) => {
            appSend(Turaku.SignIn(session, teams, invitations));
            Js.Promise.resolve();
          })
+      |> Js.Promise.catch(error =>
+           switch (error |> handleRestoreSessionFailure(appSend)) {
+           | Some(x) => x
+           | None =>
+             Js.log(error);
+             appSend(Turaku.SkipLoading);
+             Js.Promise.resolve();
+           }
+         )
       |> ignore
     };
   },
-  render: _self => <div> ("Loading..." |> str) </div>,
+  render: _self => <div> {"Loading..." |> str} </div>,
 };
