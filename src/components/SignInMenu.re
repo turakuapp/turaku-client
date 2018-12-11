@@ -1,7 +1,5 @@
 type createSessionError = [
   | `AuthenticationFailure
-  | `BlankEmail
-  | `BlankPassword
   | `InvalidEmail
   | `UnconfirmedEmail
 ];
@@ -85,13 +83,6 @@ let handleCreateSessionFailure = send =>
                send(AddError(AuthenticationFailure))
              | `InvalidEmail => send(AddError(InvalidEmail))
              | `UnconfirmedEmail => send(AddError(UnconfirmedEmail))
-             | `BlankEmail
-             | `BlankPassword =>
-               send(
-                 AddError(
-                   UnexpectedError("Email and / or password are blank."),
-                 ),
-               )
              }
            );
         Js.Promise.resolve();
@@ -142,11 +133,9 @@ let handleSubmit = (appSend, state, send, event) => {
        let accessToken = rawSession##token |> AccessToken.create;
        let session = Session.create(accessToken, encryptionHash);
        let key = session |> Session.getCryptographicKey;
-       Team.decryptTeams(
-         (rawSession, session),
-         key,
-         rawSession##user##teams,
-       );
+       let teams = Team.decryptTeams(key, rawSession##user##teams);
+
+       Js.Promise.all2((Js.Promise.resolve((rawSession, session)), teams));
      })
   |> Js.Promise.then_((((rawSession, session), teams)) => {
        session |> Session.saveInLocalStorage;
@@ -188,11 +177,11 @@ let handleSubmit = (appSend, state, send, event) => {
 let signedUpAlert = (data: Turaku.signInPageData) =>
   if (data.justSignedUp) {
     <div className="p-2 bg-yellow-light rounded mb-3">
-      (
+      {
         str(
           "Thank you for signing up! Please confirm your email address before signing in.",
         )
-      )
+      }
     </div>;
   } else {
     ReasonReact.null;
@@ -230,14 +219,14 @@ let toMessageKey = error =>
 let errorMessages = state =>
   if (state.errors != []) {
     <ul className="mt-2 list-reset text-sm text-red-darker">
-      (
+      {
         state.errors
         |> Array.of_list
         |> Array.map(error =>
-             <li key=(error |> toMessageKey)> (error |> toMessage |> str) </li>
+             <li key={error |> toMessageKey}> {error |> toMessage |> str} </li>
            )
         |> ReasonReact.array
-      )
+      }
     </ul>;
   } else {
     ReasonReact.null;
@@ -260,48 +249,48 @@ let make = (~data, ~appSend, _children) => {
     <div className="container mx-auto px-4">
       <div className="flex justify-center h-screen">
         <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-          (signedUpAlert(data))
-          <form onSubmit=(handleSubmit(appSend, state, send))>
+          {signedUpAlert(data)}
+          <form onSubmit={handleSubmit(appSend, state, send)}>
             <div>
               <label htmlFor="sign-in-form__email">
-                (str("Email address"))
+                {str("Email address")}
               </label>
               <input
-                value=(state.email |> Email.toString)
-                onChange=(
+                value={state.email |> Email.toString}
+                onChange={
                   event =>
                     UpdateEmail(event->ReactEvent.Form.target##value) |> send
-                )
+                }
                 autoFocus=true
                 required=true
                 type_="email"
-                className=(inputClasses(state))
+                className={inputClasses(state)}
               />
             </div>
-            (errorMessages(state))
+            {errorMessages(state)}
             <div className="mt-3">
               <label htmlFor="sign-in-form__password">
-                (str("Password"))
+                {str("Password")}
               </label>
               <input
-                value=state.password
-                onChange=(
+                value={state.password}
+                onChange={
                   event =>
                     UpdatePassword(event->ReactEvent.Form.target##value)
                     |> send
-                )
+                }
                 required=true
                 type_="password"
-                className=(inputClasses(state))
+                className={inputClasses(state)}
               />
             </div>
             <button type_="submit" className="mt-5 btn btn-blue">
-              (str("Sign In"))
+              {str("Sign In")}
             </button>
             <a
-              onClick=(gotoSignUp(appSend))
+              onClick={gotoSignUp(appSend)}
               className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
-              (str("Sign Up"))
+              {str("Sign Up")}
             </a>
           </form>
         </div>
