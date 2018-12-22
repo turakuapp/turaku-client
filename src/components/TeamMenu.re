@@ -30,8 +30,8 @@ let newInvitationButton = (state, send) =>
   | NothingSelected
   | TeamMemberSelected(_)
   | ExistingInvitationSelected(_) =>
-    <button className="mr-2 btn btn-blue" onClick=(showInvitationForm(send))>
-      ("+" |> str)
+    <button className="mr-2 btn btn-blue" onClick={showInvitationForm(send)}>
+      {"+" |> str}
     </button>
   | NewInvitationSelected => ReasonReact.null
   };
@@ -70,22 +70,22 @@ let selectInvitation = (invitation, send, event) => {
 
 let teamMemberOptions = (ctx, state, send) =>
   switch (ctx.team |> Team.teamMembers) {
-  | [] => <div> ("Loading users..." |> str) </div>
+  | [] => <div> {"Loading users..." |> str} </div>
   | teamMembers =>
     <div>
-      (
+      {
         teamMembers
         |> List.map(teamMember =>
              <div
-               onClick=(selectTeamMember(teamMember, send))
-               className=(containerClasses(state, ~teamMember, ()))
-               key=(teamMember |> TeamMember.id)>
-               (teamMember |> TeamMember.name |> str)
+               onClick={selectTeamMember(teamMember, send)}
+               className={containerClasses(state, ~teamMember, ())}
+               key={teamMember |> TeamMember.id}>
+               {teamMember |> TeamMember.name |> str}
              </div>
            )
         |> Array.of_list
         |> ReasonReact.array
-      )
+      }
     </div>
   };
 
@@ -94,24 +94,24 @@ let invitedMembers = (ctx, state, send) =>
   |> Team.invitations
   |> List.map(invitation =>
        <div
-         onClick=(selectInvitation(invitation, send))
-         className=(containerClasses(state, ~invitation, ()))
-         key=(invitation |> InvitationToUser.id)>
+         onClick={selectInvitation(invitation, send)}
+         className={containerClasses(state, ~invitation, ())}
+         key={invitation |> InvitationToUser.id}>
          <em>
-           (
+           {
              switch (invitation |> InvitationToUser.name) {
              | Some(name) => name |> str
              | None =>
                invitation |> InvitationToUser.email |> Email.toString |> str
              }
-           )
+           }
          </em>
-         (
+         {
            switch (invitation |> InvitationToUser.name) {
            | Some(_) => <Icon kind=Icon.EnvelopeOpen size=Icon.Size.Md />
            | None => <Icon kind=Icon.Envelope size=Icon.Size.Md />
            }
-         )
+         }
        </div>
      )
   |> Array.of_list
@@ -199,14 +199,14 @@ let invitationForm = (ctx, appSend, send) =>
     <div className="flex">
       <div className="w-32 mr-2" />
       <div className="text-lg font-bold pl-2">
-        ("Invite a team member" |> str)
+        {"Invite a team member" |> str}
       </div>
     </div>
-    <form className="mt-4" onSubmit=(inviteUser(ctx, appSend, send))>
+    <form className="mt-4" onSubmit={inviteUser(ctx, appSend, send)}>
       <div className="flex mt-1">
         <div
           className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
-          ("Email address" |> str)
+          {"Email address" |> str}
         </div>
         <input
           className="w-1/2 p-2 rounded bg-grey-lighter"
@@ -220,12 +220,12 @@ let invitationForm = (ctx, appSend, send) =>
         <button
           type_="submit"
           className="btn bg-green hover:bg-green-dark text-white">
-          ("Send Invite" |> str)
+          {"Send Invite" |> str}
         </button>
         <button
           className="ml-2 btn btn-blue"
-          onClick=(hideInvitationForm(ctx, send))>
-          ("Cancel" |> str)
+          onClick={hideInvitationForm(ctx, send)}>
+          {"Cancel" |> str}
         </button>
       </div>
     </form>
@@ -255,42 +255,55 @@ module UsersQuery = [%graphql
 let refreshUsers = (ctx, appSend) =>
   UsersQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
-  |> Js.Promise.then_(response => {
-       let teamMembers =
-         response##team##users
-         |> Array.map(jsUser =>
-              TeamMember.create(
-                jsUser##id,
-                jsUser##name,
-                jsUser##email |> Email.create,
+  |> Js.Promise.then_(response =>
+       switch (response##team) {
+       | Some(team) =>
+         let teamMembers =
+           team##users
+           |> Array.map(jsUser =>
+                TeamMember.create(
+                  jsUser##id,
+                  jsUser##name,
+                  jsUser##email |> Email.create,
+                )
               )
-            )
-         |> Array.to_list;
-       let invitations =
-         response##team##invitations
-         |> Array.map(jsInvitation =>
-              InvitationToUser.create(
-                jsInvitation##id,
-                jsInvitation##invitedUser##email |> Email.create,
-                jsInvitation##invitedUser##name,
-              )
-            )
-         |> Array.to_list;
+           |> Array.to_list;
 
-       appSend(
-         Turaku.RefreshTeamMembers(
-           ctx.team |> Team.id,
-           teamMembers,
-           invitations,
-         ),
-       );
-       Js.Promise.resolve();
-     })
+         let invitations =
+           team##invitations
+           |> Array.map(jsInvitation =>
+                InvitationToUser.create(
+                  jsInvitation##id,
+                  jsInvitation##invitedUser##email |> Email.create,
+                  jsInvitation##invitedUser##name,
+                )
+              )
+           |> Array.to_list;
+
+         appSend(
+           Turaku.RefreshTeamMembers(
+             ctx.team |> Team.id,
+             teamMembers,
+             invitations,
+           ),
+         );
+
+         Js.Promise.resolve();
+
+       | None =>
+         Webapi.Dom.window
+         |> Webapi.Dom.Window.alert(
+              "It looks like you have lost access to the current team. Reloading Turaku...",
+            );
+         Webapi.Dom.location |> Webapi.Dom.Location.reload;
+         Js.Promise.resolve();
+       }
+     )
   |> ignore;
 
 let editorPlaceholder =
   <div className="mt-2 ml-2">
-    ("Select a team member, or invite someone." |> str)
+    {"Select a team member, or invite someone." |> str}
   </div>;
 
 let make = (~ctx, ~appSend, _children) => {
@@ -317,15 +330,15 @@ let make = (~ctx, ~appSend, _children) => {
             placeholder="Search"
             className="rounded flex-grow mx-2 pl-2 py-2"
           />
-          (newInvitationButton(state, send))
+          {newInvitationButton(state, send)}
         </div>
         <div className="overflow-scroll mt-2">
-          (invitedMembers(ctx, state, send))
-          (teamMemberOptions(ctx, state, send))
+          {invitedMembers(ctx, state, send)}
+          {teamMemberOptions(ctx, state, send)}
         </div>
       </div>
       <div className="w-4/5 bg-white">
-        (
+        {
           switch (state.selection) {
           | TeamMemberSelected(teamMemberId) =>
             switch (
@@ -361,7 +374,7 @@ let make = (~ctx, ~appSend, _children) => {
           | NewInvitationSelected => invitationForm(ctx, appSend, send)
           | NothingSelected => editorPlaceholder
           }
-        )
+        }
       </div>
     </div>,
 };

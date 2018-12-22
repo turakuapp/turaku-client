@@ -1,3 +1,19 @@
+exception LoadEntriesFailure;
+
+let handleLoadEntriesFailure = () =>
+  [@bs.open]
+  (
+    fun
+    | LoadEntriesFailure => {
+        Webapi.Dom.window
+        |> Webapi.Dom.Window.alert(
+             "It looks like you have lost access to the current team. Reloading Turaku...",
+           );
+        Webapi.Dom.location |> Webapi.Dom.Location.reload;
+        Js.Promise.resolve();
+      }
+  );
+
 let str = ReasonReact.string;
 
 type ctx = {
@@ -32,7 +48,7 @@ let entryChoices = (ctx, state, appSend) =>
      )
   |> List.map(entry =>
        <EntryChoice
-         key=(entry |> Entry.id)
+         key={entry |> Entry.id}
          ctx={userData: ctx.userData, team: ctx.team, entry}
          appSend
        />
@@ -113,15 +129,18 @@ let decryptTags = (decryptionKey, encryptedTags) => {
 let loadEntries = (ctx, appSend) =>
   EntriesQuery.make(~teamId=ctx.team |> Team.id, ())
   |> Api.sendAuthenticatedQuery(ctx.userData.session)
-  |> Js.Promise.then_(response => {
-       let decryptionKey = ctx.team |> Team.createCryptographicKey;
-       let team = response##team;
+  |> Js.Promise.then_(response =>
+       switch (response##team) {
+       | Some(team) =>
+         let decryptionKey = ctx.team |> Team.createCryptographicKey;
 
-       Js.Promise.all2((
-         team##entries |> decryptEntries(decryptionKey),
-         team##tags |> decryptTags(decryptionKey),
-       ));
-     })
+         Js.Promise.all2((
+           team##entries |> decryptEntries(decryptionKey),
+           team##tags |> decryptTags(decryptionKey),
+         ));
+       | None => Js.Promise.reject(LoadEntriesFailure)
+       }
+     )
   |> Js.Promise.then_(((entries, tags)) => {
        Js.log(
          "Loaded "
@@ -134,6 +153,14 @@ let loadEntries = (ctx, appSend) =>
        appSend(Turaku.RefreshEntries(ctx.team |> Team.id, entries, tags));
        Js.Promise.resolve();
      })
+  |> Js.Promise.catch(error =>
+       switch (error |> handleLoadEntriesFailure()) {
+       | Some(x) => x
+       | None =>
+         Js.log(error);
+         Js.Promise.resolve();
+       }
+     )
   |> ignore;
 
 let getSelection = (ctx, appSend, entry) =>
@@ -144,7 +171,7 @@ let getSelection = (ctx, appSend, entry) =>
       appSend
     />
   | None =>
-    <p className="m-2"> (str("Select an entry, or create a new one.")) </p>
+    <p className="m-2"> {str("Select an entry, or create a new one.")} </p>
   };
 
 let updateSearch = (send, _event) => {
@@ -167,25 +194,25 @@ let make = (~ctx, ~appSend, _children) => {
           <input
             id="sign-in-menu__search"
             type_="text"
-            onChange=(updateSearch(send))
+            onChange={updateSearch(send)}
             placeholder="Search"
             className="pl-2 rounded flex-grow"
           />
-          <button className="ml-2 btn btn-blue" onClick=(addEntry(appSend))>
-            ("+" |> str)
+          <button className="ml-2 btn btn-blue" onClick={addEntry(appSend)}>
+            {"+" |> str}
           </button>
         </div>
         <div className="overflow-scroll mt-2">
-          (entryChoices(ctx, state, appSend) |> ReasonReact.array)
+          {entryChoices(ctx, state, appSend) |> ReasonReact.array}
         </div>
       </div>
       <div className="w-4/5 bg-white">
-        (
+        {
           ctx.team
           |> Team.entries
           |> SelectableList.selected
           |> getSelection(ctx, appSend)
-        )
+        }
       </div>
     </div>,
 };
