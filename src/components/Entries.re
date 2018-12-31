@@ -196,9 +196,11 @@ let make = (~ctx, ~appSend, _children) => {
             type_="text"
             onChange={updateSearch(send)}
             placeholder="Search"
-            className="pl-2 rounded flex-grow"
+            className="flex-shrink pl-2 rounded min-w-0"
           />
-          <button className="ml-2 btn btn-blue" onClick={addEntry(appSend)}>
+          <button
+            className="flex-no-shrink ml-2 btn btn-blue"
+            onClick={addEntry(appSend)}>
             {"+" |> str}
           </button>
         </div>
