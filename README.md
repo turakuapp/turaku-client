@@ -1,5 +1,11 @@
 # Turaku Client
 
+## Demo
+
+Here's a (very) short demo of the client, in action! Click the image to watch on YouTube.
+
+[![Watch the video](https://img.youtube.com/vi/UwLE9S5iwyA/maxresdefault.jpg)](https://youtu.be/UwLE9S5iwyA)
+
 ## Development Status
 
 - [x] ReactJS Prototype: **Completed in Dec 2017**
