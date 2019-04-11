@@ -17,26 +17,19 @@ let component = ReasonReact.statelessComponent("LoadingScreen");
 module RestoreSessionQuery = [%graphql
   {|
   query {
-    session {
-      user {
-        encryptionSalt
-        teams {
-          id
-          name
-          encryptedPassword {
-            iv
-            ciphertext
-          }
-        }
-        incomingInvitations {
-          id
-          team {
-            name
-          }
-          invitingUser {
-            email
-          }
-        }
+    teams {
+      id
+      name
+      encryptedPassword {
+        iv
+        ciphertext
+      }
+    }
+    incomingInvitations {
+      id
+      teamName
+      invitingUser {
+        email
       }
     }
   }
@@ -56,30 +49,25 @@ let make = (~appSend, _children) => {
       /* Session info was loaded, so retrieve sign user back in. */
       RestoreSessionQuery.make()
       |> Api.sendAuthenticatedQuery(session)
-      |> Js.Promise.then_(response =>
-           switch (response##session) {
-           | Some(incomingSession) =>
-             let teams =
-               incomingSession##user##teams
-               |> Team.decryptTeams(session |> Session.getCryptographicKey);
+      |> Js.Promise.then_(response => {
+           let teams =
+             response##teams
+             |> Team.decryptTeams(session |> Session.getCryptographicKey);
 
-             let invitations =
-               incomingSession##user##incomingInvitations
-               |> Array.map(i =>
-                    InvitationFromTeam.create(
-                      i##id,
-                      ~teamName=i##team##name,
-                      ~invitingUserEmail=
-                        i##invitingUser##email |> Email.create,
-                    )
+           let invitations =
+             response##incomingInvitations
+             |> Array.map(i =>
+                  InvitationFromTeam.create(
+                    i##id,
+                    ~teamName=i##teamName,
+                    ~invitingUserEmail=i##invitingUser##email |> Email.create,
                   )
-               |> Array.to_list
-               |> Js.Promise.resolve;
+                )
+             |> Array.to_list
+             |> Js.Promise.resolve;
 
-             Js.Promise.all2((teams, invitations));
-           | None => Js.Promise.reject(RestoreSessionFailure)
-           }
-         )
+           Js.Promise.all2((teams, invitations));
+         })
       |> Js.Promise.then_(((teams, invitations)) => {
            appSend(Turaku.SignIn(session, teams, invitations));
            Js.Promise.resolve();

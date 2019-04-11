@@ -235,7 +235,7 @@ module UsersQuery = [%graphql
   {|
   query($teamId: ID!) {
     team(id: $teamId) {
-      users {
+      teamMembers {
         id
         name
         email
@@ -259,12 +259,12 @@ let refreshUsers = (ctx, appSend) =>
        switch (response##team) {
        | Some(team) =>
          let teamMembers =
-           team##users
-           |> Array.map(jsUser =>
+           team##teamMembers
+           |> Array.map(teamMember =>
                 TeamMember.create(
-                  jsUser##id,
-                  jsUser##name,
-                  jsUser##email |> Email.create,
+                  teamMember##id,
+                  teamMember##name,
+                  teamMember##email |> Email.create,
                 )
               )
            |> Array.to_list;

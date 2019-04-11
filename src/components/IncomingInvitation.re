@@ -16,10 +16,8 @@ module AcceptInvitationQuery = [%graphql
   {|
   mutation($id: ID!, $iv: String!, $ciphertext: String!) {
     acceptInvitation(id: $id, encryptedPassword: {iv: $iv, ciphertext: $ciphertext}) {
-      invitation {
-        team {
-          id
-        }
+      team {
+        id
       }
       errors
     }
@@ -53,12 +51,11 @@ let acceptInvitation = (ctx, appSend, event) => {
        |> Api.sendAuthenticatedQuery(ctx.userData.session);
      })
   |> Js.Promise.then_(response => {
-       let invitation = response##acceptInvitation##invitation;
-       switch (invitation) {
-       | Some(i) =>
+       switch (response##acceptInvitation##team) {
+       | Some(invitingTeam) =>
          let team =
            Team.create(
-             i##team##id,
+             invitingTeam##id,
              ctx.invitation |> InvitationFromTeam.name,
              stringPassword |> TeamPassword.fromString,
            );
@@ -108,17 +105,17 @@ let make = (~ctx, ~appSend, _children) => {
     <div className="card mb-3">
       <div className="card-body">
         <h4 className="card-title">
-          (str(ctx.invitation |> InvitationFromTeam.name))
+          {str(ctx.invitation |> InvitationFromTeam.name)}
         </h4>
         <h6 className="card-subtitle mb-2 text-muted">
-          (str("from"))
+          {str("from")}
           <code>
-            (
+            {
               ctx.invitation
               |> InvitationFromTeam.email
               |> Email.toString
               |> str
-            )
+            }
           </code>
         </h6>
         <p className="card-text">
@@ -127,20 +124,20 @@ let make = (~ctx, ~appSend, _children) => {
             id="invitations__team-password"
             className="w-100"
             type_="text"
-            value=state.teamPassword
-            onChange=(updateTeamPassword(send))
+            value={state.teamPassword}
+            onChange={updateTeamPassword(send)}
             placeholder="Enter your team's password to accept"
           />
         </p>
         <button
-          onClick=(acceptInvitation(ctx, appSend))
+          onClick={acceptInvitation(ctx, appSend)}
           className="card-link btn btn-sm btn-success">
-          (str("Accept"))
+          {str("Accept")}
         </button>
         <button
-          onClick=(rejectInvitation(ctx, appSend))
+          onClick={rejectInvitation(ctx, appSend)}
           className="card-link btn btn-sm btn-danger ml-2">
-          (str("Reject"))
+          {str("Reject")}
         </button>
       </div>
     </div>,

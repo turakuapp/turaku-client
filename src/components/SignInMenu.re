@@ -31,9 +31,7 @@ let str = ReasonReact.string;
 module GetAuthenticationSaltQuery = [%graphql
   {|
   query($email: String!) {
-    user(email: $email) {
-      authenticationSalt
-    }
+    authenticationSalt(email: $email)
   }
   |}
 ];
@@ -46,23 +44,21 @@ module SignInQuery = [%graphql
           token
           user {
             encryptionSalt
-            teams {
-              id
-              name
-              encryptedPassword {
-                iv
-                ciphertext
-              }
-            }
-            incomingInvitations {
-              id
-              team {
-                name
-              }
-              invitingUser {
-                email
-              }
-            }
+          }
+        }
+        teams {
+          id
+          name
+          encryptedPassword {
+            iv
+            ciphertext
+          }
+        }
+        incomingInvitations {
+          id
+          teamName
+          invitingUser {
+            email
           }
         }
         errors
@@ -106,7 +102,7 @@ let handleSubmit = (appSend, state, send, event) => {
   GetAuthenticationSaltQuery.make(~email=email |> Email.toString, ())
   |> Api.sendPublicQuery
   |> Js.Promise.then_(response => {
-       let salt = response##user##authenticationSalt |> Salt.fromString;
+       let salt = response##authenticationSalt |> Salt.fromString;
        AuthenticationHash.create(password, salt);
      })
   |> Js.Promise.then_(authenticationHash =>
@@ -124,36 +120,38 @@ let handleSubmit = (appSend, state, send, event) => {
          let encryptionSalt = rawSession##user##encryptionSalt;
          EncryptionHash.create(password, encryptionSalt)
          |> Js.Promise.then_(encryptionHash =>
-              Js.Promise.resolve((rawSession, encryptionHash))
+              Js.Promise.resolve((
+                rawSession##token,
+                response##teams,
+                response##incomingInvitations,
+                encryptionHash,
+              ))
             );
        | None => Js.Promise.reject(CreateSessionFailure(response##errors))
        };
      })
-  |> Js.Promise.then_(((rawSession, encryptionHash)) => {
-       let accessToken = rawSession##token |> AccessToken.create;
+  |> Js.Promise.then_(((token, teams, incomingInvitations, encryptionHash)) => {
+       let accessToken = token |> AccessToken.create;
        let session = Session.create(accessToken, encryptionHash);
        let key = session |> Session.getCryptographicKey;
-       let teams = Team.decryptTeams(key, rawSession##user##teams);
+       let teams = Team.decryptTeams(key, teams);
 
-       Js.Promise.all2((Js.Promise.resolve((rawSession, session)), teams));
-     })
-  |> Js.Promise.then_((((rawSession, session), teams)) => {
-       session |> Session.saveInLocalStorage;
-       appSend(
-         Turaku.SignIn(
-           session,
-           teams,
-           rawSession##user##incomingInvitations
-           |> Array.map(i =>
-                InvitationFromTeam.create(
-                  i##id,
-                  ~teamName=i##team##name,
-                  ~invitingUserEmail=i##invitingUser##email |> Email.create,
-                )
+       let invitations =
+         incomingInvitations
+         |> Array.map(i =>
+              InvitationFromTeam.create(
+                i##id,
+                ~teamName=i##teamName,
+                ~invitingUserEmail=i##invitingUser##email |> Email.create,
               )
-           |> Array.to_list,
-         ),
-       );
+            )
+         |> Array.to_list;
+
+       Js.Promise.all2((Js.Promise.resolve((session, invitations)), teams));
+     })
+  |> Js.Promise.then_((((session, incomingInvitations), teams)) => {
+       session |> Session.saveInLocalStorage;
+       appSend(Turaku.SignIn(session, teams, incomingInvitations));
        Js.Promise.resolve();
      })
   |> Js.Promise.catch(error =>
