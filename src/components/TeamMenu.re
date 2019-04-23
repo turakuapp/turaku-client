@@ -108,8 +108,8 @@ let invitedMembers = (ctx, state, send) =>
          </em>
          {
            switch (invitation |> InvitationToUser.name) {
-           | Some(_) => <Icon kind=Icon.EnvelopeOpen size=Icon.Size.Md />
-           | None => <Icon kind=Icon.Envelope size=Icon.Size.Md />
+           | Some(_) => <i className="fas fa-envelope-open" />
+           | None => <i className="fas fa-envelope" />
            }
          }
        </div>

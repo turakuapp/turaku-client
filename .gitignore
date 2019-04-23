@@ -29,8 +29,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# BSB lockfile
+# Buckescript files
 .bsb.lock
+*.bs.js
 
 # Tailwind generated CSS.
 src/index.css

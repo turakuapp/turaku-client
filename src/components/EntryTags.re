@@ -104,37 +104,31 @@ let make = (~ctx, ~appSend, _children) => {
     <div className="flex mt-1">
       <div
         className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
-        ("Tags" |> str)
+        {"Tags" |> str}
       </div>
       <div className="col">
         <div className="mt-1">
-          (
+          {
             ctx.entry
             |> Entry.tagIds
             |> List.map(tagId =>
-                 <EntryTag
-                   key=tagId
-                   team=ctx.team
-                   entry=ctx.entry
-                   tagId
-                   appSend
-                 />
+                 <EntryTag team={ctx.team} entry={ctx.entry} tagId appSend />
                )
             |> Array.of_list
             |> ReasonReact.array
-          )
+          }
         </div>
-        <form onSubmit=(addTag(ctx, state, send))>
+        <form onSubmit={addTag(ctx, state, send)}>
           <input
             className="mt-2"
             type_="text"
-            onChange=(updateName(send))
-            value=state.name
+            onChange={updateName(send)}
+            value={state.name}
             placeholder="Add tags"
-            onBlur=(_e => send(UpdateName("")))
+            onBlur={_e => send(UpdateName(""))}
           />
         </form>
-        <TagOptions team=ctx.team entry=ctx.entry search=state.name />
+        <TagOptions team={ctx.team} entry={ctx.entry} search={state.name} />
       </div>
     </div>,
 };

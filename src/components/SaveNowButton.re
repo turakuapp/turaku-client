@@ -125,12 +125,12 @@ let make = (~ctx, ~appSend, _children) => {
     | Save => ReasonReact.Update({saving: true})
     },
   render: ({state, send}) =>
-    <span onClick=(_e => saveChanges(ctx, send, appSend))>
-      (
+    <span onClick={_e => saveChanges(ctx, send, appSend)}>
+      {
         state.saving ?
-          <Icon kind=Icon.Loading size=Icon.Size.Md /> :
-          <Icon kind=Icon.Save size=Icon.Size.Md />
-      )
+          <i className="fas fa-spinner fa-pulse" /> :
+          <i className="fas fa-save" />
+      }
     </span>,
 };
 /* export default class SaveBar extends React.Component {

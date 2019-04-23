@@ -2,32 +2,37 @@
   "name": "turaku-client",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "tailwind:dev": "tailwind build ./src/tailwind/index.css -c ./tailwind.js -o src/index.css",
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack -w",
+    "webpack:production": "NODE_ENV=production webpack",
+    "server": "webpack-dev-server"
+  },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
-    "@fortawesome/free-solid-svg-icons": "^5.1.0-11",
-    "@fortawesome/react-fontawesome": "^0.1.0-11",
+    "@fortawesome/fontawesome-free": "^5.8.1",
     "@glennsl/bs-json": "^3.0.0",
     "base64-js": "^1.3.0",
     "query-string": "^6.1.0",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1"
-  },
-  "homepage": "./",
-  "main": "src/electron-starter.js",
-  "scripts": {
-    "tailwind:dev": "tailwind build ./src/tailwind/index.css -c ./tailwind.js -o src/index.css",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "react": "^16.8.1",
+    "react-dom": "^16.8.1",
+    "reason-react": ">=0.7.0"
   },
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.4.3",
     "bs-fetch": "^0.3.0",
-    "bs-platform": "^5.0.0",
+    "bs-platform": "^5.0.3",
     "bs-webapi": "^0.13.6",
+    "css-loader": "^2.1.1",
     "graphql_ppx": "^0.2.7",
-    "reason-react": "^0.6.0",
-    "tailwindcss": "^0.7.4"
+    "html-webpack-plugin": "^3.2.0",
+    "postcss-loader": "^3.0.0",
+    "style-loader": "^0.23.1",
+    "tailwindcss": "^0.7.4",
+    "webpack": "^4.0.1",
+    "webpack-cli": "^3.1.1",
+    "webpack-dev-server": "^3.1.8"
   }
 }

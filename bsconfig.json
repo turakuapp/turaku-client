@@ -1,17 +1,26 @@
 {
-  "name": "reason-scripts",
-  "sources": ["src", "src/components", "src/utils", "src/types"],
+  "name": "turaku-client",
+  "reason": {
+    "react-jsx": 2
+  },
+  "sources": {
+    "dir": "src",
+    "subdirs": true
+  },
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
+  "suffix": ".bs.js",
+  "namespace": true,
   "bs-dependencies": [
     "reason-react",
-    "@glennsl/bs-jest",
     "@glennsl/bs-json",
     "bs-webapi",
     "bs-fetch"
   ],
-  "ppx-flags": ["graphql_ppx/ppx"],
-  "reason": {
-    "react-jsx": 2
-  },
-  "bsc-flags": ["-bs-super-errors"],
-  "refmt": 3
+  "refmt": 3,
+  "ppx-flags": ["graphql_ppx/ppx"]
 }

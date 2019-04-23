@@ -17,10 +17,10 @@ let make = (~team, ~entry, ~tagId, ~appSend, _children) => {
       |> SelectableList.all
       |> List.find(tag => tag |> Tag.id == tagId);
 
-    <span className="p-1 mr-1" onClick=(removeTag(entry, tagId, appSend))>
-      (tag |> Tag.name |> str)
-      (" " |> str)
-      <Icon kind=Icon.Delete size=Icon.Size.Xs />
+    <span className="p-1 mr-1" onClick={removeTag(entry, tagId, appSend)}>
+      {tag |> Tag.name |> str}
+      {" " |> str}
+      <i className="fas fa-trash fa-xs" />
     </span>;
   },
 };
