@@ -1,3 +1,5 @@
+[%bs.raw {|require("@fortawesome/fontawesome-free/js/all.js")|}];
+
 open Turaku;
 
 let app = ReasonReact.reducerComponent("App");
@@ -23,5 +25,5 @@ let make = _children => {
   ...app,
   initialState: () => initialState,
   reducer,
-  render: ({state, send}) => <div> (currentComponent(state, send)) </div>,
+  render: ({state, send}) => <div> {currentComponent(state, send)} </div>,
 };
