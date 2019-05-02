@@ -8,34 +8,24 @@ type ctx = {
 
 let component = ReasonReact.statelessComponent("EntryEditor");
 
-let handleTitleChange = (_ctx, appSend, _event) => {
+let handleTitleChange = (appSend, _event) => {
   Js.log("Editing title");
   let title = DomUtils.getValueOfInputById("entry-editor__title");
   appSend(Turaku.EditEntryTitle(title));
 };
 
-let fields = (ctx, appSend) => {
+let fields = (entry, appSend) => {
   let index = ref(-1);
   List.map(
     (field: Field.t) => {
       index := index^ + 1;
-      <EntryField
-        key=(field |> Field.key)
-        ctx={
-          userData: ctx.userData,
-          team: ctx.team,
-          entry: ctx.entry,
-          field,
-          index: index^,
-        }
-        appSend
-      />;
+      <EntryField key={field |> Field.key} entry field index=index^ appSend />;
     },
-    ctx.entry |> Entry.fields,
+    entry |> Entry.fields,
   );
 };
 
-let make = (~ctx, ~appSend, _children) => {
+let make = (~team, ~entry, ~session, ~appSend, _children) => {
   ...component,
   render: _self =>
     <div className="px-2">
@@ -43,17 +33,14 @@ let make = (~ctx, ~appSend, _children) => {
         <div className="w-32 mr-2" />
         <input
           type_="text"
-          value=(ctx.entry |> Entry.title)
-          onChange=(handleTitleChange(ctx, appSend))
+          value={entry |> Entry.title}
+          onChange={handleTitleChange(appSend)}
           className="w-1/2 text-lg p-2 bg-white hover:bg-grey-lighter focus:bg-grey-lighter font-bold"
           placeholder="Entry Title"
           id="entry-editor__title"
         />
       </div>
-      (fields(ctx, appSend) |> Array.of_list |> ReasonReact.array)
-      <EntryTags
-        ctx={team: ctx.team, entry: ctx.entry, session: ctx.userData.session}
-        appSend
-      />
+      {fields(entry, appSend) |> Array.of_list |> ReasonReact.array}
+      <EntryTags team entry session appSend />
     </div>,
 };

@@ -2,7 +2,7 @@
 
 ## Demo
 
-Here's a (very) short demo of the client, in action! Click the image to watch on YouTube.
+Here's a short demo of the (WIP) client!
 
 ![Turaku Demo](https://www.turaku.com/uploads/static/turaku_demo_v1.gif)
 

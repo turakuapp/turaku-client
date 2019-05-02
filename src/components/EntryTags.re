@@ -8,12 +8,6 @@ type action =
   | UpdateName(string)
   | AddNewTag(Tag.t);
 
-type ctx = {
-  team: Team.t,
-  entry: Entry.t,
-  session: Session.t,
-};
-
 let component = ReasonReact.reducerComponent("EntryTags");
 
 let updateName = (send, event) => {
@@ -34,13 +28,13 @@ module CreateTagQuery = [%graphql
   |}
 ];
 
-let createTag = (ctx, state, nameHash) => {
-  let key = ctx.team |> Team.createCryptographicKey;
+let createTag = (team, session, state, nameHash) => {
+  let key = team |> Team.createCryptographicKey;
   state.name
   |> EncryptedData.encrypt(key)
   |> Js.Promise.then_(encryptedName =>
        CreateTagQuery.make(
-         ~teamId=ctx.team |> Team.id,
+         ~teamId=team |> Team.id,
          ~nameHash,
          ~iv=
            encryptedName |> EncryptedData.iv |> InitializationVector.toString,
@@ -48,7 +42,7 @@ let createTag = (ctx, state, nameHash) => {
            encryptedName |> EncryptedData.ciphertext |> CipherText.toString,
          (),
        )
-       |> Api.sendAuthenticatedQuery(ctx.session)
+       |> Api.sendAuthenticatedQuery(session)
      )
   |> Js.Promise.then_(response =>
        switch (response##createTag##tag) {
@@ -63,7 +57,7 @@ let createTag = (ctx, state, nameHash) => {
      );
 };
 
-let addTag = (ctx, state, send, event) => {
+let addTag = (team, session, state, send, event) => {
   event |> DomUtils.preventEventDefault;
 
   Hash.create(state.name |> Js.String.toUpperCase, Salt.empty())
@@ -73,14 +67,14 @@ let addTag = (ctx, state, send, event) => {
          |> UnsignedByteArray.fromArrayBuffer
          |> UnsignedByteArray.toBase64String;
        let someTag =
-         ctx.team
+         team
          |> Team.tags
          |> SelectableList.all
          |> ListUtils.find_opt(tag => tag |> Tag.nameHash == nameHash);
 
        switch (someTag) {
        | Some(tag) => tag |> Js.Promise.resolve
-       | None => createTag(ctx, state, nameHash)
+       | None => createTag(team, session, state, nameHash)
        };
      })
   |> Js.Promise.then_(tag => {
@@ -90,14 +84,14 @@ let addTag = (ctx, state, send, event) => {
   |> ignore;
 };
 
-let make = (~ctx, ~appSend, _children) => {
+let make = (~team, ~entry, ~session, ~appSend, _children) => {
   ...component,
   initialState: () => {name: ""},
   reducer: (action, _state) =>
     switch (action) {
     | UpdateName(name) => ReasonReact.Update({name: name})
     | AddNewTag(tag) =>
-      appSend(AddTagToEntry(ctx.entry, tag));
+      appSend(AddTagToEntry(entry, tag));
       ReasonReact.Update({name: ""});
     },
   render: ({state, send}) =>
@@ -109,16 +103,14 @@ let make = (~ctx, ~appSend, _children) => {
       <div className="col">
         <div className="mt-1">
           {
-            ctx.entry
+            entry
             |> Entry.tagIds
-            |> List.map(tagId =>
-                 <EntryTag team={ctx.team} entry={ctx.entry} tagId appSend />
-               )
+            |> List.map(tagId => <EntryTag team entry tagId appSend />)
             |> Array.of_list
             |> ReasonReact.array
           }
         </div>
-        <form onSubmit={addTag(ctx, state, send)}>
+        <form onSubmit={addTag(team, session, state, send)}>
           <input
             className="mt-2"
             type_="text"
@@ -128,7 +120,7 @@ let make = (~ctx, ~appSend, _children) => {
             onBlur={_e => send(UpdateName(""))}
           />
         </form>
-        <TagOptions team={ctx.team} entry={ctx.entry} search={state.name} />
+        <TagOptions team entry search={state.name} />
       </div>
     </div>,
 };
