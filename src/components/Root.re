@@ -16,8 +16,20 @@ let currentComponent = (state, send) =>
     }
   | SignedInUser(userData) =>
     switch (userData.teams |> SelectableList.selected) {
-    | None => <TeamSelection ctx={userData: userData} appSend=send />
-    | Some(team) => <Dashboard ctx={userData, team} appSend=send />
+    | None =>
+      <TeamSelection
+        session={userData.session}
+        invitations={userData.invitations}
+        teams={userData.teams}
+        appSend=send
+      />
+    | Some(team) =>
+      <Dashboard
+        session={userData.session}
+        team
+        dashboardMenu={userData.dashboardMenu}
+        appSend=send
+      />
     }
   };
 

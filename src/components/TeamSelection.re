@@ -11,27 +11,26 @@ type action =
 
 let str = ReasonReact.string;
 
-type ctx = {userData: Turaku.userData};
-
 let component = ReasonReact.reducerComponent("TeamSelection");
 
-let invitations = (ctx, appSend) =>
-  if (ctx.userData.invitations |> List.length > 0) {
+let invitationEntries = (invitations, session, appSend) =>
+  if (invitations |> List.length > 0) {
     <div>
-      <h2> (str("Invitations")) </h2>
-      <p> (str("You have been invited to join:")) </p>
-      (
-        ctx.userData.invitations
+      <h2> {str("Invitations")} </h2>
+      <p> {str("You have been invited to join:")} </p>
+      {
+        invitations
         |> List.map(invitation =>
              <IncomingInvitation
-               key=(invitation |> InvitationFromTeam.id)
-               ctx={userData: ctx.userData, invitation}
+               key={invitation |> InvitationFromTeam.id}
+               session
+               invitation
                appSend
              />
            )
         |> Array.of_list
         |> ReasonReact.array
-      )
+      }
     </div>;
   } else {
     ReasonReact.null;
@@ -43,41 +42,41 @@ let selectTeam = (appSend, team, _event) => {
   appSend(Turaku.SelectTeam(team));
 };
 
-let teams = (ctx, appSend) => {
-  let allTeams = ctx.userData.teams |> SelectableList.all;
+let teamEntries = (teams, appSend) => {
+  let allTeams = teams |> SelectableList.all;
 
   if (allTeams |> List.length > 0) {
     <div>
-      <h2> (str("Your Teams")) </h2>
+      <h2> {str("Your Teams")} </h2>
       <div>
         <ul className="mt-3 list-reset">
-          (
+          {
             allTeams
             |> List.map((team: Team.t) =>
-                 <li key=(team |> Team.id) className="mt-2">
+                 <li key={team |> Team.id} className="mt-2">
                    <button
-                     onClick=(selectTeam(appSend, team))
+                     onClick={selectTeam(appSend, team)}
                      className="btn btn-blue">
-                     (str(team |> Team.name))
+                     {str(team |> Team.name)}
                    </button>
                  </li>
                )
             |> Array.of_list
             |> ReasonReact.array
-          )
+          }
         </ul>
       </div>
     </div>;
   } else {
-    <p> (str("You do not belong to any team, right now. Create one?")) </p>;
+    <p> {str("You do not belong to any team, right now. Create one?")} </p>;
   };
 };
 
 let createTeamButton = send =>
   <button
     className="btn border hover:bg-grey-light mt-2"
-    onClick=(_event => send(ToggleCreateForm))>
-    (str("Create a new Team"))
+    onClick={_event => send(ToggleCreateForm)}>
+    {str("Create a new Team")}
   </button>;
 
 module CreateTeamQuery = [%graphql
@@ -93,7 +92,7 @@ module CreateTeamQuery = [%graphql
   |}
 ];
 
-let createTeam = (ctx, appSend, state, event) => {
+let createTeam = (session, appSend, state, event) => {
   event |> DomUtils.preventEventDefault;
   Js.log(
     "Creating a team with name "
@@ -101,7 +100,7 @@ let createTeam = (ctx, appSend, state, event) => {
     ++ " and password (B64) "
     ++ (state.teamPassword |> TeamPassword.toString),
   );
-  let encryptionKey = ctx.userData.session |> Session.getCryptographicKey;
+  let encryptionKey = session |> Session.getCryptographicKey;
   EncryptedData.encrypt(
     encryptionKey,
     state.teamPassword |> TeamPassword.toString,
@@ -115,7 +114,7 @@ let createTeam = (ctx, appSend, state, event) => {
            encryptedData |> EncryptedData.ciphertext |> CipherText.toString,
          (),
        )
-       |> Api.sendAuthenticatedQuery(ctx.userData.session)
+       |> Api.sendAuthenticatedQuery(session)
      )
   |> Js.Promise.then_(response => {
        let team = response##createTeam##team;
@@ -148,49 +147,49 @@ let updateTeamName = (send, _event) => {
   send(UpdateTeamName(name));
 };
 
-let createTeamForm = (ctx, appSend, state, send) =>
-  <form onSubmit=(createTeam(ctx, appSend, state))>
+let createTeamForm = (session, appSend, state, send) =>
+  <form onSubmit={createTeam(session, appSend, state)}>
     <div>
-      <label htmlFor="teams__form-name"> ("Name of your team" |> str) </label>
+      <label htmlFor="teams__form-name"> {"Name of your team" |> str} </label>
       <input
         autoFocus=true
         required=true
         className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
         id="teams__form-name"
-        onChange=(updateTeamName(send))
+        onChange={updateTeamName(send)}
       />
       <small className="block text-grey-dark mt-1">
-        ("You can add team members later." |> str)
+        {"You can add team members later." |> str}
       </small>
     </div>
     <div className="mt-3">
-      <label htmlFor="teams__form-password"> ("Team password" |> str) </label>
+      <label htmlFor="teams__form-password"> {"Team password" |> str} </label>
       <input
         required=true
         className="rounded bg-grey-light focus:bg-grey-lighter p-2 mt-2 w-full"
         id="teams__form-password"
-        value=(state.teamPassword |> TeamPassword.toString)
-        onChange=(updateTeamPassword(send))
+        value={state.teamPassword |> TeamPassword.toString}
+        onChange={updateTeamPassword(send)}
       />
       <ul className="pl-8 mt-2">
         <li>
           <small className="block text-grey-dark">
-            (
+            {
               "Type random characters into the password field to improve its "
               |> str
-            )
-            <em> ("randomness" |> str) </em>
-            ("." |> str)
+            }
+            <em> {"randomness" |> str} </em>
+            {"." |> str}
           </small>
         </li>
         <li>
           <small className="block text-grey-dark mt-1">
-            ("This is the password used to encode your team's records." |> str)
+            {"This is the password used to encode your team's records." |> str}
           </small>
         </li>
         <li>
           <small className="block text-grey-dark mt-1">
-            ("It will be encrypted before being sent to Turaku." |> str)
+            {"It will be encrypted before being sent to Turaku." |> str}
           </small>
         </li>
       </ul>
@@ -198,16 +197,16 @@ let createTeamForm = (ctx, appSend, state, send) =>
     <button
       type_="submit"
       className="btn mt-5 bg-green hover:bg-green-dark text-white">
-      (str("Create"))
+      {str("Create")}
     </button>
     <button
       className="btn mt-5 ml-2 border hover:bg-grey-light cursor-pointer"
-      onClick=(_event => send(ToggleCreateForm))>
-      ("Cancel" |> str)
+      onClick={_event => send(ToggleCreateForm)}>
+      {"Cancel" |> str}
     </button>
   </form>;
 
-let make = (~ctx, ~appSend, _children) => {
+let make = (~session, ~invitations, ~teams, ~appSend, _children) => {
   ...component,
   initialState: () => {
     createFormVisible: false,
@@ -230,13 +229,13 @@ let make = (~ctx, ~appSend, _children) => {
     <div className="container mx-auto px-4">
       <div className="flex justify-center h-screen">
         <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-          (invitations(ctx, appSend))
-          (
+          {invitationEntries(invitations, session, appSend)}
+          {
             state.createFormVisible ?
-              createTeamForm(ctx, appSend, state, send) :
-              [|teams(ctx, appSend), createTeamButton(send)|]
+              createTeamForm(session, appSend, state, send) :
+              [|teamEntries(teams, appSend), createTeamButton(send)|]
               |> ReasonReact.array
-          )
+          }
         </div>
       </div>
     </div>,

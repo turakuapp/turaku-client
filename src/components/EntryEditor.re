@@ -1,11 +1,5 @@
 let str = ReasonReact.string;
 
-type ctx = {
-  userData: Turaku.userData,
-  team: Team.t,
-  entry: Entry.t,
-};
-
 let component = ReasonReact.statelessComponent("EntryEditor");
 
 let handleTitleChange = (appSend, _event) => {

@@ -13,11 +13,6 @@ type action =
   | SelectTeamMember(TeamMember.id)
   | SelectInvitation(InvitationToUser.id);
 
-type ctx = {
-  userData: Turaku.userData,
-  team: Team.t,
-};
-
 let component = ReasonReact.reducerComponent("TeamMenu");
 
 let showInvitationForm = (send, event) => {
@@ -68,8 +63,8 @@ let selectInvitation = (invitation, send, event) => {
   send(SelectInvitation(invitation |> InvitationToUser.id));
 };
 
-let teamMemberOptions = (ctx, state, send) =>
-  switch (ctx.team |> Team.teamMembers) {
+let teamMemberOptions = (team, state, send) =>
+  switch (team |> Team.teamMembers) {
   | [] => <div> {"Loading users..." |> str} </div>
   | teamMembers =>
     <div>
@@ -89,8 +84,8 @@ let teamMemberOptions = (ctx, state, send) =>
     </div>
   };
 
-let invitedMembers = (ctx, state, send) =>
-  ctx.team
+let invitedMembers = (team, state, send) =>
+  team
   |> Team.invitations
   |> List.map(invitation =>
        <div
@@ -133,18 +128,18 @@ module CreateInvitation = [%graphql
   |}
 ];
 
-let inviteUser = (ctx, appSend, send, event) => {
+let inviteUser = (session, team, appSend, send, event) => {
   Js.log("Invite a new user!");
   event |> DomUtils.preventEventDefault;
   let email =
     DomUtils.getValueOfInputById("users__invite-form-email") |> Email.create;
 
   CreateInvitation.make(
-    ~teamId=ctx.team |> Team.id,
+    ~teamId=team |> Team.id,
     ~email=email |> Email.toString,
     (),
   )
-  |> Api.sendAuthenticatedQuery(ctx.userData.session)
+  |> Api.sendAuthenticatedQuery(session)
   |> Js.Promise.then_(response => {
        switch (response##createInvitation##invitation) {
        | Some(invitation) =>
@@ -154,9 +149,7 @@ let inviteUser = (ctx, appSend, send, event) => {
              email,
              invitation##invitedUser##name,
            );
-         appSend(
-           Turaku.AddInvitationToUser(ctx.team, invitation, ctx.userData),
-         );
+         appSend(Turaku.AddInvitationToUser(invitation));
          send(SelectInvitation(invitation |> InvitationToUser.id));
        | None =>
          Js.log2(
@@ -171,21 +164,21 @@ let inviteUser = (ctx, appSend, send, event) => {
   |> ignore;
 };
 
-let defaultSelection = ctx =>
-  switch (ctx.team |> Team.invitations) {
+let defaultSelection = team =>
+  switch (team |> Team.invitations) {
   | [invitation, ..._] =>
     ExistingInvitationSelected(invitation |> InvitationToUser.id)
   | [] =>
-    switch (ctx.team |> Team.teamMembers) {
+    switch (team |> Team.teamMembers) {
     | [teamMember, ..._] => TeamMemberSelected(teamMember |> TeamMember.id)
     | [] => NothingSelected
     }
   };
 
-let hideInvitationForm = (ctx, send, event) => {
+let hideInvitationForm = (team, send, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
-  switch (ctx |> defaultSelection) {
+  switch (team |> defaultSelection) {
   | ExistingInvitationSelected(invitationId) =>
     send(SelectInvitation(invitationId))
   | TeamMemberSelected(teamMemberId) => send(SelectTeamMember(teamMemberId))
@@ -194,7 +187,7 @@ let hideInvitationForm = (ctx, send, event) => {
   };
 };
 
-let invitationForm = (ctx, appSend, send) =>
+let invitationForm = (session, team, appSend, send) =>
   <div className="mt-4 ml-2">
     <div className="flex">
       <div className="w-32 mr-2" />
@@ -202,7 +195,8 @@ let invitationForm = (ctx, appSend, send) =>
         {"Invite a team member" |> str}
       </div>
     </div>
-    <form className="mt-4" onSubmit={inviteUser(ctx, appSend, send)}>
+    <form
+      className="mt-4" onSubmit={inviteUser(session, team, appSend, send)}>
       <div className="flex mt-1">
         <div
           className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
@@ -224,7 +218,7 @@ let invitationForm = (ctx, appSend, send) =>
         </button>
         <button
           className="ml-2 btn btn-blue"
-          onClick={hideInvitationForm(ctx, send)}>
+          onClick={hideInvitationForm(team, send)}>
           {"Cancel" |> str}
         </button>
       </div>
@@ -252,9 +246,9 @@ module UsersQuery = [%graphql
   |}
 ];
 
-let refreshUsers = (ctx, appSend) =>
-  UsersQuery.make(~teamId=ctx.team |> Team.id, ())
-  |> Api.sendAuthenticatedQuery(ctx.userData.session)
+let refreshUsers = (session, userTeam, appSend) =>
+  UsersQuery.make(~teamId=userTeam |> Team.id, ())
+  |> Api.sendAuthenticatedQuery(session)
   |> Js.Promise.then_(response =>
        switch (response##team) {
        | Some(team) =>
@@ -282,7 +276,7 @@ let refreshUsers = (ctx, appSend) =>
 
          appSend(
            Turaku.RefreshTeamMembers(
-             ctx.team |> Team.id,
+             userTeam |> Team.id,
              teamMembers,
              invitations,
            ),
@@ -306,10 +300,10 @@ let editorPlaceholder =
     {"Select a team member, or invite someone." |> str}
   </div>;
 
-let make = (~ctx, ~appSend, _children) => {
+let make = (~session, ~team, ~appSend, _children) => {
   ...component,
-  didMount: _self => refreshUsers(ctx, appSend),
-  initialState: () => {selection: ctx |> defaultSelection},
+  didMount: _self => refreshUsers(session, team, appSend),
+  initialState: () => {selection: team |> defaultSelection},
   reducer: (action, _state) =>
     switch (action) {
     | ShowInvitationForm =>
@@ -333,8 +327,8 @@ let make = (~ctx, ~appSend, _children) => {
           {newInvitationButton(state, send)}
         </div>
         <div className="overflow-scroll mt-2">
-          {invitedMembers(ctx, state, send)}
-          {teamMemberOptions(ctx, state, send)}
+          {invitedMembers(team, state, send)}
+          {teamMemberOptions(team, state, send)}
         </div>
       </div>
       <div className="w-4/5 bg-white">
@@ -342,36 +336,30 @@ let make = (~ctx, ~appSend, _children) => {
           switch (state.selection) {
           | TeamMemberSelected(teamMemberId) =>
             switch (
-              ctx.team
+              team
               |> Team.teamMembers
               |> ListUtils.find_opt(teamMember =>
                    teamMember |> TeamMember.id == teamMemberId
                  )
             ) {
-            | Some(teamMember) =>
-              <TeamMemberEditor
-                ctx={userData: ctx.userData, teamMember}
-                appSend
-              />
+            | Some(teamMember) => <TeamMemberEditor teamMember appSend />
             | None => editorPlaceholder
             }
 
           | ExistingInvitationSelected(invitationId) =>
             switch (
-              ctx.team
+              team
               |> Team.invitations
               |> ListUtils.find_opt(invitation =>
                    invitation |> InvitationToUser.id == invitationId
                  )
             ) {
             | Some(invitation) =>
-              <InvitationEditor
-                ctx={userData: ctx.userData, team: ctx.team, invitation}
-                appSend
-              />
+              <InvitationEditor session team invitation appSend />
             | None => editorPlaceholder
             }
-          | NewInvitationSelected => invitationForm(ctx, appSend, send)
+          | NewInvitationSelected =>
+            invitationForm(session, team, appSend, send)
           | NothingSelected => editorPlaceholder
           }
         }

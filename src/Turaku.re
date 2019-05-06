@@ -40,9 +40,9 @@ type action =
   | SelectTeamMenu
   | SelectTag(option(Tag.t))
   | SignOut(Session.t)
-  | AddInvitationToUser(Team.t, InvitationToUser.t, userData)
-  | RemoveInvitationToUser(Team.t, InvitationToUser.t, userData)
-  | RemoveInvitationFromTeam(InvitationFromTeam.t, userData)
+  | AddInvitationToUser(InvitationToUser.t)
+  | RemoveInvitationToUser(InvitationToUser.t)
+  | RemoveInvitationFromTeam(InvitationFromTeam.t)
   | AddNewEntry
   | EditEntryTitle(string)
   | EditEntryField(Field.t, int)
@@ -224,30 +224,42 @@ let reducer = (action, state) =>
          },
        )
 
-  | AddInvitationToUser(team, invitation, userData) =>
-    let updatedTeam = team |> Team.addInvitation(invitation);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-        dashboardMenu: TeamMenu,
-      }),
-    );
-  | RemoveInvitationToUser(team, invitation, userData) =>
-    let updatedTeam = team |> Team.removeInvitation(invitation);
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        teams: userData.teams |> SelectableList.replace(team, updatedTeam),
-      }),
-    );
-  | RemoveInvitationFromTeam(invitation, userData) =>
-    ReasonReact.Update(
-      SignedInUser({
-        ...userData,
-        invitations: userData.invitations |> List.filter(i => i != invitation),
-      }),
-    )
+  | AddInvitationToUser(invitation) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedTeam = team |> Team.addInvitation(invitation);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+             dashboardMenu: TeamMenu,
+           }),
+         );
+       })
+  | RemoveInvitationToUser(invitation) =>
+    state
+    |> withSelectedTeam((team, userData) => {
+         let updatedTeam = team |> Team.removeInvitation(invitation);
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             teams:
+               userData.teams |> SelectableList.replace(team, updatedTeam),
+           }),
+         );
+       })
+  | RemoveInvitationFromTeam(invitation) =>
+    state
+    |> withUser(userData =>
+         ReasonReact.Update(
+           SignedInUser({
+             ...userData,
+             invitations:
+               userData.invitations |> List.filter(i => i != invitation),
+           }),
+         )
+       )
   | EditEntryTitle(title) =>
     state
     |> withSelectedEntry((entry, team, userData) => {

@@ -5,11 +5,6 @@ type state = {teamPassword: string};
 type action =
   | UpdateTeamPassword(string);
 
-type ctx = {
-  userData: Turaku.userData,
-  invitation: InvitationFromTeam.t,
-};
-
 let component = ReasonReact.reducerComponent("IncomingInvitation");
 
 module AcceptInvitationQuery = [%graphql
@@ -25,16 +20,16 @@ module AcceptInvitationQuery = [%graphql
   |}
 ];
 
-let acceptInvitation = (ctx, appSend, event) => {
+let acceptInvitation = (session, invitation, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
-  let invitationId = ctx.invitation |> InvitationFromTeam.id;
+  let invitationId = invitation |> InvitationFromTeam.id;
   Js.log("Accepting Invitation#" ++ invitationId);
 
   let stringPassword =
     DomUtils.getValueOfInputById("invitations__team-password");
 
-  let encryptionKey = ctx.userData.session |> Session.getCryptographicKey;
+  let encryptionKey = session |> Session.getCryptographicKey;
   EncryptedData.encrypt(encryptionKey, stringPassword)
   |> Js.Promise.then_(encryptedData => {
        let iv =
@@ -43,12 +38,12 @@ let acceptInvitation = (ctx, appSend, event) => {
          encryptedData |> EncryptedData.ciphertext |> CipherText.toString;
 
        AcceptInvitationQuery.make(
-         ~id=ctx.invitation |> InvitationFromTeam.id,
+         ~id=invitation |> InvitationFromTeam.id,
          ~iv,
          ~ciphertext,
          (),
        )
-       |> Api.sendAuthenticatedQuery(ctx.userData.session);
+       |> Api.sendAuthenticatedQuery(session);
      })
   |> Js.Promise.then_(response => {
        switch (response##acceptInvitation##team) {
@@ -56,10 +51,10 @@ let acceptInvitation = (ctx, appSend, event) => {
          let team =
            Team.create(
              invitingTeam##id,
-             ctx.invitation |> InvitationFromTeam.name,
+             invitation |> InvitationFromTeam.name,
              stringPassword |> TeamPassword.fromString,
            );
-         appSend(Turaku.AcceptInvitation(team, ctx.invitation));
+         appSend(Turaku.AcceptInvitation(team, invitation));
        | None => Js.log2("Errors: ", response##acceptInvitation##errors)
        };
        Js.Promise.resolve();
@@ -67,20 +62,17 @@ let acceptInvitation = (ctx, appSend, event) => {
   |> ignore;
 };
 
-let rejectInvitation = (ctx, appSend, event) => {
+let rejectInvitation = (session, invitation, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
-  let invitationId = ctx.invitation |> InvitationFromTeam.id;
+  let invitationId = invitation |> InvitationFromTeam.id;
   Js.log("Rejecting Invitation#" ++ invitationId);
 
   invitationId
-  |> Invitation.delete(ctx.userData.session)
+  |> Invitation.delete(session)
   |> Js.Promise.then_(response => {
        switch (response##deleteInvitation##errors |> Array.to_list) {
-       | [] =>
-         appSend(
-           Turaku.RemoveInvitationFromTeam(ctx.invitation, ctx.userData),
-         )
+       | [] => appSend(Turaku.RemoveInvitationFromTeam(invitation))
        | errors => Js.log2("Errors: ", errors)
        };
        Js.Promise.resolve();
@@ -94,7 +86,7 @@ let updateTeamPassword = (send, _event) => {
   send(UpdateTeamPassword(teamPassword));
 };
 
-let make = (~ctx, ~appSend, _children) => {
+let make = (~session, ~invitation, ~appSend, _children) => {
   ...component,
   initialState: () => {teamPassword: ""},
   reducer: (action, _state) =>
@@ -105,17 +97,12 @@ let make = (~ctx, ~appSend, _children) => {
     <div className="card mb-3">
       <div className="card-body">
         <h4 className="card-title">
-          {str(ctx.invitation |> InvitationFromTeam.name)}
+          {str(invitation |> InvitationFromTeam.name)}
         </h4>
         <h6 className="card-subtitle mb-2 text-muted">
           {str("from")}
           <code>
-            {
-              ctx.invitation
-              |> InvitationFromTeam.email
-              |> Email.toString
-              |> str
-            }
+            {invitation |> InvitationFromTeam.email |> Email.toString |> str}
           </code>
         </h6>
         <p className="card-text">
@@ -130,12 +117,12 @@ let make = (~ctx, ~appSend, _children) => {
           />
         </p>
         <button
-          onClick={acceptInvitation(ctx, appSend)}
+          onClick={acceptInvitation(session, invitation, appSend)}
           className="card-link btn btn-sm btn-success">
           {str("Accept")}
         </button>
         <button
-          onClick={rejectInvitation(ctx, appSend)}
+          onClick={rejectInvitation(session, invitation, appSend)}
           className="card-link btn btn-sm btn-danger ml-2">
           {str("Reject")}
         </button>
