@@ -1,6 +1,4 @@
-let str = ReasonReact.string;
-
-let component = ReasonReact.statelessComponent("EntryEditor");
+let str = React.string;
 
 let handleTitleChange = (appSend, _event) => {
   Js.log("Editing title");
@@ -19,22 +17,20 @@ let fields = (entry, appSend) => {
   );
 };
 
-let make = (~team, ~entry, ~session, ~appSend, _children) => {
-  ...component,
-  render: _self =>
-    <div className="px-2">
-      <div className="flex mt-2">
-        <div className="w-32 mr-2" />
-        <input
-          type_="text"
-          value={entry |> Entry.title}
-          onChange={handleTitleChange(appSend)}
-          className="w-1/2 text-lg p-2 bg-white hover:bg-grey-lighter focus:bg-grey-lighter font-bold"
-          placeholder="Entry Title"
-          id="entry-editor__title"
-        />
-      </div>
-      {fields(entry, appSend) |> Array.of_list |> ReasonReact.array}
-      <EntryTags team entry session appSend />
-    </div>,
-};
+[@react.component]
+let make = (~team, ~entry, ~session, ~appSend, _children) =>
+  <div className="px-2">
+    <div className="flex mt-2">
+      <div className="w-32 mr-2" />
+      <input
+        type_="text"
+        value={entry |> Entry.title}
+        onChange={handleTitleChange(appSend)}
+        className="w-1/2 text-lg p-2 bg-white hover:bg-grey-lighter focus:bg-grey-lighter font-bold"
+        placeholder="Entry Title"
+        id="entry-editor__title"
+      />
+    </div>
+    {fields(entry, appSend) |> Array.of_list |> ReasonReact.array}
+    <EntryTags team entry session appSend />
+  </div>;

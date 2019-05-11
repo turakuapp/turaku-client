@@ -1,7 +1,5 @@
 let str = ReasonReact.string;
 
-let component = ReasonReact.statelessComponent("EntryChoice");
-
 let isCurrentChoice = (team, entry) =>
   team |> Team.entries |> SelectableList.selected == Some(entry);
 
@@ -30,19 +28,17 @@ let title = entry => {
   };
 };
 
-let make = (~session, ~team, ~entry, ~appSend, _children) => {
-  ...component,
-  render: _self =>
-    <div
-      className={containerClasses(team, entry)}
-      onClick={chooseEntry(team, entry, appSend)}>
-      {entry |> title}
-      {
-        if (entry |> Entry.unpersisted) {
-          <SaveNowButton session team entry appSend />;
-        } else {
-          ReasonReact.null;
-        }
+[@react.component]
+let make = (~session, ~team, ~entry, ~appSend, _children) =>
+  <div
+    className={containerClasses(team, entry)}
+    onClick={chooseEntry(team, entry, appSend)}>
+    {entry |> title}
+    {
+      if (entry |> Entry.unpersisted) {
+        <SaveNowButton session team entry appSend />;
+      } else {
+        ReasonReact.null;
       }
-    </div>,
-};
+    }
+  </div>;

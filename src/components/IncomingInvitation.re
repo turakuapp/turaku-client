@@ -1,11 +1,4 @@
-let str = ReasonReact.string;
-
-type state = {teamPassword: string};
-
-type action =
-  | UpdateTeamPassword(string);
-
-let component = ReasonReact.reducerComponent("IncomingInvitation");
+let str = React.string;
 
 module AcceptInvitationQuery = [%graphql
   {|
@@ -80,52 +73,42 @@ let rejectInvitation = (session, invitation, appSend, event) => {
   |> ignore;
 };
 
-let updateTeamPassword = (send, _event) => {
-  let teamPassword =
-    DomUtils.getValueOfInputById("invitations__team-password");
-  send(UpdateTeamPassword(teamPassword));
-};
-
+[@react.component]
 let make = (~session, ~invitation, ~appSend, _children) => {
-  ...component,
-  initialState: () => {teamPassword: ""},
-  reducer: (action, _state) =>
-    switch (action) {
-    | UpdateTeamPassword(tp) => ReasonReact.Update({teamPassword: tp})
-    },
-  render: ({state, send}) =>
-    <div className="card mb-3">
-      <div className="card-body">
-        <h4 className="card-title">
-          {str(invitation |> InvitationFromTeam.name)}
-        </h4>
-        <h6 className="card-subtitle mb-2 text-muted">
-          {str("from")}
-          <code>
-            {invitation |> InvitationFromTeam.email |> Email.toString |> str}
-          </code>
-        </h6>
-        <p className="card-text">
-          <input
-            required=true
-            id="invitations__team-password"
-            className="w-100"
-            type_="text"
-            value={state.teamPassword}
-            onChange={updateTeamPassword(send)}
-            placeholder="Enter your team's password to accept"
-          />
-        </p>
-        <button
-          onClick={acceptInvitation(session, invitation, appSend)}
-          className="card-link btn btn-sm btn-success">
-          {str("Accept")}
-        </button>
-        <button
-          onClick={rejectInvitation(session, invitation, appSend)}
-          className="card-link btn btn-sm btn-danger ml-2">
-          {str("Reject")}
-        </button>
-      </div>
-    </div>,
+  let (teamPassword, setTeamPassword) = React.useState(() => "");
+  <div className="card mb-3">
+    <div className="card-body">
+      <h4 className="card-title">
+        {str(invitation |> InvitationFromTeam.name)}
+      </h4>
+      <h6 className="card-subtitle mb-2 text-muted">
+        {str("from")}
+        <code>
+          {invitation |> InvitationFromTeam.email |> Email.toString |> str}
+        </code>
+      </h6>
+      <p className="card-text">
+        <input
+          required=true
+          className="w-100"
+          type_="text"
+          value=teamPassword
+          onChange={
+            event => setTeamPassword(_ => event->ReactEvent.Form.target##value)
+          }
+          placeholder="Enter your team's password to accept"
+        />
+      </p>
+      <button
+        onClick={acceptInvitation(session, invitation, appSend)}
+        className="card-link btn btn-sm btn-success">
+        {str("Accept")}
+      </button>
+      <button
+        onClick={rejectInvitation(session, invitation, appSend)}
+        className="card-link btn btn-sm btn-danger ml-2">
+        {str("Reject")}
+      </button>
+    </div>
+  </div>;
 };

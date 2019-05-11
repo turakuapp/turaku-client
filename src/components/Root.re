@@ -2,9 +2,7 @@
 
 open Turaku;
 
-let app = ReasonReact.reducerComponent("App");
-
-let str = ReasonReact.string;
+let str = React.string;
 
 let currentComponent = (state, send) =>
   switch (state) {
@@ -33,9 +31,9 @@ let currentComponent = (state, send) =>
     }
   };
 
-let make = _children => {
-  ...app,
-  initialState: () => initialState,
-  reducer,
-  render: ({state, send}) => <div> {currentComponent(state, send)} </div>,
+[@react.component]
+let make = () => {
+  let (state, send) = React.useReducer(Turaku.reducer, Turaku.initialState);
+
+  <div> {currentComponent(state, send)} </div>;
 };

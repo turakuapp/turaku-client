@@ -14,21 +14,14 @@ let handleLoadEntriesFailure = () =>
       }
   );
 
-let str = ReasonReact.string;
-
-type action =
-  | UpdateSearch(string);
-
-type state = {search: string};
-
-let component = ReasonReact.reducerComponent("Entries");
+let str = React.string;
 
 let addEntry = (appSend, _event) => {
   Js.log("Add a new entry");
   appSend(Turaku.AddNewEntry);
 };
 
-let entryChoices = (session, team, state, appSend) =>
+let entryChoices = (session, team, search, appSend) =>
   team
   |> Team.entries
   |> SelectableList.all
@@ -36,8 +29,7 @@ let entryChoices = (session, team, state, appSend) =>
        if (entry |> Entry.unpersisted) {
          true;
        } else {
-         let searchExp =
-           state.search |> Js.Re.fromStringWithFlags(~flags="i");
+         let searchExp = search |> Js.Re.fromStringWithFlags(~flags="i");
          entry |> Entry.title |> Js.String.search(searchExp) > (-1);
        }
      )
@@ -161,47 +153,43 @@ let getSelection = (session, team, appSend, entry) =>
     <p className="m-2"> {str("Select an entry, or create a new one.")} </p>
   };
 
-let updateSearch = (send, _event) => {
-  let searchString = DomUtils.getValueOfInputById("sign-in-menu__search");
-  send(UpdateSearch(searchString));
-};
+let updateSearch = (setSearch, _event) =>
+  setSearch(_ => DomUtils.getValueOfInputById("sign-in-menu__search"));
 
+[@react.component]
 let make = (~session, ~team, ~appSend, _children) => {
-  ...component,
-  initialState: () => {search: ""},
-  reducer: (action, _state) =>
-    switch (action) {
-    | UpdateSearch(search) => ReasonReact.Update({search: search})
-    },
-  didMount: _self => loadEntries(session, team, appSend),
-  render: ({state, send}) =>
-    <div className="flex">
-      <div className="w-1/5 flex flex-col h-screen">
-        <div className="mt-2 flex flex-no-shrink flex-row mx-2">
-          <input
-            id="sign-in-menu__search"
-            type_="text"
-            onChange={updateSearch(send)}
-            placeholder="Search"
-            className="flex-shrink pl-2 rounded min-w-0"
-          />
-          <button
-            className="flex-no-shrink ml-2 btn btn-blue"
-            onClick={addEntry(appSend)}>
-            {"+" |> str}
-          </button>
-        </div>
-        <div className="overflow-scroll mt-2">
-          {entryChoices(session, team, state, appSend) |> ReasonReact.array}
-        </div>
+  let (search, setSearch) = React.useState(() => "");
+
+  React.useEffect(() => Some(() => loadEntries(session, team, appSend)));
+
+  <div className="flex">
+    <div className="w-1/5 flex flex-col h-screen">
+      <div className="mt-2 flex flex-no-shrink flex-row mx-2">
+        <input
+          id="sign-in-menu__search"
+          type_="text"
+          onChange={updateSearch(setSearch)}
+          placeholder="Search"
+          className="flex-shrink pl-2 rounded min-w-0"
+          value=search
+        />
+        <button
+          className="flex-no-shrink ml-2 btn btn-blue"
+          onClick={addEntry(appSend)}>
+          {"+" |> str}
+        </button>
       </div>
-      <div className="w-4/5 bg-white">
-        {
-          team
-          |> Team.entries
-          |> SelectableList.selected
-          |> getSelection(session, team, appSend)
-        }
+      <div className="overflow-scroll mt-2">
+        {entryChoices(session, team, search, appSend) |> ReasonReact.array}
       </div>
-    </div>,
+    </div>
+    <div className="w-4/5 bg-white">
+      {
+        team
+        |> Team.entries
+        |> SelectableList.selected
+        |> getSelection(session, team, appSend)
+      }
+    </div>
+  </div>;
 };
