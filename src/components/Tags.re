@@ -1,6 +1,4 @@
-let str = ReasonReact.string;
-
-let component = ReasonReact.statelessComponent("Tags");
+let str = React.string;
 
 let tagLinks = (team, _appSend) =>
   team
@@ -14,15 +12,13 @@ let tagLinks = (team, _appSend) =>
        </div>
      )
   |> Array.of_list
-  |> ReasonReact.array;
+  |> React.array;
 
-let make = (~team, ~appSend, _children) => {
-  ...component,
-  render: _self =>
-    <div className="mt-4">
-      <div className="uppercase text-xs font-bold tracking-wide pl-4 mb-1">
-        {"Tags" |> str}
-      </div>
-      {tagLinks(team, appSend)}
-    </div>,
-};
+[@react.component]
+let make = (~team, ~appSend) =>
+  <div className="mt-4">
+    <div className="uppercase text-xs font-bold tracking-wide pl-4 mb-1">
+      {"Tags" |> str}
+    </div>
+    {tagLinks(team, appSend)}
+  </div>;

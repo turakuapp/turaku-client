@@ -24,9 +24,7 @@ type action =
   | UpdatePassword(string)
   | ClearErrors;
 
-let component = ReasonReact.reducerComponent("SignInMenu");
-
-let str = ReasonReact.string;
+let str = React.string;
 
 module GetAuthenticationSaltQuery = [%graphql
   {|
@@ -182,7 +180,7 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
       }
     </div>;
   } else {
-    ReasonReact.null;
+    React.null;
   };
 
 let gotoSignUp = (appSend, _event) => Turaku.SelectSignUp |> appSend;
@@ -223,75 +221,78 @@ let errorMessages = state =>
         |> Array.map(error =>
              <li key={error |> toMessageKey}> {error |> toMessage |> str} </li>
            )
-        |> ReasonReact.array
+        |> React.array
       }
     </ul>;
   } else {
-    ReasonReact.null;
+    React.null;
   };
 
-let make = (~data, ~appSend, _children) => {
-  ...component,
-  initialState: () => {errors: [], email: Email.create(""), password: ""},
-  reducer: (action, state) =>
-    switch (action) {
-    | AddError(error) =>
-      ReasonReact.Update({...state, errors: [error, ...state.errors]})
-    | UpdateEmail(email) =>
-      ReasonReact.Update({...state, email: email |> Email.create, errors: []})
-    | UpdatePassword(password) =>
-      ReasonReact.Update({...state, password, errors: []})
-    | ClearErrors => ReasonReact.Update({...state, errors: []})
-    },
-  render: ({state, send}) =>
-    <div className="container mx-auto px-4">
-      <div className="flex justify-center h-screen">
-        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-          {signedUpAlert(data)}
-          <form onSubmit={handleSubmit(appSend, state, send)}>
-            <div>
-              <label htmlFor="sign-in-form__email">
-                {str("Email address")}
-              </label>
-              <input
-                value={state.email |> Email.toString}
-                onChange={
-                  event =>
-                    UpdateEmail(event->ReactEvent.Form.target##value) |> send
-                }
-                autoFocus=true
-                required=true
-                type_="email"
-                className={inputClasses(state)}
-              />
-            </div>
-            {errorMessages(state)}
-            <div className="mt-3">
-              <label htmlFor="sign-in-form__password">
-                {str("Password")}
-              </label>
-              <input
-                value={state.password}
-                onChange={
-                  event =>
-                    UpdatePassword(event->ReactEvent.Form.target##value)
-                    |> send
-                }
-                required=true
-                type_="password"
-                className={inputClasses(state)}
-              />
-            </div>
-            <button type_="submit" className="mt-5 btn btn-blue">
-              {str("Sign In")}
-            </button>
-            <a
-              onClick={gotoSignUp(appSend)}
-              className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
-              {str("Sign Up")}
-            </a>
-          </form>
-        </div>
+[@react.component]
+let make = (~data, ~appSend) => {
+  let (state, send) =
+    React.useReducer(
+      (state, action) =>
+        switch (action) {
+        | AddError(error) => {...state, errors: [error, ...state.errors]}
+        | UpdateEmail(email) => {
+            ...state,
+            email: email |> Email.create,
+            errors: [],
+          }
+        | UpdatePassword(password) => {...state, password, errors: []}
+        | ClearErrors => {...state, errors: []}
+        },
+      {errors: [], email: Email.create(""), password: ""},
+    );
+
+  <div className="container mx-auto px-4">
+    <div className="flex justify-center h-screen">
+      <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
+        {signedUpAlert(data)}
+        <form onSubmit={handleSubmit(appSend, state, send)}>
+          <div>
+            <label htmlFor="sign-in-form__email">
+              {str("Email address")}
+            </label>
+            <input
+              value={state.email |> Email.toString}
+              onChange={
+                event =>
+                  UpdateEmail(event->ReactEvent.Form.target##value) |> send
+              }
+              autoFocus=true
+              required=true
+              type_="email"
+              className={inputClasses(state)}
+            />
+          </div>
+          {errorMessages(state)}
+          <div className="mt-3">
+            <label htmlFor="sign-in-form__password">
+              {str("Password")}
+            </label>
+            <input
+              value={state.password}
+              onChange={
+                event =>
+                  UpdatePassword(event->ReactEvent.Form.target##value) |> send
+              }
+              required=true
+              type_="password"
+              className={inputClasses(state)}
+            />
+          </div>
+          <button type_="submit" className="mt-5 btn btn-blue">
+            {str("Sign In")}
+          </button>
+          <a
+            onClick={gotoSignUp(appSend)}
+            className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
+            {str("Sign Up")}
+          </a>
+        </form>
       </div>
-    </div>,
+    </div>
+  </div>;
 };

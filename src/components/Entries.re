@@ -157,10 +157,16 @@ let updateSearch = (setSearch, _event) =>
   setSearch(_ => DomUtils.getValueOfInputById("sign-in-menu__search"));
 
 [@react.component]
-let make = (~session, ~team, ~appSend, _children) => {
+let make = (~session, ~team, ~appSend) => {
   let (search, setSearch) = React.useState(() => "");
 
-  React.useEffect(() => Some(() => loadEntries(session, team, appSend)));
+  React.useEffect1(
+    () => {
+      loadEntries(session, team, appSend);
+      None;
+    },
+    [|team |> Team.id|],
+  );
 
   <div className="flex">
     <div className="w-1/5 flex flex-col h-screen">
@@ -180,7 +186,7 @@ let make = (~session, ~team, ~appSend, _children) => {
         </button>
       </div>
       <div className="overflow-scroll mt-2">
-        {entryChoices(session, team, search, appSend) |> ReasonReact.array}
+        {entryChoices(session, team, search, appSend) |> React.array}
       </div>
     </div>
     <div className="w-4/5 bg-white">

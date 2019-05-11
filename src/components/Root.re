@@ -6,7 +6,7 @@ let str = React.string;
 
 let currentComponent = (state, send) =>
   switch (state) {
-  | SignedOutUser(page) =>
+  | Turaku.SignedOutUser(page) =>
     switch (page) {
     | LoadingPage => <LoadingScreen appSend=send />
     | SignInPage(data) => <SignInMenu data appSend=send />

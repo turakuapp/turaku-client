@@ -18,7 +18,7 @@ let fields = (entry, appSend) => {
 };
 
 [@react.component]
-let make = (~team, ~entry, ~session, ~appSend, _children) =>
+let make = (~team, ~entry, ~session, ~appSend) =>
   <div className="px-2">
     <div className="flex mt-2">
       <div className="w-32 mr-2" />
@@ -31,6 +31,6 @@ let make = (~team, ~entry, ~session, ~appSend, _children) =>
         id="entry-editor__title"
       />
     </div>
-    {fields(entry, appSend) |> Array.of_list |> ReasonReact.array}
+    {fields(entry, appSend) |> Array.of_list |> React.array}
     <EntryTags team entry session appSend />
   </div>;

@@ -6,7 +6,7 @@ let removeTag = (entry, tagId, appSend, event) => {
 };
 
 [@react.component]
-let make = (~team, ~entry, ~tagId, ~appSend, _children) => {
+let make = (~team, ~entry, ~tagId, ~appSend) => {
   /* This uses the unsafe List.find. Use find_option / find_opt when it becomes available. */
   let tag =
     team

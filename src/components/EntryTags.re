@@ -72,7 +72,7 @@ let addTag = (team, session, name, setName, appSend, entry, event) => {
 };
 
 [@react.component]
-let make = (~team, ~entry, ~session, ~appSend, _children) => {
+let make = (~team, ~entry, ~session, ~appSend) => {
   let (name, setName) = React.useState(() => "");
   <div className="flex mt-1">
     <div
@@ -86,7 +86,7 @@ let make = (~team, ~entry, ~session, ~appSend, _children) => {
           |> Entry.tagIds
           |> List.map(tagId => <EntryTag team entry tagId appSend />)
           |> Array.of_list
-          |> ReasonReact.array
+          |> React.array
         }
       </div>
       <form onSubmit={addTag(team, session, name, setName, appSend, entry)}>

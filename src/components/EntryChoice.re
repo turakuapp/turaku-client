@@ -1,4 +1,4 @@
-let str = ReasonReact.string;
+let str = React.string;
 
 let isCurrentChoice = (team, entry) =>
   team |> Team.entries |> SelectableList.selected == Some(entry);
@@ -29,7 +29,7 @@ let title = entry => {
 };
 
 [@react.component]
-let make = (~session, ~team, ~entry, ~appSend, _children) =>
+let make = (~session, ~team, ~entry, ~appSend) =>
   <div
     className={containerClasses(team, entry)}
     onClick={chooseEntry(team, entry, appSend)}>
@@ -38,7 +38,7 @@ let make = (~session, ~team, ~entry, ~appSend, _children) =>
       if (entry |> Entry.unpersisted) {
         <SaveNowButton session team entry appSend />;
       } else {
-        ReasonReact.null;
+        React.null;
       }
     }
   </div>;

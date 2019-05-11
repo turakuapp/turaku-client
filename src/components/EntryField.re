@@ -16,7 +16,7 @@ let fieldType = (field, hidden) =>
   };
 
 [@react.component]
-let make = (~entry, ~field, ~index, ~appSend, _children) => {
+let make = (~entry, ~field, ~index, ~appSend) => {
   let (hidden, setHidden) = React.useState(() => true);
 
   <div className="flex mt-1">

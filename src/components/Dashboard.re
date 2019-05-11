@@ -29,7 +29,7 @@ let navigateToAllEntries = (dashboardMenu, appSend, event) => {
 };
 
 [@react.component]
-let make = (~session, ~team, ~dashboardMenu, ~appSend, _children) =>
+let make = (~session, ~team, ~dashboardMenu, ~appSend) =>
   <div className="flex">
     <div
       className="w-1/6 h-screen bg-grey-light flex flex-col justify-between">

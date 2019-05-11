@@ -1,4 +1,4 @@
-let str = ReasonReact.string;
+let str = React.string;
 
 type selection =
   | TeamMemberSelected(TeamMember.id)
@@ -6,36 +6,29 @@ type selection =
   | NewInvitationSelected
   | NothingSelected;
 
-type state = {selection};
-
-type action =
-  | ShowInvitationForm
-  | SelectTeamMember(TeamMember.id)
-  | SelectInvitation(InvitationToUser.id);
-
-let component = ReasonReact.reducerComponent("TeamMenu");
-
-let showInvitationForm = (send, event) => {
+let showInvitationForm = (setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  send(ShowInvitationForm);
+  setSelection(_ => ShowInvitationForm);
 };
 
-let newInvitationButton = (state, send) =>
-  switch (state.selection) {
+let newInvitationButton = (selection, setSelection) =>
+  switch (selection) {
   | NothingSelected
   | TeamMemberSelected(_)
   | ExistingInvitationSelected(_) =>
-    <button className="mr-2 btn btn-blue" onClick={showInvitationForm(send)}>
+    <button
+      className="mr-2 btn btn-blue"
+      onClick={showInvitationForm(setSelection)}>
       {"+" |> str}
     </button>
-  | NewInvitationSelected => ReasonReact.null
+  | NewInvitationSelected => React.null
   };
 
-let containerClasses = (state, ~teamMember=?, ~invitation=?, ()) => {
+let containerClasses = (selection, ~teamMember=?, ~invitation=?, ()) => {
   let classes = "cursor-pointer p-2 font-thin hover:bg-white flex justify-between items-center";
 
   let selected =
-    switch (state.selection) {
+    switch (selection) {
     | TeamMemberSelected(teamMemberId) =>
       switch (teamMember) {
       | Some(teamMember) => teamMember |> TeamMember.id == teamMemberId
@@ -53,17 +46,17 @@ let containerClasses = (state, ~teamMember=?, ~invitation=?, ()) => {
   selected ? classes ++ " bg-white font-normal" : classes;
 };
 
-let selectTeamMember = (teamMember, send, event) => {
+let selectTeamMember = (teamMember, setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  send(SelectTeamMember(teamMember |> TeamMember.id));
+  setSelection(_ => SelectTeamMember(teamMember |> TeamMember.id));
 };
 
-let selectInvitation = (invitation, send, event) => {
+let selectInvitation = (invitation, setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  send(SelectInvitation(invitation |> InvitationToUser.id));
+  setSelection(_ => SelectInvitation(invitation |> InvitationToUser.id));
 };
 
-let teamMemberOptions = (team, state, send) =>
+let teamMemberOptions = (team, selection, setSelection) =>
   switch (team |> Team.teamMembers) {
   | [] => <div> {"Loading users..." |> str} </div>
   | teamMembers =>
@@ -72,25 +65,25 @@ let teamMemberOptions = (team, state, send) =>
         teamMembers
         |> List.map(teamMember =>
              <div
-               onClick={selectTeamMember(teamMember, send)}
-               className={containerClasses(state, ~teamMember, ())}
+               onClick={selectTeamMember(teamMember, setSelection)}
+               className={containerClasses(selection, ~teamMember, ())}
                key={teamMember |> TeamMember.id}>
                {teamMember |> TeamMember.name |> str}
              </div>
            )
         |> Array.of_list
-        |> ReasonReact.array
+        |> React.array
       }
     </div>
   };
 
-let invitedMembers = (team, state, send) =>
+let invitedMembers = (team, selection, setSelection) =>
   team
   |> Team.invitations
   |> List.map(invitation =>
        <div
-         onClick={selectInvitation(invitation, send)}
-         className={containerClasses(state, ~invitation, ())}
+         onClick={selectInvitation(invitation, setSelection)}
+         className={containerClasses(selection, ~invitation, ())}
          key={invitation |> InvitationToUser.id}>
          <em>
            {
@@ -110,7 +103,7 @@ let invitedMembers = (team, state, send) =>
        </div>
      )
   |> Array.of_list
-  |> ReasonReact.array;
+  |> React.array;
 
 module CreateInvitation = [%graphql
   {|
@@ -128,7 +121,7 @@ module CreateInvitation = [%graphql
   |}
 ];
 
-let inviteUser = (session, team, appSend, send, event) => {
+let inviteUser = (session, team, appSend, setSelection, event) => {
   Js.log("Invite a new user!");
   event |> DomUtils.preventEventDefault;
   let email =
@@ -150,7 +143,9 @@ let inviteUser = (session, team, appSend, send, event) => {
              invitation##invitedUser##name,
            );
          appSend(Turaku.AddInvitationToUser(invitation));
-         send(SelectInvitation(invitation |> InvitationToUser.id));
+         setSelection(_ =>
+           SelectInvitation(invitation |> InvitationToUser.id)
+         );
        | None =>
          Js.log2(
            "Failed to send invitations. Errors array: ",
@@ -175,19 +170,20 @@ let defaultSelection = team =>
     }
   };
 
-let hideInvitationForm = (team, send, event) => {
+let hideInvitationForm = (team, setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
 
   switch (team |> defaultSelection) {
   | ExistingInvitationSelected(invitationId) =>
-    send(SelectInvitation(invitationId))
-  | TeamMemberSelected(teamMemberId) => send(SelectTeamMember(teamMemberId))
+    setSelection(_ => SelectInvitation(invitationId))
+  | TeamMemberSelected(teamMemberId) =>
+    setSelection(_ => SelectTeamMember(teamMemberId))
   | NewInvitationSelected
   | NothingSelected => ()
   };
 };
 
-let invitationForm = (session, team, appSend, send) =>
+let invitationForm = (session, team, appSend, setSelection) =>
   <div className="mt-4 ml-2">
     <div className="flex">
       <div className="w-32 mr-2" />
@@ -196,7 +192,8 @@ let invitationForm = (session, team, appSend, send) =>
       </div>
     </div>
     <form
-      className="mt-4" onSubmit={inviteUser(session, team, appSend, send)}>
+      className="mt-4"
+      onSubmit={inviteUser(session, team, appSend, setSelection)}>
       <div className="flex mt-1">
         <div
           className="cursor-pointer w-32 font-thin hover:font-normal p-2 text-right mr-2">
@@ -218,7 +215,7 @@ let invitationForm = (session, team, appSend, send) =>
         </button>
         <button
           className="ml-2 btn btn-blue"
-          onClick={hideInvitationForm(team, send)}>
+          onClick={hideInvitationForm(team, setSelection)}>
           {"Cancel" |> str}
         </button>
       </div>
@@ -300,69 +297,58 @@ let editorPlaceholder =
     {"Select a team member, or invite someone." |> str}
   </div>;
 
-let make = (~session, ~team, ~appSend, _children) => {
-  ...component,
-  didMount: _self => refreshUsers(session, team, appSend),
-  initialState: () => {selection: team |> defaultSelection},
-  reducer: (action, _state) =>
-    switch (action) {
-    | ShowInvitationForm =>
-      ReasonReact.Update({selection: NewInvitationSelected})
-    | SelectTeamMember(teamMemberId) =>
-      ReasonReact.Update({selection: TeamMemberSelected(teamMemberId)})
-    | SelectInvitation(invitationId) =>
-      ReasonReact.Update({
-        selection: ExistingInvitationSelected(invitationId),
-      })
-    },
-  render: ({state, send}) =>
-    <div className="flex">
-      <div className="w-1/5 flex flex-col h-screen">
-        <div className="mt-2 flex flex-no-shrink flex-row">
-          <input
-            type_="text"
-            placeholder="Search"
-            className="rounded flex-grow mx-2 pl-2 py-2"
-          />
-          {newInvitationButton(state, send)}
-        </div>
-        <div className="overflow-scroll mt-2">
-          {invitedMembers(team, state, send)}
-          {teamMemberOptions(team, state, send)}
-        </div>
-      </div>
-      <div className="w-4/5 bg-white">
-        {
-          switch (state.selection) {
-          | TeamMemberSelected(teamMemberId) =>
-            switch (
-              team
-              |> Team.teamMembers
-              |> ListUtils.find_opt(teamMember =>
-                   teamMember |> TeamMember.id == teamMemberId
-                 )
-            ) {
-            | Some(teamMember) => <TeamMemberEditor teamMember appSend />
-            | None => editorPlaceholder
-            }
+[@react.component]
+let make = (~session, ~team, ~appSend) => {
+  let (selection, setSelection) =
+    React.useState(() => team |> defaultSelection);
 
-          | ExistingInvitationSelected(invitationId) =>
-            switch (
-              team
-              |> Team.invitations
-              |> ListUtils.find_opt(invitation =>
-                   invitation |> InvitationToUser.id == invitationId
-                 )
-            ) {
-            | Some(invitation) =>
-              <InvitationEditor session team invitation appSend />
-            | None => editorPlaceholder
-            }
-          | NewInvitationSelected =>
-            invitationForm(session, team, appSend, send)
-          | NothingSelected => editorPlaceholder
-          }
-        }
+  <div className="flex">
+    <div className="w-1/5 flex flex-col h-screen">
+      <div className="mt-2 flex flex-no-shrink flex-row">
+        <input
+          type_="text"
+          placeholder="Search"
+          className="rounded flex-grow mx-2 pl-2 py-2"
+        />
+        {newInvitationButton(selection, setSelection)}
       </div>
-    </div>,
+      <div className="overflow-scroll mt-2">
+        {invitedMembers(team, selection, setSelection)}
+        {teamMemberOptions(team, selection, setSelection)}
+      </div>
+    </div>
+    <div className="w-4/5 bg-white">
+      {
+        switch (selection) {
+        | TeamMemberSelected(teamMemberId) =>
+          switch (
+            team
+            |> Team.teamMembers
+            |> ListUtils.find_opt(teamMember =>
+                 teamMember |> TeamMember.id == teamMemberId
+               )
+          ) {
+          | Some(teamMember) => <TeamMemberEditor teamMember appSend />
+          | None => editorPlaceholder
+          }
+
+        | ExistingInvitationSelected(invitationId) =>
+          switch (
+            team
+            |> Team.invitations
+            |> ListUtils.find_opt(invitation =>
+                 invitation |> InvitationToUser.id == invitationId
+               )
+          ) {
+          | Some(invitation) =>
+            <InvitationEditor session team invitation appSend />
+          | None => editorPlaceholder
+          }
+        | NewInvitationSelected =>
+          invitationForm(session, team, appSend, setSelection)
+        | NothingSelected => editorPlaceholder
+        }
+      }
+    </div>
+  </div>;
 };

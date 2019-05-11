@@ -1,7 +1,7 @@
 let str = React.string;
 
 [@react.component]
-let make = _children =>
+let make = () =>
   <div className="mt-4">
     <div className="uppercase text-xs font-bold tracking-wide pl-4 mb-1">
       {"Groups" |> str}

@@ -9,9 +9,7 @@ type action =
   | UpdateTeamPassword(TeamPassword.t)
   | UpdateTeamName(string);
 
-let str = ReasonReact.string;
-
-let component = ReasonReact.reducerComponent("TeamSelection");
+let str = React.string;
 
 let invitationEntries = (invitations, session, appSend) =>
   if (invitations |> List.length > 0) {
@@ -29,11 +27,11 @@ let invitationEntries = (invitations, session, appSend) =>
              />
            )
         |> Array.of_list
-        |> ReasonReact.array
+        |> React.array
       }
     </div>;
   } else {
-    ReasonReact.null;
+    React.null;
   };
 
 let selectTeam = (appSend, team, _event) => {
@@ -62,7 +60,7 @@ let teamEntries = (teams, appSend) => {
                  </li>
                )
             |> Array.of_list
-            |> ReasonReact.array
+            |> React.array
           }
         </ul>
       </div>
@@ -206,37 +204,39 @@ let createTeamForm = (session, appSend, state, send) =>
     </button>
   </form>;
 
-let make = (~session, ~invitations, ~teams, ~appSend, _children) => {
-  ...component,
-  initialState: () => {
-    createFormVisible: false,
-    teamPassword: TeamPassword.create(),
-    teamName: "",
-  },
-  reducer: (action, state) =>
-    switch (action) {
-    | ToggleCreateForm =>
-      ReasonReact.Update({
-        ...state,
-        createFormVisible: !state.createFormVisible,
-      })
-    | UpdateTeamPassword(password) =>
-      /* TODO: Hash the password every time it is updated. See old code below in function updateTeamPassword. */
-      ReasonReact.Update({...state, teamPassword: password})
-    | UpdateTeamName(name) => ReasonReact.Update({...state, teamName: name})
-    },
-  render: ({state, send}) =>
-    <div className="container mx-auto px-4">
-      <div className="flex justify-center h-screen">
-        <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-          {invitationEntries(invitations, session, appSend)}
-          {
-            state.createFormVisible ?
-              createTeamForm(session, appSend, state, send) :
-              [|teamEntries(teams, appSend), createTeamButton(send)|]
-              |> ReasonReact.array
+[@react.component]
+let make = (~session, ~invitations, ~teams, ~appSend) => {
+  let (state, send) =
+    React.useReducer(
+      (state, action) =>
+        switch (action) {
+        | ToggleCreateForm => {
+            ...state,
+            createFormVisible: !state.createFormVisible,
           }
-        </div>
+        | UpdateTeamPassword(password) =>
+          /* TODO: Hash the password every time it is updated. See old code below in function updateTeamPassword. */
+          {...state, teamPassword: password}
+        | UpdateTeamName(name) => {...state, teamName: name}
+        },
+      {
+        createFormVisible: false,
+        teamPassword: TeamPassword.create(),
+        teamName: "",
+      },
+    );
+
+  <div className="container mx-auto px-4">
+    <div className="flex justify-center h-screen">
+      <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
+        {invitationEntries(invitations, session, appSend)}
+        {
+          state.createFormVisible ?
+            createTeamForm(session, appSend, state, send) :
+            [|teamEntries(teams, appSend), createTeamButton(send)|]
+            |> React.array
+        }
       </div>
-    </div>,
+    </div>
+  </div>;
 };

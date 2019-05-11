@@ -74,7 +74,7 @@ let rejectInvitation = (session, invitation, appSend, event) => {
 };
 
 [@react.component]
-let make = (~session, ~invitation, ~appSend, _children) => {
+let make = (~session, ~invitation, ~appSend) => {
   let (teamPassword, setTeamPassword) = React.useState(() => "");
   <div className="card mb-3">
     <div className="card-body">

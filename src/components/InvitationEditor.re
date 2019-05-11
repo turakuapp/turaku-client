@@ -1,6 +1,4 @@
-let str = ReasonReact.string;
-
-let component = ReasonReact.statelessComponent("InvitationEditor");
+let str = React.string;
 
 let deleteInvitation = (session, invitation, appSend, event) => {
   event |> DomUtils.preventMouseEventDefault;
@@ -25,48 +23,43 @@ let deleteInvitation = (session, invitation, appSend, event) => {
   |> ignore;
 };
 
-let make = (~session, ~team, ~invitation, ~appSend, _children) => {
-  ...component,
-  render: _self =>
-    <div className="px-2">
-      <div className="flex mt-2">
-        <div className="w-32 mr-2" />
-        <div className="text-lg font-bold p-2">
-          {"Invitation to " |> str}
-          <span className="text-blue-darker">
-            {invitation |> InvitationToUser.email |> Email.toString |> str}
-          </span>
-        </div>
+[@react.component]
+let make = (~session, ~team, ~invitation, ~appSend) =>
+  <div className="px-2">
+    <div className="flex mt-2">
+      <div className="w-32 mr-2" />
+      <div className="text-lg font-bold p-2">
+        {"Invitation to " |> str}
+        <span className="text-blue-darker">
+          {invitation |> InvitationToUser.email |> Email.toString |> str}
+        </span>
       </div>
-      <div className="flex mt-2">
-        <div
-          className="cursor-pointer w-32 font-thin text-sm hover:font-normal p-2 text-right mr-2">
-          {"Team Password" |> str}
-        </div>
-        <input
-          className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
-          id="entry-field__input-0"
-          type_="text"
-          value={team |> Team.password |> TeamPassword.toString}
-          readOnly=true
-        />
+    </div>
+    <div className="flex mt-2">
+      <div
+        className="cursor-pointer w-32 font-thin text-sm hover:font-normal p-2 text-right mr-2">
+        {"Team Password" |> str}
       </div>
-      <div className="flex mt-1">
-        <div className="w-32 mr-2" />
-        <small className="text-grey-dark pl-2">
-          {
-            "This new user will need the team password to join your team."
-            |> str
-          }
-        </small>
-      </div>
-      <div className="flex mt-4">
-        <div className="w-32 mr-2" />
-        <button
-          className="btn bg-red hover:bg-red-dark text-white"
-          onClick={deleteInvitation(session, invitation, appSend)}>
-          {"Delete Invitation" |> str}
-        </button>
-      </div>
-    </div>,
-};
+      <input
+        className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
+        id="entry-field__input-0"
+        type_="text"
+        value={team |> Team.password |> TeamPassword.toString}
+        readOnly=true
+      />
+    </div>
+    <div className="flex mt-1">
+      <div className="w-32 mr-2" />
+      <small className="text-grey-dark pl-2">
+        {"This new user will need the team password to join your team." |> str}
+      </small>
+    </div>
+    <div className="flex mt-4">
+      <div className="w-32 mr-2" />
+      <button
+        className="btn bg-red hover:bg-red-dark text-white"
+        onClick={deleteInvitation(session, invitation, appSend)}>
+        {"Delete Invitation" |> str}
+      </button>
+    </div>
+  </div>;

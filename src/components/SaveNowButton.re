@@ -1,13 +1,6 @@
 exception CreateFailure(string);
 
-let str = ReasonReact.string;
-
-type state = {saving: bool};
-
-type action =
-  | Save;
-
-let component = ReasonReact.reducerComponent("SaveNowButton");
+let str = React.string;
 
 module CreateEntryQuery = [%graphql
   {|
@@ -83,42 +76,21 @@ let saveChangesInBackground = (team, entry, session, appSend) => {
   |> ignore;
 };
 
-let saveChanges = (team, entry, session, send, appSend) => {
+let saveChanges = (team, entry, session, setSaving, appSend) => {
   Js.log("Saving entry: " ++ (entry |> Entry.id));
-  send(Save);
+  setSaving(_ => true);
   saveChangesInBackground(team, entry, session, appSend);
 };
 
-let make = (~session, ~team, ~entry, ~appSend, _children) => {
-  ...component,
-  willUnmount: ({state}) =>
-    if (entry |> Entry.unpersisted && !state.saving) {
-      Js.log(
-        "Auto-saving (on unmount) entry with ID: " ++ (entry |> Entry.id),
-      );
-      saveChangesInBackground(team, entry, session, appSend);
-    },
-  didUpdate: ({newSelf}) => {
-    let selectedEntry = team |> Team.entries |> SelectableList.selected;
-    if (entry
-        |> Entry.unpersisted
-        && Some(entry) != selectedEntry
-        && !newSelf.state.saving) {
-      Js.log("Auto-saving entry with ID: " ++ (entry |> Entry.id));
-      saveChanges(team, entry, session, newSelf.send, appSend);
-    };
-  },
-  initialState: () => {saving: false},
-  reducer: (action, _state) =>
-    switch (action) {
-    | Save => ReasonReact.Update({saving: true})
-    },
-  render: ({state, send}) =>
-    <span onClick={_e => saveChanges(team, entry, session, send, appSend)}>
-      {
-        state.saving ?
-          <i className="fas fa-spinner fa-pulse" /> :
-          <i className="fas fa-save" />
-      }
-    </span>,
+[@react.component]
+let make = (~session, ~team, ~entry, ~appSend) => {
+  let (saving, setSaving) = React.useState(() => false);
+
+  <span onClick={_e => saveChanges(team, entry, session, setSaving, appSend)}>
+    {
+      saving ?
+        <i className="fas fa-spinner fa-pulse" /> :
+        <i className="fas fa-save" />
+    }
+  </span>;
 };
