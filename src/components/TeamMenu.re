@@ -8,7 +8,7 @@ type selection =
 
 let showInvitationForm = (setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  setSelection(_ => ShowInvitationForm);
+  setSelection(_ => NewInvitationSelected);
 };
 
 let newInvitationButton = (selection, setSelection) =>
@@ -48,12 +48,14 @@ let containerClasses = (selection, ~teamMember=?, ~invitation=?, ()) => {
 
 let selectTeamMember = (teamMember, setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  setSelection(_ => SelectTeamMember(teamMember |> TeamMember.id));
+  setSelection(_ => TeamMemberSelected(teamMember |> TeamMember.id));
 };
 
 let selectInvitation = (invitation, setSelection, event) => {
   event |> DomUtils.preventMouseEventDefault;
-  setSelection(_ => SelectInvitation(invitation |> InvitationToUser.id));
+  setSelection(_ =>
+    ExistingInvitationSelected(invitation |> InvitationToUser.id)
+  );
 };
 
 let teamMemberOptions = (team, selection, setSelection) =>
@@ -144,7 +146,7 @@ let inviteUser = (session, team, appSend, setSelection, event) => {
            );
          appSend(Turaku.AddInvitationToUser(invitation));
          setSelection(_ =>
-           SelectInvitation(invitation |> InvitationToUser.id)
+           ExistingInvitationSelected(invitation |> InvitationToUser.id)
          );
        | None =>
          Js.log2(
@@ -175,9 +177,9 @@ let hideInvitationForm = (team, setSelection, event) => {
 
   switch (team |> defaultSelection) {
   | ExistingInvitationSelected(invitationId) =>
-    setSelection(_ => SelectInvitation(invitationId))
+    setSelection(_ => ExistingInvitationSelected(invitationId))
   | TeamMemberSelected(teamMemberId) =>
-    setSelection(_ => SelectTeamMember(teamMemberId))
+    setSelection(_ => TeamMemberSelected(teamMemberId))
   | NewInvitationSelected
   | NothingSelected => ()
   };

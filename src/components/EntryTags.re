@@ -101,7 +101,7 @@ let make = (~team, ~entry, ~session, ~appSend) => {
           onBlur={_e => setName(_ => "")}
         />
       </form>
-      <TagOptions team entry search={state.name} />
+      <TagOptions team entry search=name />
     </div>
   </div>;
 };

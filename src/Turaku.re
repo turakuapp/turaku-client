@@ -93,9 +93,8 @@ let withSelectedEntry = (f, state) =>
 
 let reducer = (state, action) =>
   switch (action) {
-  | SelectSignIn =>
-    ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
-  | SelectSignUp => ReasonReact.Update(SignedOutUser(SignUpPage))
+  | SelectSignIn => SignedOutUser(SignInPage({justSignedUp: false}))
+  | SelectSignUp => SignedOutUser(SignUpPage)
   | SignIn(session, teams, invitations) =>
     let teamList =
       teams
@@ -103,18 +102,15 @@ let reducer = (state, action) =>
         teams |> List.length > 1 ?
           SelectableList.create : SelectableList.createAndSelect
       );
-    ReasonReact.Update(
-      SignedInUser({
-        dashboardMenu: EntriesMenu,
-        session,
-        invitations,
-        teams: teamList,
-      }),
-    );
-  | SignUp =>
-    ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: true})))
-  | SkipLoading =>
-    ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})))
+
+    SignedInUser({
+      dashboardMenu: EntriesMenu,
+      session,
+      invitations,
+      teams: teamList,
+    });
+  | SignUp => SignedOutUser(SignInPage({justSignedUp: true}))
+  | SkipLoading => SignedOutUser(SignInPage({justSignedUp: false}))
   | SelectTeam(team) =>
     state
     |> withUser(userData =>
@@ -156,7 +152,7 @@ let reducer = (state, action) =>
        )
   | SignOut(session) =>
     session |> Session.signOut;
-    ReasonReact.Update(SignedOutUser(SignInPage({justSignedUp: false})));
+    SignedOutUser(SignInPage({justSignedUp: false}));
   | RefreshEntries(teamId, entries, tags) =>
     state
     |> withTeam(
