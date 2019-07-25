@@ -1,4 +1,4 @@
-@tailwind preflight;
+@tailwind base;
 @tailwind components;
 
 /* Add custom component classes before loading Tailwind's utilities. */
@@ -8,11 +8,11 @@
 }
 
 .btn-blue {
-  @apply bg-blue text-white;
+  @apply bg-blue-500 text-white;
 }
 
 .btn-blue:hover {
-  @apply bg-blue-dark;
+  @apply bg-blue-700;
 }
 
 @tailwind utilities;
