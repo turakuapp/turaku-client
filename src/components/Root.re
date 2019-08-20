@@ -1,7 +1,5 @@
 [%bs.raw {|require("@fortawesome/fontawesome-free/js/all.js")|}];
 
-open Turaku;
-
 let str = React.string;
 
 /* let currentComponent = (state, send) =>
@@ -31,68 +29,26 @@ let str = React.string;
      }
    }; */
 
-module EncryptedTeam = {
-  type t;
-};
-
-module EncryptedEntry = {
-  type t = {teamId: Team.id};
-
-  let teamId = t => t.teamId;
-};
-
-type state = {
-  session: option(Session.t),
-  teams: list(EncryptedTeam.t),
-  entries: list(EncryptedEntry.t),
-};
-
-/* This should load encrypted team and entry data from local persistent storage. */
-let initialState = {session: None, teams: [], entries: []};
-
-type action =
-  | SignIn(Session.t)
-  | SignOut
-  | UpdateEntries(list(EncryptedEntry.t), Team.id)
-  | AddEntry(EncryptedEntry.t)
-  | ReplaceEntry(EncryptedEntry.t)
-  | DeleteEntry(EncryptedEntry.t)
-  | UpdateTeams(list(Team.t))
-  | AddTeam(Team.t)
-  | ReplaceTeam(Team.t)
-  | DeleteTeam(Team.t);
-
-let reducer = (state, action) =>
-  switch (action) {
-  | SignIn(session) => {...state, session: Some(session)}
-  | SignOut => {...state, session: None}
-  | UpdateEntries(upToDateEntries, teamId) => {
-      ...state,
-      entries:
-        state.entries
-        |> List.filter(entry => entry |> EncryptedEntry.teamId != teamId)
-        |> List.rev_append(upToDateEntries),
-    }
-  | AddEntry(encryptedEntry) => state
-  | ReplaceEntry(encryptedEntry) => state
-  | DeleteEntry(encryptedEntry) => state
-  | UpdateTeams(upToDateTeams) => state
-  | AddTeam(team) => state
-  | ReplaceTeam(team) => state
-  | DeleteTeam(team) => state
-  };
+let signOut = (setSession, ()) => setSession(_ => None);
 
 [@react.component]
 let make = () => {
-  /* let (state, send) = React.useReducer(Turaku.reducer, Turaku.initialState); */
-  let (state, send) = React.useReducer(reducer, initialState);
+  let (session, setSession) = React.useState(() => None);
+  let (logs, setLogs) = React.useState(() => [||]);
 
-  switch (state.session) {
-  | Some(session) =>
-    /* User has signed in. */
-    <div> {"Signed in" |> str} </div>
-  | None =>
-    /* User hasn't signed in yet. */
-    <div> {"Sign in" |> str} </div>
-  };
+  let log = message => setLogs(logs => Js.Array.push(message) |> ignore);
+  let signOut = () => setSession(_ => None);
+  let signIn = session => setSession(_ => Some(session));
+
+  <div>
+    {
+      switch (session) {
+      | Some(session) => <UserDashboard session signOut />
+      | None => <SignInMenu log signIn />
+      }
+    }
+
+    /* Also show logs at the bottom, somehow. */
+    <div> {"Logs go here" |> str}
+  </div>;
 };
