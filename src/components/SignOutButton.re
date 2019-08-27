@@ -10,14 +10,14 @@ module DeleteSessionQuery = [%graphql
   |}
 ];
 
-let signOut = (session, setInProgress, appSend, _event) => {
+let signOut = (session, setInProgress, _event) => {
   setInProgress(_ => true);
 
   DeleteSessionQuery.make()
   |> Api.sendAuthenticatedQuery(session)
   |> Js.Promise.then_(response => {
        if (response##deleteSession##errors |> Array.to_list |> List.length == 0) {
-         appSend(Turaku.SignOut(session));
+         ();
        } else {
          Js.log2(
            "Some error occured while trying to sign out. Check: ",
@@ -31,7 +31,7 @@ let signOut = (session, setInProgress, appSend, _event) => {
 };
 
 [@react.component]
-let make = (~session, ~appSend) => {
+let make = (~session) => {
   let (inProgress, setInProgress) = React.useState(() => false);
 
   if (inProgress) {
@@ -41,7 +41,7 @@ let make = (~session, ~appSend) => {
   } else {
     <div
       className="cursor-pointer p-2 pl-4 hover:bg-grey-lighter"
-      onClick={signOut(session, setInProgress, appSend)}>
+      onClick={signOut(session, setInProgress)}>
       {"Sign Out" |> str}
     </div>;
   };

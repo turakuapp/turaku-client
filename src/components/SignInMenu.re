@@ -229,7 +229,7 @@ let errorMessages = state =>
   };
 
 [@react.component]
-let make = (~data, ~appSend) => {
+let make = (~log, ~signIn) => {
   let (state, send) =
     React.useReducer(
       (state, action) =>
@@ -249,50 +249,52 @@ let make = (~data, ~appSend) => {
   <div className="container mx-auto px-4">
     <div className="flex justify-center h-screen">
       <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-        {signedUpAlert(data)}
-        <form onSubmit={handleSubmit(appSend, state, send)}>
-          <div>
-            <label htmlFor="sign-in-form__email">
-              {str("Email address")}
-            </label>
-            <input
-              value={state.email |> Email.toString}
-              onChange={
-                event =>
-                  UpdateEmail(event->ReactEvent.Form.target##value) |> send
-              }
-              autoFocus=true
-              required=true
-              type_="email"
-              className={inputClasses(state)}
-            />
-          </div>
-          {errorMessages(state)}
-          <div className="mt-3">
-            <label htmlFor="sign-in-form__password">
-              {str("Password")}
-            </label>
-            <input
-              value={state.password}
-              onChange={
-                event =>
-                  UpdatePassword(event->ReactEvent.Form.target##value) |> send
-              }
-              required=true
-              type_="password"
-              className={inputClasses(state)}
-            />
-          </div>
-          <button type_="submit" className="mt-5 btn btn-blue">
-            {str("Sign In")}
-          </button>
-          <a
-            onClick={gotoSignUp(appSend)}
-            className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
-            {str("Sign Up")}
-          </a>
-        </form>
-      </div>
+        /* {signedUpAlert(data)} */
+
+          <form onSubmit={/*handleSubmit(appSend, state, send)*/ _ => ()}>
+            <div>
+              <label htmlFor="sign-in-form__email">
+                {str("Email address")}
+              </label>
+              <input
+                value={state.email |> Email.toString}
+                onChange={
+                  event =>
+                    UpdateEmail(event->ReactEvent.Form.target##value) |> send
+                }
+                autoFocus=true
+                required=true
+                type_="email"
+                className={inputClasses(state)}
+              />
+            </div>
+            {errorMessages(state)}
+            <div className="mt-3">
+              <label htmlFor="sign-in-form__password">
+                {str("Password")}
+              </label>
+              <input
+                value={state.password}
+                onChange={
+                  event =>
+                    UpdatePassword(event->ReactEvent.Form.target##value)
+                    |> send
+                }
+                required=true
+                type_="password"
+                className={inputClasses(state)}
+              />
+            </div>
+            <button type_="submit" className="mt-5 btn btn-blue">
+              {str("Sign In")}
+            </button>
+            <a
+              onClick={/*gotoSignUp(appSend)*/ _ => ()}
+              className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
+              {str("Sign Up")}
+            </a>
+          </form>
+        </div>
     </div>
   </div>;
 };

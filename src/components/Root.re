@@ -36,19 +36,24 @@ let make = () => {
   let (session, setSession) = React.useState(() => None);
   let (logs, setLogs) = React.useState(() => [||]);
 
-  let log = message => setLogs(logs => Js.Array.push(message) |> ignore);
+  let log = message => setLogs(logs => logs |> Js.Array.concat([|message|]));
   let signOut = () => setSession(_ => None);
   let signIn = session => setSession(_ => Some(session));
 
   <div>
     {
       switch (session) {
-      | Some(session) => <UserDashboard session signOut />
       | None => <SignInMenu log signIn />
+      | Some(session) => <SignedInRoot log session signOut />
       }
     }
-
     /* Also show logs at the bottom, somehow. */
-    <div> {"Logs go here" |> str}
+    <div>
+      {
+        logs
+        |> Array.map(logEntry => <span> {logEntry |> str} </span>)
+        |> React.array
+      }
+    </div>
   </div>;
 };

@@ -1,6 +1,6 @@
 let str = React.string;
 
-let tagLinks = (team, _appSend) =>
+let tagLinks = team =>
   team
   |> Team.tags
   |> SelectableList.all
@@ -15,10 +15,10 @@ let tagLinks = (team, _appSend) =>
   |> React.array;
 
 [@react.component]
-let make = (~team, ~appSend) =>
+let make = (~team) =>
   <div className="mt-4">
     <div className="uppercase text-xs font-bold tracking-wide pl-4 mb-1">
       {"Tags" |> str}
     </div>
-    {tagLinks(team, appSend)}
+    {tagLinks(team)}
   </div>;

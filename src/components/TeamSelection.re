@@ -40,21 +40,17 @@ let selectTeam = (appSend, team, _event) => {
   appSend(Turaku.SelectTeam(team));
 };
 
-let teamEntries = (teams, appSend) => {
-  let allTeams = teams |> SelectableList.all;
-
-  if (allTeams |> List.length > 0) {
+let teamEntries = teams =>
+  if (teams |> List.length > 0) {
     <div>
       <h2> {str("Your Teams")} </h2>
       <div>
         <ul className="mt-3 list-reset">
           {
-            allTeams
+            teams
             |> List.map((team: Team.t) =>
                  <li key={team |> Team.id} className="mt-2">
-                   <button
-                     onClick={selectTeam(appSend, team)}
-                     className="btn btn-blue">
+                   <button onClick={_ => ()} className="btn btn-blue">
                      {str(team |> Team.name)}
                    </button>
                  </li>
@@ -68,7 +64,6 @@ let teamEntries = (teams, appSend) => {
   } else {
     <p> {str("You do not belong to any team, right now. Create one?")} </p>;
   };
-};
 
 let createTeamButton = send =>
   <button
@@ -145,8 +140,8 @@ let updateTeamName = (send, _event) => {
   send(UpdateTeamName(name));
 };
 
-let createTeamForm = (session, appSend, state, send) =>
-  <form onSubmit={createTeam(session, appSend, state)}>
+let createTeamForm = (session, state, send) =>
+  <form onSubmit={/*createTeam(session, appSend, state)*/ _ => ()}>
     <div>
       <label htmlFor="teams__form-name"> {"Name of your team" |> str} </label>
       <input
@@ -205,7 +200,8 @@ let createTeamForm = (session, appSend, state, send) =>
   </form>;
 
 [@react.component]
-let make = (~session, ~invitations, ~teams, ~appSend) => {
+let make = (~log, ~session) => {
+  let teams = [];
   let (state, send) =
     React.useReducer(
       (state, action) =>
@@ -229,14 +225,14 @@ let make = (~session, ~invitations, ~teams, ~appSend) => {
   <div className="container mx-auto px-4">
     <div className="flex justify-center h-screen">
       <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-        {invitationEntries(invitations, session, appSend)}
-        {
-          state.createFormVisible ?
-            createTeamForm(session, appSend, state, send) :
-            [|teamEntries(teams, appSend), createTeamButton(send)|]
-            |> React.array
-        }
-      </div>
+        /* {invitationEntries(invitations, session, appSend)} */
+
+          {
+            state.createFormVisible ?
+              createTeamForm(session, state, send) :
+              [|teamEntries(teams), createTeamButton(send)|] |> React.array
+          }
+        </div>
     </div>
   </div>;
 };
