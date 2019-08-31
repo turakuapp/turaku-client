@@ -38,7 +38,11 @@ let make = () => {
 
   let log = message => setLogs(logs => logs |> Js.Array.concat([|message|]));
   let signOut = () => setSession(_ => None);
-  let signIn = session => setSession(_ => Some(session));
+
+  let signIn = (session, encryptedTeams) => {
+    LocalStorage.saveTeams(encryptedTeams);
+    setSession(_ => Some(session));
+  };
 
   <div>
     {

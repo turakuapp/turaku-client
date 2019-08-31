@@ -11,6 +11,29 @@ type action =
 
 let str = React.string;
 
+module LoadTeamsAndInvitations = [%graphql
+  {|
+    query ($sessionSomething: Something!) {
+      teams {
+        id
+        name
+        encryptedPassword {
+          iv
+          ciphertext
+        }
+      }
+      incomingInvitations {
+        id
+        teamName
+        invitingUser {
+          email
+        }
+      }
+      errors
+    }
+  |}
+];
+
 let invitationEntries = (invitations, session, appSend) =>
   if (invitations |> List.length > 0) {
     <div>

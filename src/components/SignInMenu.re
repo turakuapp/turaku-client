@@ -52,13 +52,6 @@ module SignInQuery = [%graphql
             ciphertext
           }
         }
-        incomingInvitations {
-          id
-          teamName
-          invitingUser {
-            email
-          }
-        }
         errors
       }
     }
@@ -83,13 +76,13 @@ let handleCreateSessionFailure = send =>
       }
   );
 
-let handleSubmit = (appSend, state, send, event) => {
+let handleSubmit = (state, send, log, signIn, event) => {
   send(ClearErrors);
   event |> DomUtils.preventEventDefault;
 
   let {email, password} = state;
 
-  Js.log(
+  log(
     "Attempting to sign in with email "
     ++ (email |> Email.toString)
     ++ " and password "
@@ -149,7 +142,7 @@ let handleSubmit = (appSend, state, send, event) => {
      })
   |> Js.Promise.then_((((session, incomingInvitations), teams)) => {
        session |> Session.saveInLocalStorage;
-       appSend(Turaku.SignIn(session, teams, incomingInvitations));
+       signIn(session, teams, incomingInvitations);
        Js.Promise.resolve();
      })
   |> Js.Promise.catch(error =>
@@ -182,8 +175,6 @@ let signedUpAlert = (data: Turaku.signInPageData) =>
   } else {
     React.null;
   };
-
-let gotoSignUp = (appSend, _event) => Turaku.SelectSignUp |> appSend;
 
 let inputClasses = state => {
   let classes = "rounded p-2 mt-2 w-full";
@@ -249,52 +240,44 @@ let make = (~log, ~signIn) => {
   <div className="container mx-auto px-4">
     <div className="flex justify-center h-screen">
       <div className="w-full md:w-1/2 self-auto md:self-center pt-4 md:pt-0">
-        /* {signedUpAlert(data)} */
-
-          <form onSubmit={/*handleSubmit(appSend, state, send)*/ _ => ()}>
-            <div>
-              <label htmlFor="sign-in-form__email">
-                {str("Email address")}
-              </label>
-              <input
-                value={state.email |> Email.toString}
-                onChange={
-                  event =>
-                    UpdateEmail(event->ReactEvent.Form.target##value) |> send
-                }
-                autoFocus=true
-                required=true
-                type_="email"
-                className={inputClasses(state)}
-              />
-            </div>
-            {errorMessages(state)}
-            <div className="mt-3">
-              <label htmlFor="sign-in-form__password">
-                {str("Password")}
-              </label>
-              <input
-                value={state.password}
-                onChange={
-                  event =>
-                    UpdatePassword(event->ReactEvent.Form.target##value)
-                    |> send
-                }
-                required=true
-                type_="password"
-                className={inputClasses(state)}
-              />
-            </div>
-            <button type_="submit" className="mt-5 btn btn-blue">
-              {str("Sign In")}
-            </button>
-            <a
-              onClick={/*gotoSignUp(appSend)*/ _ => ()}
-              className="mt-5 ml-2 btn border hover:bg-grey-light cursor-pointer">
-              {str("Sign Up")}
-            </a>
-          </form>
-        </div>
+        <form onSubmit={handleSubmit(state, send, log, signIn)}>
+          <div>
+            <label htmlFor="sign-in-form__email">
+              {str("Email address")}
+            </label>
+            <input
+              value={state.email |> Email.toString}
+              onChange={
+                event =>
+                  UpdateEmail(event->ReactEvent.Form.target##value) |> send
+              }
+              autoFocus=true
+              required=true
+              type_="email"
+              className={inputClasses(state)}
+            />
+          </div>
+          {errorMessages(state)}
+          <div className="mt-3">
+            <label htmlFor="sign-in-form__password">
+              {str("Password")}
+            </label>
+            <input
+              value={state.password}
+              onChange={
+                event =>
+                  UpdatePassword(event->ReactEvent.Form.target##value) |> send
+              }
+              required=true
+              type_="password"
+              className={inputClasses(state)}
+            />
+          </div>
+          <button type_="submit" className="mt-5 btn btn-blue">
+            {str("Sign In")}
+          </button>
+        </form>
+      </div>
     </div>
   </div>;
 };
