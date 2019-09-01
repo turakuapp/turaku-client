@@ -48,7 +48,8 @@ let make = () => {
     {
       switch (session) {
       | None => <SignInMenu log signIn />
-      | Some(session) => <SignedInRoot log session signOut />
+      /* | Some(session) => <SignedInRoot log session signOut /> */
+      | Some(_session) => <div> {"Signed in" |> str} </div>
       }
     }
     /* Also show logs at the bottom, somehow. */

@@ -14,7 +14,7 @@ type error =
 
 type state = {
   errors: list(error),
-  email: Email.t,
+  email: string,
   password: string,
 };
 
@@ -84,24 +84,20 @@ let handleSubmit = (state, send, log, signIn, event) => {
 
   log(
     "Attempting to sign in with email "
-    ++ (email |> Email.toString)
+    ++ email
     ++ " and password "
     ++ password,
   );
 
   /* Fetch the authentication salt to hash the password before attempting to sign in. */
-  GetAuthenticationSaltQuery.make(~email=email |> Email.toString, ())
+  GetAuthenticationSaltQuery.make(~email, ())
   |> Api.sendPublicQuery
   |> Js.Promise.then_(response => {
        let salt = response##authenticationSalt |> Salt.fromString;
        AuthenticationHash.create(password, salt);
      })
   |> Js.Promise.then_(authenticationHash =>
-       SignInQuery.make(
-         ~email=email |> Email.toString,
-         ~password=authenticationHash,
-         (),
-       )
+       SignInQuery.make(~email, ~password=authenticationHash, ())
        |> Api.sendPublicQuery
      )
   |> Js.Promise.then_(rawResponse => {
@@ -133,7 +129,7 @@ let handleSubmit = (state, send, log, signIn, event) => {
               InvitationFromTeam.create(
                 i##id,
                 ~teamName=i##teamName,
-                ~invitingUserEmail=i##invitingUser##email |> Email.create,
+                ~invitingUserEmail=i##invitingUser##email,
               )
             )
          |> Array.to_list;
@@ -226,15 +222,11 @@ let make = (~log, ~signIn) => {
       (state, action) =>
         switch (action) {
         | AddError(error) => {...state, errors: [error, ...state.errors]}
-        | UpdateEmail(email) => {
-            ...state,
-            email: email |> Email.create,
-            errors: [],
-          }
+        | UpdateEmail(email) => {...state, email, errors: []}
         | UpdatePassword(password) => {...state, password, errors: []}
         | ClearErrors => {...state, errors: []}
         },
-      {errors: [], email: Email.create(""), password: ""},
+      {errors: [], email: "", password: ""},
     );
 
   <div className="container mx-auto px-4">
@@ -246,7 +238,7 @@ let make = (~log, ~signIn) => {
               {str("Email address")}
             </label>
             <input
-              value={state.email |> Email.toString}
+              value={state.email}
               onChange={
                 event =>
                   UpdateEmail(event->ReactEvent.Form.target##value) |> send
