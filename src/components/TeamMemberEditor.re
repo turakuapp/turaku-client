@@ -25,7 +25,7 @@ let make = (~teamMember, ~appSend) => {
         className="w-1/2 p-2 rounded bg-white hover:bg-grey-lighter focus:bg-grey-lighter"
         id="entry-field__input-0"
         type_="text"
-        value={teamMember |> TeamMember.email |> Email.toString}
+        value={teamMember |> TeamMember.email}
         readOnly=true
       />
     </div>

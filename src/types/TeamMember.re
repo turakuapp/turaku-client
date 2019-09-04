@@ -1,7 +1,7 @@
 type t = {
   id,
   name: string,
-  email: Email.t,
+  email: string,
 }
 and id = User.id;
 

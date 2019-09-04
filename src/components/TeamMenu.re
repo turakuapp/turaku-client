@@ -91,8 +91,7 @@ let invitedMembers = (team, selection, setSelection) =>
            {
              switch (invitation |> InvitationToUser.name) {
              | Some(name) => name |> str
-             | None =>
-               invitation |> InvitationToUser.email |> Email.toString |> str
+             | None => invitation |> InvitationToUser.email |> str
              }
            }
          </em>
@@ -126,14 +125,9 @@ module CreateInvitation = [%graphql
 let inviteUser = (session, team, appSend, setSelection, event) => {
   Js.log("Invite a new user!");
   event |> DomUtils.preventEventDefault;
-  let email =
-    DomUtils.getValueOfInputById("users__invite-form-email") |> Email.create;
+  let email = DomUtils.getValueOfInputById("users__invite-form-email");
 
-  CreateInvitation.make(
-    ~teamId=team |> Team.id,
-    ~email=email |> Email.toString,
-    (),
-  )
+  CreateInvitation.make(~teamId=team |> Team.id, ~email, ())
   |> Api.sendAuthenticatedQuery(session)
   |> Js.Promise.then_(response => {
        switch (response##createInvitation##invitation) {
@@ -257,7 +251,7 @@ let refreshUsers = (session, userTeam, appSend) =>
                 TeamMember.create(
                   teamMember##id,
                   teamMember##name,
-                  teamMember##email |> Email.create,
+                  teamMember##email,
                 )
               )
            |> Array.to_list;
@@ -267,7 +261,7 @@ let refreshUsers = (session, userTeam, appSend) =>
            |> Array.map(jsInvitation =>
                 InvitationToUser.create(
                   jsInvitation##id,
-                  jsInvitation##invitedUser##email |> Email.create,
+                  jsInvitation##invitedUser##email,
                   jsInvitation##invitedUser##name,
                 )
               )

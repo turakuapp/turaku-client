@@ -3,6 +3,9 @@ type t = {
   encryptionHash: EncryptionHash.t,
 };
 
+let accessToken = c => c.accessToken;
+let encryptionHash = c => c.encryptionHash;
+
 let shouldRestore = (): bool => true;
 
 let create = (accessToken, encryptionHash) => {accessToken, encryptionHash};
@@ -43,8 +46,6 @@ let attemptRestoration = () =>
   | None => None
   | Some(c) => Some(c |> Json.parseOrRaise |> Codec.decode)
   };
-
-let getAccessToken = c => c.accessToken;
 
 let getCryptographicKey = session =>
   session.encryptionHash |> CryptographicKey.keyFromEncryptionHash;

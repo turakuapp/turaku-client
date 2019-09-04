@@ -13,17 +13,17 @@ module Team = {
   external parseMany: string => array(t) = "parse";
 };
 
-module Session = {
-  [@bs.deriving abstract]
-  type t = {
-    token: string,
-    encryptionSalt: string,
-  };
+/* module Session = {
+     [@bs.deriving abstract]
+     type t = {
+       token: string,
+       encryptionSalt: string,
+     };
 
-  let make = t;
+     let make = t;
 
-  [@bs.scope "JSON"] [@bs.val] external parse: string => t = "parse";
-};
+     [@bs.scope "JSON"] [@bs.val] external parse: string => t = "parse";
+   }; */
 
 module Entry = {
   [@bs.deriving abstract]
@@ -49,8 +49,11 @@ let save = (key, value) =>
 let saveTeams = (teams: array(Team.t)) =>
   save("teams", teams |> unsafeStringify);
 
-let saveSession = (session: Session.t) =>
-  save("session", session |> unsafeStringify);
+/* let saveSession = (session: Session.t) =>
+   save("session", session |> unsafeStringify); */
+
+let saveEncryptionSalt = encryptionSalt =>
+  save("encryptionSalt", encryptionSalt);
 
 let entriesKey = teamId => "teams." ++ teamId ++ "." ++ "entries";
 
@@ -59,11 +62,13 @@ let saveEntries = (teamId, entries: array(Entry.t)) =>
 
 let getItem = Dom.Storage.getItem(_, Dom.Storage.sessionStorage);
 
-let loadSession = () =>
-  switch (getItem("session")) {
-  | Some(session) => Some(session |> Session.parse)
-  | None => None
-  };
+/* let loadSession = () =>
+   switch (getItem("session")) {
+   | Some(session) => Some(session |> Session.parse)
+   | None => None
+   }; */
+
+let loadEncryptionSalt = () => getItem("encryptionSalt");
 
 let loadTeams = () =>
   switch (getItem("teams")) {

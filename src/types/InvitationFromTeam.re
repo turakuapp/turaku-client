@@ -1,7 +1,7 @@
 type t = {
   id,
   teamName: string,
-  invitingUserEmail: Email.t,
+  invitingUserEmail: string,
 }
 and id = Invitation.id;
 

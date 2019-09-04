@@ -110,35 +110,23 @@ let handleSubmit = (state, send, log, signIn, event) => {
               Js.Promise.resolve((
                 rawSession##token,
                 response##teams,
-                response##incomingInvitations,
                 encryptionHash,
               ))
             );
        | None => Js.Promise.reject(CreateSessionFailure(response##errors))
        };
      })
-  |> Js.Promise.then_(((token, teams, incomingInvitations, encryptionHash)) => {
+  |> Js.Promise.then_(((token, teams, encryptionHash)) => {
        let accessToken = token |> AccessToken.create;
        let session = Session.create(accessToken, encryptionHash);
        let key = session |> Session.getCryptographicKey;
        let teams = Team.decryptTeams(key, teams);
 
-       let invitations =
-         incomingInvitations
-         |> Array.map(i =>
-              InvitationFromTeam.create(
-                i##id,
-                ~teamName=i##teamName,
-                ~invitingUserEmail=i##invitingUser##email,
-              )
-            )
-         |> Array.to_list;
-
-       Js.Promise.all2((Js.Promise.resolve((session, invitations)), teams));
+       Js.Promise.all2((Js.Promise.resolve(session), teams));
      })
-  |> Js.Promise.then_((((session, incomingInvitations), teams)) => {
+  |> Js.Promise.then_(((session, teams)) => {
        session |> Session.saveInLocalStorage;
-       signIn(session, teams, incomingInvitations);
+       signIn(session, teams);
        Js.Promise.resolve();
      })
   |> Js.Promise.catch(error =>
@@ -158,19 +146,6 @@ let handleSubmit = (state, send, log, signIn, event) => {
      )
   |> ignore;
 };
-
-let signedUpAlert = (data: Turaku.signInPageData) =>
-  if (data.justSignedUp) {
-    <div className="p-2 bg-yellow-light rounded mb-3">
-      {
-        str(
-          "Thank you for signing up! Please confirm your email address before signing in.",
-        )
-      }
-    </div>;
-  } else {
-    React.null;
-  };
 
 let inputClasses = state => {
   let classes = "rounded p-2 mt-2 w-full";

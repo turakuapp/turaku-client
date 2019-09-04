@@ -31,7 +31,7 @@ let make = (~session, ~team, ~invitation, ~appSend) =>
       <div className="text-lg font-bold p-2">
         {"Invitation to " |> str}
         <span className="text-blue-darker">
-          {invitation |> InvitationToUser.email |> Email.toString |> str}
+          {invitation |> InvitationToUser.email |> str}
         </span>
       </div>
     </div>

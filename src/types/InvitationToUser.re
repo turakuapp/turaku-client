@@ -1,6 +1,6 @@
 type t = {
   id,
-  email: Email.t,
+  email: string,
   name: option(string),
 }
 and id = Invitation.id;

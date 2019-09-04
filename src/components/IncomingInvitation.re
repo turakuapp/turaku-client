@@ -83,9 +83,7 @@ let make = (~session, ~invitation, ~appSend) => {
       </h4>
       <h6 className="card-subtitle mb-2 text-muted">
         {str("from")}
-        <code>
-          {invitation |> InvitationFromTeam.email |> Email.toString |> str}
-        </code>
+        <code> {invitation |> InvitationFromTeam.email |> str} </code>
       </h6>
       <p className="card-text">
         <input

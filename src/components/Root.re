@@ -40,6 +40,7 @@ let make = () => {
   let signOut = () => setSession(_ => None);
 
   let signIn = (session, encryptedTeams) => {
+    LocalStorage.saveEncryptionSalt(session |> Session.encryptionSalt);
     LocalStorage.saveTeams(encryptedTeams);
     setSession(_ => Some(session));
   };
@@ -49,7 +50,7 @@ let make = () => {
       switch (session) {
       | None => <SignInMenu log signIn />
       /* | Some(session) => <SignedInRoot log session signOut /> */
-      | Some(_session) => <div> {"Signed in" |> str} </div>
+      | Some(session) => <div> {"Signed in" |> str} </div>
       }
     }
     /* Also show logs at the bottom, somehow. */

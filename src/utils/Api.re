@@ -27,7 +27,7 @@ let sendQuery = (session, query) => {
   let accessToken =
     switch (session) {
     | None => None
-    | Some(s) => Some(s |> Session.getAccessToken)
+    | Some(s) => Some(s |> Session.accessToken)
     };
   Js.Dict.fromList([
     ("query", Js.Json.string(query##query)),

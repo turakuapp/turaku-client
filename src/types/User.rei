@@ -8,6 +8,6 @@ let id: t => id;
 
 let name: t => string;
 
-let email: t => Email.t;
+let email: t => string;
 
 let encryptionSalt: t => string;
