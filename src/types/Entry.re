@@ -17,7 +17,7 @@ let entry = t =>
   };
 
 module Codec = {
-  let decode = (id, tagIds, json) =>
+  let decode = (suppliedId, tagIds, json) =>
     Json.Decode.(
       Saved(
         {
@@ -25,7 +25,7 @@ module Codec = {
           fields: json |> field("fields", list(Field.Codec.decode)),
           tagIds,
         },
-        id,
+        suppliedId,
       )
     );
 

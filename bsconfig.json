@@ -22,7 +22,7 @@
     "bs-fetch"
   ],
   "refmt": 3,
-  "ppx-flags": ["graphql_ppx/ppx"],
+  "ppx-flags": [],
   "warnings": {
     "error": "+8"
   }
