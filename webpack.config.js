@@ -1,4 +1,5 @@
 const path = require("path");
+const Dotenv = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const outputDir = path.join(__dirname, "build/");
 
@@ -12,12 +13,15 @@ module.exports = {
     filename: "Index.js"
   },
   plugins: [
+    new Dotenv(),
     new HtmlWebpackPlugin({
       template: "src/index.html",
       inject: false
     })
   ],
   devServer: {
+    https: true,
+    public: "turaku-localhost.com",
     compress: true,
     contentBase: outputDir,
     port: process.env.PORT || 8000,
